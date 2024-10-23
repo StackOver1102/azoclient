@@ -5,7 +5,7 @@ import Header from "@/components/Header/Header";
 import CustomImage from "@/components/Image/Image";
 import { RootState } from "@/libs/redux/store";
 import { TypeHearder } from "@/types/enum";
-import { GetStaticProps } from "next";
+import { GetServerSideProps, GetStaticProps } from "next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import Link from "next/link";
 import { useState } from "react";
@@ -13,7 +13,33 @@ import CountUp from "react-countup";
 import { useInView } from "react-intersection-observer";
 import { useSelector } from "react-redux";
 
-export default function Home() {
+type Props = {
+  token: string | null;
+};
+export const getServerSideProps: GetServerSideProps<Props> = async (
+  context
+) => {
+  const token = context.req.cookies.access_token;
+
+  // if (!token) {
+  //   return {
+  //     redirect: {
+  //       destination: "/signin",
+  //       permanent: false,
+  //     },
+  //   };
+  // }
+
+  // Return the data and any error to the component
+  return {
+    props: {
+      token: token ?? null,
+    },
+  };
+};
+
+export default function Home(prop: Props) {
+  const { token } = prop;
   const [counterOn, setCounterOn] = useState(false);
   const { ref, inView } = useInView({
     triggerOnce: true, // Kích hoạt một lần khi phần tử vào khung nhìn
@@ -24,7 +50,12 @@ export default function Home() {
 
   return (
     <>
-      <Header logo="/images/logo4.png" userInfo={userLogin} type={TypeHearder.HOME}/>
+      <Header
+        logo="/images/logo4.png"
+        token={token}
+        user={userLogin}
+        type={TypeHearder.HOME}
+      />
       {/* START LANDING */}
       <section className="bg-[#13263c] dark:bg-gray-900 pt-10" id="hero">
         <div className="py-16 px-4 mx-auto max-w-screen-xl text-center lg:py-20 lg:px-12">
@@ -39,9 +70,9 @@ export default function Home() {
           <div className="flex flex-col mb-8 lg:mt-16 lg:mb-24  space-y-4 sm:flex-row sm:justify-center sm:space-y-0 sm:space-x-4">
             <Link
               href="/signup"
-              className={
-              `${userLogin ? 'hidden' : ''} text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-8 py-5 mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800`
-              }
+              className={`${
+                userLogin ? "hidden" : ""
+              } text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-8 py-5 mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800`}
             >
               Sign up now!
             </Link>
@@ -205,7 +236,7 @@ export default function Home() {
                       start={0}
                       end={23469975}
                       className="text-white min-w-[70px]"
-                      formattingFn={(num) => num.toLocalestring()}
+                      formattingFn={(num) => num.toString()}
                     />
                   )}
                   +
@@ -430,15 +461,15 @@ export default function Home() {
         </div>
       </section>
 
-      <Footer/>
+      <Footer />
     </>
   );
 }
 
-export const getStaticProps: GetStaticProps = async ({ locale }) => {
-  return {
-    props: {
-      ...(await serverSideTranslations(locale!, ["common"])),
-    },
-  };
-};
+// export const getStaticProps: GetStaticProps = async ({ locale }) => {
+//   return {
+//     props: {
+//       ...(await serverSideTranslations(locale!, ["common"])),
+//     },
+//   };
+// };

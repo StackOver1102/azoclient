@@ -1,13 +1,15 @@
 import { useRouter } from 'next/router';
 import { useEffect, ComponentType } from 'react';
+import { useSelector } from 'react-redux';
+import { RootState } from '../redux/store';
 
 const withAuth = <P extends object>(WrappedComponent: ComponentType<P>) => {
   const AuthenticatedComponent = (props: P) => {
     const router = useRouter();
+    const userLogin = useSelector((state: RootState) => state.user);
 
     useEffect(() => {
-      const token = localStorage.getItem('access_token');
-      if (!token) {
+      if (!userLogin.access_token) {
         router.replace('/signin'); 
       }
     }, [router]);

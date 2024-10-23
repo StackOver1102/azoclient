@@ -2,8 +2,8 @@ import CustomImage from "@/components/Image/Image";
 import { useMutationHooks } from "@/hooks/useMutationHook";
 import Link from "next/link";
 import React, { useState } from "react";
-import * as UserService from "../../services/UserService";
 import { showErrorToast, showSuccessToast } from "@/services/toastService";
+import UserService, { BodyUser } from "@/services/UserService";
 
 const Signup = () => {
   // State to handle form input
@@ -14,7 +14,7 @@ const Signup = () => {
   const [showLoader, setShowLoader] = useState<Boolean>(false);
 
   const mutation = useMutationHooks(
-    async (userData: UserService.BodyCreateUser) => {
+    async (userData: BodyUser) => {
       return await UserService.createdUser(userData);
     },
     {
@@ -48,7 +48,7 @@ const Signup = () => {
         showErrorToast("Password must be at least 8 characters long");
         return;
       }
-      const userBody: UserService.BodyCreateUser = {
+      const userBody: BodyUser = {
         name,
         email,
         password,

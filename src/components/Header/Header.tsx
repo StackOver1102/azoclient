@@ -7,17 +7,19 @@ import { TypeHearder } from "@/types/enum";
 
 interface HeaderProps {
   logo: string;
-  userInfo: UserSlice;
+  token: string | null;
+  user: UserSlice;
   type: TypeHearder;
 }
 
 const Header: React.FC<HeaderProps> = ({
   logo,
-  userInfo,
+  token,
+  user,
   type = TypeHearder.OTHE,
 }) => {
   const { t } = useTranslation("common");
-  const access_token = userInfo.access_token;
+  const access_token = token;
   const [color, setColor] = useState(false); // Quản lý trạng thái màu sắc
   const [open, setOpen] = useState(false); // Quản lý trạng thái mở/đóng của thanh menu
 
@@ -270,7 +272,7 @@ const Header: React.FC<HeaderProps> = ({
                     href="/pro/#pricing"
                     className=" inline-flex items-center text-green-700 hover:text-white border border-green-700 hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center ml-3"
                   >
-                    $ {userInfo?.money}
+                    $ {user?.money}
                   </a>
                   <svg
                     data-bs-toggle="offcanvas"

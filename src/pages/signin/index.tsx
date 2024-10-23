@@ -2,13 +2,17 @@ import CustomImage from "@/components/Image/Image";
 import { useMutationHooks } from "@/hooks/useMutationHook";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
-import * as UserService from "../../services/UserService";
 import { showErrorToast, showSuccessToast } from "@/services/toastService";
 import Loading from "@/components/Loading/Loading";
 import { useRouter } from "next/router";
 import { useDispatch } from "react-redux";
 import { updateUser } from "@/libs/redux/slices/userSlice";
 import { persistor } from "@/libs/redux/store";
+import UserService, {
+  BodyLoginUser,
+  ResponseLogin,
+} from "@/services/UserService";
+import Cookies from 'js-cookie';
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -30,12 +34,8 @@ const Login = () => {
     }
   };
 
-  const mutation = useMutationHooks<
-    UserService.ResponseLogin,
-    Error,
-    UserService.BodyLoginUser
-  >(
-    async (data: UserService.BodyLoginUser) => {
+  const mutation = useMutationHooks<ResponseLogin, Error, BodyLoginUser>(
+    async (data: BodyLoginUser) => {
       return await UserService.loginUser(data);
     },
     {
@@ -47,9 +47,13 @@ const Login = () => {
         setShowLoader(false);
         showSuccessToast("Login Successful");
         if (access_token) {
-          localStorage.setItem("access_token", JSON.stringify(access_token));
+          Cookies.set("access_token", access_token, {
+            expires: 1 / 24, // Expires in 1 hour
+            secure: true, // Ensures the cookie is only sent over HTTPS
+            sameSite: "strict", // Prevents CSRF attacks
+          });
           await handleGetDetailsUser(access_token);
-          router.push("/")
+          router.push("/");
         }
       },
       onError: (error: any) => {

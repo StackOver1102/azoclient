@@ -1,5 +1,17 @@
 import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
 
+export type ApiResponse<T> = {
+  success: string;    // This could also be typed as a literal 'success' if it's always this value
+  message: string;    // Descriptive message about the operation
+  data: T[];            // The actual data, which could be an array or an object depending on the API
+};
+
+export type CustomError = {
+  status: number | null;
+  message: string;
+  data: any;
+};
+
 export const commonRequest = async (
   method: 'get' | 'post' | 'put' | 'patch',
   url: string,
@@ -16,31 +28,38 @@ export const commonRequest = async (
     return response;
   } catch (error: any) {
     if (error.response) {
-      const statusCode = error.response.status;
 
+      // Tạo một đối tượng lỗi tùy chỉnh với status code và message
+      const statusCode = error.response.status;
+      const customError: CustomError = {
+        status: statusCode,
+        message: error.response.data?.message || "An error occurred",
+        data: error.response.data || null,
+      };
+
+      // Throw the custom error based on the status code
       switch (statusCode) {
         case 400:
-          console.error('Bad Request (400): ', error.response.data);
-          throw new Error('Bad Request: Dữ liệu không hợp lệ');
-        
         case 401:
-          console.error('Unauthorized (401): ', error.response.data);
-          throw new Error('Unauthorized: Bạn cần đăng nhập để thực hiện hành động này');
-        
         case 500:
-          console.error('Internal Server Error (500): ', error.response.data);
-          throw new Error('Internal Server Error: Có lỗi xảy ra trên máy chủ');
-        
+          throw customError;
         default:
-          console.error(`Error ${statusCode}: `, error.response.data);
-          throw new Error(`Error ${statusCode}: Đã xảy ra lỗi`);
+          throw customError;
       }
     } else if (error.request) {
       console.error('No response received: ', error.request);
-      throw new Error('No response: Không có phản hồi từ máy chủ');
+      throw {
+        status: null,
+        message: 'No response: Không có phản hồi từ máy chủ',
+        data: null,
+      } as CustomError;
     } else {
       console.error('Error setting up request: ', error.message);
-      throw new Error(`Request Error: ${error.message}`);
+      throw {
+        status: null,
+        message: `Request Error: ${error.message}`,
+        data: null,
+      } as CustomError;
     }
   }
 };
