@@ -1,72 +1,93 @@
 import Header from "@/components/Header/Header";
 import Sidebar from "@/components/Sidebar/Sidebar";
-import { RootState } from "@/libs/redux/store";
 import { TypeHearder } from "@/types/enum";
 import {
   DehydratedState,
-  HydrationBoundary,
+  QueryClient,
   dehydrate,
-  useQuery,
 } from "@tanstack/react-query";
 import { GetServerSideProps } from "next";
 import React from "react";
 import { useSelector } from "react-redux";
 import ProductService from "@/services/ProductService";
-import { getQueryClient } from "@/utils/queryClient";
 import Table from "./__component/Table";
-export const getServerSideProps: GetServerSideProps = async () => {
-  const queryClient = getQueryClient();
-
-  await queryClient.prefetchQuery({
-    queryKey: ["product"],
-    queryFn: ProductService.fetchProducts,
-  });
-  return {
-    props: {
-      dehydratedState: dehydrate(queryClient),
-    },
+type Props = {
+  token: string | null;
+  dehydratedState: DehydratedState;
+  error?: {
+    status: number;
+    message: string;
   };
 };
-const Service = ({ dehydratedState }: { dehydratedState: DehydratedState }) => {
+export const getServerSideProps: GetServerSideProps<Props> = async (
+  context
+) => {
+  const token = context.req.cookies.access_token;
+
+  // Kiểm tra token
+  if (!token) {
+    return {
+      props: {
+        error: {
+          status: 401,
+          message: "Unauthorized: Invalid or expired token",
+        },
+        token: null,
+        dehydratedState: dehydrate(new QueryClient()), // Trả về empty state
+      },
+    };
+  }
+
+  const queryClient = new QueryClient();
+
+  try {
+    // Prefetch dữ liệu từ product service
+    await queryClient.prefetchQuery({
+      queryKey: ["product"],
+      queryFn: ProductService.fetchProducts,
+    });
+
+    return {
+      props: {
+        token,
+        dehydratedState: dehydrate(queryClient), // Đảm bảo có dữ liệu dehydrated
+      },
+    };
+  } catch (error) {
+    return {
+      props: {
+        error: {
+          status: 500,
+          message: "Failed to fetch data",
+        },
+        token: null,
+        dehydratedState: dehydrate(queryClient), // Trả về empty state nếu có lỗi
+      },
+    };
+  }
+};
+const Service = (props: Props) => {
+  const { token } = props;
   // console.log("🚀 ~ Service ~ dehydratedState:", dehydratedState)
 
-  const userLogin = useSelector((state: RootState) => state.user);
+  // const userLogin = useSelector((state: RootState) => state.user);
 
   return (
     <div className="flex">
-      {/* Sidebar */}
       <Sidebar />
-      {/* Main content */}
       <div className="flex-1 lg:ml-64">
-        {" "}
-        {/* Apply margin only on large screens (lg) */}
-        <Header
+        {/* <Header
           logo="/images/logo4.png"
-          userInfo={userLogin}
+          user={userLogin}
           type={TypeHearder.OTHE}
-        />
-        {/* Two-column layout for the content with 70-30 split */}
+          token={token}
+        /> */}
         <div className="grid grid-cols-1 gap-4 p-6">
-          {/* Left Column (70%) */}
           <div className="bg-white p-6 rounded-lg shadow-md">
             <div className="overflow-x-auto">
-              <HydrationBoundary state={dehydratedState}>
-                <Table userLogin={userLogin} />
-              </HydrationBoundary>
+              {/* <Table userLogin={userLogin} /> */}
             </div>
           </div>
-
-          {/* Right Column (30%) */}
-          {/* <div className="bg-white p-6 rounded-lg shadow-md">
-            <h2 className="text-xl font-semibold mb-4">
-              Additional Information
-            </h2>
-            <div>
-              <p>
-                Content or information for the right column (30%) goes here.
-              </p>
-            </div>
-          </div> */}
         </div>
       </div>
     </div>

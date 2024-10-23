@@ -6,6 +6,12 @@ export type ApiResponse<T> = {
   data: T[];            // The actual data, which could be an array or an object depending on the API
 };
 
+export type ApiResponseDetail<T> = {
+  success: string;    // This could also be typed as a literal 'success' if it's always this value
+  message: string;    // Descriptive message about the operation
+  data:  T;            // The actual data, which could be an array or an object depending on the API
+};
+
 export type CustomError = {
   status: number | null;
   message: string;

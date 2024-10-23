@@ -1,13 +1,10 @@
 import CustomImage from "@/components/Image/Image";
 import { useMutationHooks } from "@/hooks/useMutationHook";
 import Link from "next/link";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { showErrorToast, showSuccessToast } from "@/services/toastService";
 import Loading from "@/components/Loading/Loading";
 import { useRouter } from "next/router";
-import { useDispatch } from "react-redux";
-import { updateUser } from "@/libs/redux/slices/userSlice";
-import { persistor } from "@/libs/redux/store";
 import UserService, {
   BodyLoginUser,
   ResponseLogin,
@@ -19,20 +16,6 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [showLoader, setShowLoader] = useState<Boolean>(false);
   const router = useRouter();
-  const dispatch = useDispatch();
-
-  const handleGetDetailsUser = async (accessToken: string) => {
-    try {
-      const userDetails = await UserService.getDetail(accessToken);
-      dispatch(updateUser({ ...userDetails, access_token: accessToken }));
-      return userDetails;
-    } catch (error: any) {
-      showErrorToast("Get information user failed");
-      if (error.message.includes("401 Unauthorized")) {
-        persistor.purge();
-      }
-    }
-  };
 
   const mutation = useMutationHooks<ResponseLogin, Error, BodyLoginUser>(
     async (data: BodyLoginUser) => {
@@ -52,7 +35,6 @@ const Login = () => {
             secure: true, // Ensures the cookie is only sent over HTTPS
             sameSite: "strict", // Prevents CSRF attacks
           });
-          await handleGetDetailsUser(access_token);
           router.push("/");
         }
       },

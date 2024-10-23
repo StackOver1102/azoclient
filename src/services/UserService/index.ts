@@ -1,4 +1,4 @@
-import { ApiResponse, commonRequest } from "@/commons/req";
+import { ApiResponse, ApiResponseDetail, commonRequest } from "@/commons/req";
 import { Role } from "@/types/enum";
 import axios from "axios";
 export const API_URL = process.env.NEXT_PUBLIC_API_URL_DEV;
@@ -49,7 +49,7 @@ export type ApiError = {
         statusCode: number; // HTTP status code (should match the outer status)
     };
 };
-function isApiError(error: unknown): error is ApiError {
+export function isApiError(error: unknown): error is ApiError {
     return typeof error === 'object' && error !== null && 'status' in error && 'message' in error;
 }
 const UserService = {
@@ -86,7 +86,7 @@ const UserService = {
             }
         }
     },
-    getDetail: async (token: string): Promise<User> => {
+    getDetail: async (token: string): Promise<ApiResponseDetail<User>> => {
         try {
             const response = await axios.get(`${API_URL}/users/detail`, {
                 headers: {
@@ -96,12 +96,22 @@ const UserService = {
 
             return response.data;
         } catch (error: any) {
-            if (error.response && error.response.status === 401) {
-                throw new Error('401 Unauthorized: Invalid or expired token');
-            }
+            // if (error.response && error.response.status === 401) {
+            //     throw new Error('401 Unauthorized: Invalid or expired token');
+            // }
 
-            console.error('Error fetching details:', error);
-            throw new Error('Failed to fetch details');
+            // console.error('Error fetching details:', error);
+            // throw new Error('Failed to fetch details');
+            if (isApiError(error)) {
+                if (error.status === 401) {
+                    throw error;
+                } else {
+                    throw error
+                }
+            } else {
+                // Handle unexpected error types
+                throw new Error('An unexpected error occurred');
+            }
         }
 
     },

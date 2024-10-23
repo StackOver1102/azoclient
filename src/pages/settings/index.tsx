@@ -3,8 +3,6 @@ import Input from "@/components/Input/Input";
 import Loading from "@/components/Loading/Loading";
 import Sidebar from "@/components/Sidebar/Sidebar";
 import { useMutationHooks } from "@/hooks/useMutationHook";
-import { updateUser } from "@/libs/redux/slices/userSlice";
-import { RootState, persistor } from "@/libs/redux/store";
 import withAuth from "@/libs/wrapAuth/warpAuth";
 import UserService, {
   ApiError,
@@ -16,7 +14,6 @@ import { TypeHearder } from "@/types/enum";
 import { GetServerSideProps } from "next";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
 import { useSelector } from "react-redux";
 import Cookies from "js-cookie";
 import dayjs from "dayjs";
@@ -78,11 +75,13 @@ export const getServerSideProps: GetServerSideProps<Props> = async (
 
 const Setting = (props: Props) => {
   const { loginHistory, error, token } = props;
+  console.log("🚀 ~ Setting ~ token:", token);
+  console.log("🚀 ~ Setting ~ error:", error);
   const router = useRouter();
-  if (!token || error.status === 401) {
+  if (!token || error?.status === 401) {
     // Show error toast message
     showErrorToast("Unauthorized: Invalid or expired token please login again");
-    persistor.purge();
+    // persistor.purge();
     Cookies.remove("access_token");
     return;
   }
@@ -94,26 +93,24 @@ const Setting = (props: Props) => {
     confirmPassword: "",
   });
   const [showLoader, setShowLoader] = useState<Boolean>(false);
-  const dispatch = useDispatch();
-
+ 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
-  const handleGetDetailsUser = async (accessToken: string) => {
-    try {
-      const userDetails = await UserService.getDetail(accessToken);
-      dispatch(updateUser({ ...userDetails, access_token: accessToken }));
-      return userDetails;
-    } catch (error: any) {
-      showErrorToast("Get information user failed");
-      if (error.message.includes("401 Unauthorized")) {
-        persistor.purge();
-        router.push("/signin");
-      }
-    }
-  };
-  const userLogin = useSelector((state: RootState) => state.user);
+  // const handleGetDetailsUser = async (accessToken: string) => {
+  //   try {
+  //     const userDetails = await UserService.getDetail(accessToken);
+  //     // dispatch(updateUser({ ...userDetails, access_token: accessToken }));
+  //     return userDetails;
+  //   } catch (error: any) {
+  //     showErrorToast("Get information user failed");
+  //     if (error.message.includes("401 Unauthorized")) {
+  //       router.push("/signin");
+  //     }
+  //   }
+  // };
+  // const userLogin = useSelector((state: RootState) => state.user);
 
   const mutation = useMutationHooks(
     async ({ userData, token }: { userData: BodyUser; token: string }) => {
@@ -130,7 +127,7 @@ const Setting = (props: Props) => {
       },
       onSuccess: async () => {
         setShowLoader(false);
-        await handleGetDetailsUser(token);
+        // await handleGetDetailsUser(token);
         showSuccessToast("Update user successful");
       },
       onError: (error: CustomError) => {
@@ -141,7 +138,7 @@ const Setting = (props: Props) => {
             showErrorToast(`Bad Request:${message}.`);
           } else if (statusCode === 401) {
             showErrorToast("Unauthorized: You need to log in again.");
-            persistor.purge();
+            // persistor.purge();
             router.push("/signin");
           } else if (statusCode === 500) {
             showErrorToast("The server is busy, please try again later.");
@@ -201,15 +198,15 @@ const Setting = (props: Props) => {
     });
   };
 
-  useEffect(() => {
-    if (token) {
-      setFormData({
-        ...formData,
-        ["email"]: userLogin.email,
-        ["phone"]: userLogin.phoneNumber,
-      });
-    }
-  }, [userLogin]);
+  // useEffect(() => {
+  //   if (token) {
+  //     setFormData({
+  //       ...formData,
+  //       ["email"]: userLogin.email,
+  //       ["phone"]: userLogin.phoneNumber,
+  //     });
+  //   }
+  // }, [userLogin]);
 
   return (
     <div className="flex">
@@ -218,12 +215,12 @@ const Setting = (props: Props) => {
       <Sidebar />
       {/* Main content */}
       <div className="flex-1 lg:ml-64">
-        <Header
+        {/* <Header
           logo="/images/logo4.png"
           user={userLogin}
           token={token}
           type={TypeHearder.OTHE}
-        />
+        /> */}
 
         {/* Settings Title */}
         <div className="px-6 pt-6">

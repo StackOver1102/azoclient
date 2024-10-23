@@ -1,23 +1,50 @@
+import { GetServerSideProps } from 'next';
+import { parseCookies } from 'nookies';
+import { ComponentType, useEffect } from 'react';
 import { useRouter } from 'next/router';
-import { useEffect, ComponentType } from 'react';
-import { useSelector } from 'react-redux';
-import { RootState } from '../redux/store';
 
-const withAuth = <P extends object>(WrappedComponent: ComponentType<P>) => {
-  const AuthenticatedComponent = (props: P) => {
+// Định nghĩa kiểu cho các props
+type WithAuthProps = {
+  accessToken: string;  // Bổ sung accessToken vào kiểu props
+};
+
+const withAuth = <P extends object>(WrappedComponent: ComponentType<P & WithAuthProps>) => {
+  const AuthenticatedComponent = (props: P & WithAuthProps) => {
     const router = useRouter();
-    const userLogin = useSelector((state: RootState) => state.user);
 
     useEffect(() => {
-      if (!userLogin.access_token) {
-        router.replace('/signin'); 
+      const accessToken = props.accessToken;
+
+      // Nếu không có access_token phía client, chuyển hướng tới trang signin
+      if (!accessToken) {
+        router.replace('/signin');
       }
-    }, [router]);
+    }, [router, props.accessToken]);
 
     return <WrappedComponent {...props} />;
   };
 
   return AuthenticatedComponent;
+};
+
+export const getServerSideProps: GetServerSideProps = async (ctx) => {
+  const cookies = parseCookies(ctx);
+  const accessToken = cookies.access_token;
+
+  if (!accessToken) {
+    return {
+      redirect: {
+        destination: '/signin',
+        permanent: false,
+      },
+    };
+  }
+
+  return {
+    props: {
+      accessToken, // Truyền access_token cho component
+    },
+  };
 };
 
 export default withAuth;

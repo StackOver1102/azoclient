@@ -3,7 +3,8 @@
 import Footer from "@/components/Footer/Footer";
 import Header from "@/components/Header/Header";
 import CustomImage from "@/components/Image/Image";
-import { RootState } from "@/libs/redux/store";
+import UserService, { ApiError, User } from "@/services/UserService";
+import { showErrorToast } from "@/services/toastService";
 import { TypeHearder } from "@/types/enum";
 import { GetServerSideProps, GetStaticProps } from "next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
@@ -11,10 +12,11 @@ import Link from "next/link";
 import { useState } from "react";
 import CountUp from "react-countup";
 import { useInView } from "react-intersection-observer";
-import { useSelector } from "react-redux";
-
+import Cookies from "js-cookie"
 type Props = {
   token: string | null;
+  user: User | null;
+  error: ApiError;
 };
 export const getServerSideProps: GetServerSideProps<Props> = async (
   context
@@ -29,31 +31,68 @@ export const getServerSideProps: GetServerSideProps<Props> = async (
   //     },
   //   };
   // }
+  if (!token) {
+    return {
+      props: {
+        error: {
+          status: 401,
+          message: "Unauthorized: Invalid or expired token",
+        },
+        user: null,
+        token: null,
+      },
+    };
+  }
+
+  let user = null;
+  let error = null;
+
+  try {
+    const userDetail = await UserService.getDetail(token);
+    console.log("🚀 ~ userDetail:", userDetail)
+
+    user = userDetail.data || null;
+  } catch (err: any) {
+    error = err.message || "Failed to fetch login history";
+    console.error("Error fetching login history:", err);
+  }
 
   // Return the data and any error to the component
   return {
     props: {
-      token: token ?? null,
+      user,
+      error,
+      token,
     },
   };
 };
 
 export default function Home(prop: Props) {
-  const { token } = prop;
+  const { token, user, error } = prop;
+  // if (!user) {
+  //   showErrorToast("User not found!");
+  //   Cookies.remove("access_token");
+  //   return;
+  // }
+  // if (!token || error?.status === 401) {
+  //   // Show error toast message
+  //   showErrorToast("Unauthorized: Invalid or expired token please login again");
+  //   Cookies.remove("access_token");
+  //   return;
+  // }
+
   const [counterOn, setCounterOn] = useState(false);
   const { ref, inView } = useInView({
     triggerOnce: true, // Kích hoạt một lần khi phần tử vào khung nhìn
     onChange: (inView) => setCounterOn(inView),
   });
 
-  const userLogin = useSelector((state: RootState) => state.user);
-
   return (
     <>
       <Header
         logo="/images/logo4.png"
         token={token}
-        user={userLogin}
+        user={user}
         type={TypeHearder.HOME}
       />
       {/* START LANDING */}
@@ -71,7 +110,7 @@ export default function Home(prop: Props) {
             <Link
               href="/signup"
               className={`${
-                userLogin ? "hidden" : ""
+                token ? "hidden" : ""
               } text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-8 py-5 mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800`}
             >
               Sign up now!
