@@ -1,48 +1,31 @@
 import ProductService, { ResponseProduct } from "@/services/ProductService";
 import { useQuery } from "@tanstack/react-query";
-import { UserSlice } from "@/libs/redux/slices/userSlice";
 import Badge from "@/components/Badge/Badge";
+import Loading from "@/components/Loading/Loading";
 export interface Badges {
   label: string;
   bg: string;
   text: string;
 }
-function Table({ userLogin }: { userLogin: UserSlice }) {
-  const { data } = useQuery({
-    queryKey: ["product"],
-    queryFn: ProductService.fetchProducts,
+type Props = {
+  token: string | null;
+};
+function Table(props: Props) {
+  const { token } = props;
+  const { data, isLoading } = useQuery({
+    queryKey: ["product", token],
+    queryFn: async () => {
+      return await ProductService.fetchProducts();
+    },
+    staleTime: 1000 * 60 * 5,
+    gcTime: 1000 * 60 * 10,
+    retry: 1,
+    refetchOnWindowFocus: false,
   });
-  const access_token = userLogin.access_token;
-  const badges: Badges[] = [
-    { label: "Exclusive", bg: "bg-red-100", text: "text-red-800" },
-    { label: "Owner", bg: "bg-red-100", text: "text-red-800" },
-    { label: "Provider Direct", bg: "bg-red-100", text: "text-red-800" },
-    { label: "Best Seller", bg: "bg-red-100", text: "text-red-800" },
-    { label: "Promotion", bg: "bg-green-100", text: "text-green-800" },
-    { label: "Recommendation", bg: "bg-green-100", text: "text-green-800" },
-    { label: "Instant", bg: "bg-green-100", text: "text-green-800" },
-    { label: "Super Fast", bg: "bg-green-100", text: "text-green-800" },
-    { label: "Real", bg: "bg-green-100", text: "text-green-800" },
-    { label: "30 days Refill", bg: "bg-green-100", text: "text-green-800" },
-  ];
 
-  function getRandomBadges(badgeList: Badges[], count: number) {
-    const redBadges = badgeList.filter(
-      (badge) => badge.text === "text-red-800"
-    );
-    const otherBadges = badgeList.filter(
-      (badge) => badge.text !== "text-red-800"
-    );
-
-    const shuffled = otherBadges.sort(() => 0.5 - Math.random());
-
-    const combinedBadges = [...redBadges, ...shuffled];
-
-    return combinedBadges.slice(0, count);
-  }
-
+  if (isLoading) return <Loading />;
   return (
-    <table className="min-w-full table-fixed border-collapse  ">
+    <table className="min-w-full table-fixed border-collapse">
       <tbody>
         {data?.map((item: ResponseProduct) => (
           <>
@@ -94,27 +77,20 @@ function Table({ userLogin }: { userLogin: UserSlice }) {
                   </td>
                   <td className="text-center min-w-[100px] whitespace-nowrap">
                     <span className="text-sm text-gray-500">
-                      <span className="text-gray-800">
-                        {product.min}
-                      </span>{" "}
-                      -{" "}
-                      <span className="text-gray-800">
-                        {product.max}
-                      </span>
+                      <span className="text-gray-800">{product.min}</span> -{" "}
+                      <span className="text-gray-800">{product.max}</span>
                     </span>
                   </td>
                   <td
                     className={`text-center ${
-                      access_token ? "min-w-[150px]" : ""
+                      token ? "min-w-[150px]" : ""
                     } whitespace-nowrap`}
                   >
-                    <span className="text-gray-500">
-                      {product.rate}
-                    </span>
+                    <span className="text-gray-500">{product.rate}</span>
                   </td>
                   <td
                     className={`px-1 text-center font-bold min-w-[100px] ${
-                      access_token ? "" : "hidden"
+                      token ? "" : "hidden"
                     } `}
                   >
                     <a

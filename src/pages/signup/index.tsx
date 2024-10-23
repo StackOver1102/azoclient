@@ -4,6 +4,8 @@ import Link from "next/link";
 import React, { useState } from "react";
 import { showErrorToast, showSuccessToast } from "@/services/toastService";
 import UserService, { BodyUser } from "@/services/UserService";
+import { CustomError } from "@/commons/req";
+import { useRouter } from "next/router";
 
 const Signup = () => {
   // State to handle form input
@@ -12,10 +14,14 @@ const Signup = () => {
   const [password, setPassword] = useState<string>("");
   const [confirmPassword, setConfirmPassword] = useState<string>("");
   const [showLoader, setShowLoader] = useState<Boolean>(false);
-
+  const router = useRouter();
   const mutation = useMutationHooks(
     async (userData: BodyUser) => {
-      return await UserService.createdUser(userData);
+      try {
+        return await UserService.createdUser(userData);
+      } catch (error) {
+        throw error;
+      }
     },
     {
       onMutate: () => {
@@ -25,9 +31,27 @@ const Signup = () => {
         setShowLoader(false);
         showSuccessToast("Sign Up Successful");
       },
-      onError: () => {
-        setShowLoader(false);
-        showErrorToast("Sign Up Failed");
+      onError: (error: CustomError) => {
+        console.log("🚀 ~ Signup ~ error:", error);
+        if (error.status) {
+          const statusCode = error.status;
+          const message = error.data.error;
+          if (statusCode === 400) {
+            showErrorToast(`${message}.`);
+          } else if (statusCode === 401) {
+            showErrorToast("Unauthorized: You need to log in again.");
+            // persistor.purge();
+            router.push("/signin");
+          } else if (statusCode === 500) {
+            showErrorToast("The server is busy, please try again later.");
+          } else {
+            showErrorToast(
+              `An error occurred: ${error.message || "Unknown error"}`
+            );
+          }
+        } else {
+          showErrorToast("The server is busy, please try again later.");
+        }
       },
       onSettled: () => {
         setShowLoader(false);
@@ -36,7 +60,7 @@ const Signup = () => {
   );
 
   // Submit handler
-  const submitHandler = (e: React.FormEvent) => {
+  const submitHandler = async (e: React.FormEvent) => {
     try {
       e.preventDefault();
 
@@ -54,9 +78,9 @@ const Signup = () => {
         password,
       };
 
-      mutation.mutate(userBody);
+      await mutation.mutate(userBody);
     } catch (error) {
-      console.log("🚀 ~ submitHandler ~ error:", error)
+      console.log("🚀 ~ submitHandler ~ error:", error);
     }
   };
 

@@ -15,7 +15,7 @@ import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 
-const Order = () => {
+const NewOrder = () => {
   const userLogin = useSelector((state: RootState) => state.user);
   const [platforms, setPlatforms] = useState<string[]>([]);
   const [category, setCategory] = useState<string[]>([]);
@@ -299,4 +299,4 @@ const Order = () => {
   );
 };
 
-export default Order;
+export default NewOrder;

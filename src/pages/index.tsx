@@ -6,22 +6,22 @@ import CustomImage from "@/components/Image/Image";
 import UserService, { ApiError, User } from "@/services/UserService";
 import { showErrorToast } from "@/services/toastService";
 import { TypeHearder } from "@/types/enum";
+import { dehydrate, QueryClient } from "@tanstack/react-query";
 import { GetServerSideProps, GetStaticProps } from "next";
-import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import Link from "next/link";
 import { useState } from "react";
 import CountUp from "react-countup";
 import { useInView } from "react-intersection-observer";
-import Cookies from "js-cookie"
+import Cookies from "js-cookie";
 type Props = {
   token: string | null;
-  user: User | null;
-  error: ApiError;
+  error: ApiError | null;
 };
 export const getServerSideProps: GetServerSideProps<Props> = async (
   context
 ) => {
   const token = context.req.cookies.access_token;
+  const queryClient = new QueryClient();
 
   // if (!token) {
   //   return {
@@ -38,37 +38,48 @@ export const getServerSideProps: GetServerSideProps<Props> = async (
           status: 401,
           message: "Unauthorized: Invalid or expired token",
         },
-        user: null,
         token: null,
       },
     };
   }
 
-  let user = null;
-  let error = null;
-
   try {
-    const userDetail = await UserService.getDetail(token);
-    console.log("🚀 ~ userDetail:", userDetail)
+    await queryClient.prefetchQuery({
+      queryKey: ["userDetail", token],
+      queryFn: async () => {
+        try {
+          const response = await UserService.getDetail(token);
+          if (!response || !response.data) {
+            throw new Error("No data returned from API");
+          }
+          return response.data;
+        } catch (error) {}
+      },
+    });
 
-    user = userDetail.data || null;
+    return {
+      props: {
+        error: null,
+        token,
+        dehydratedState: dehydrate(queryClient), // Pass dehydrate state to hydrate client side
+      },
+    };
   } catch (err: any) {
-    error = err.message || "Failed to fetch login history";
-    console.error("Error fetching login history:", err);
+    return {
+      props: {
+        error: {
+          status: 500,
+          message: err.message || "Failed to fetch user details",
+        },
+        token,
+        dehydratedState: dehydrate(queryClient),
+      },
+    };
   }
-
-  // Return the data and any error to the component
-  return {
-    props: {
-      user,
-      error,
-      token,
-    },
-  };
 };
 
 export default function Home(prop: Props) {
-  const { token, user, error } = prop;
+  const { token, error } = prop;
   // if (!user) {
   //   showErrorToast("User not found!");
   //   Cookies.remove("access_token");
@@ -78,7 +89,7 @@ export default function Home(prop: Props) {
   //   // Show error toast message
   //   showErrorToast("Unauthorized: Invalid or expired token please login again");
   //   Cookies.remove("access_token");
-  //   return;
+  //   // return;
   // }
 
   const [counterOn, setCounterOn] = useState(false);
@@ -89,12 +100,7 @@ export default function Home(prop: Props) {
 
   return (
     <>
-      <Header
-        logo="/images/logo4.png"
-        token={token}
-        user={user}
-        type={TypeHearder.HOME}
-      />
+      <Header logo="/images/logo4.png" token={token} type={TypeHearder.HOME} />
       {/* START LANDING */}
       <section className="bg-[#13263c] dark:bg-gray-900 pt-10" id="hero">
         <div className="py-16 px-4 mx-auto max-w-screen-xl text-center lg:py-20 lg:px-12">

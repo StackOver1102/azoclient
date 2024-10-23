@@ -53,17 +53,12 @@ export function isApiError(error: unknown): error is ApiError {
     return typeof error === 'object' && error !== null && 'status' in error && 'message' in error;
 }
 const UserService = {
-    createdUser: async (data: BodyUser): Promise<void> => {
+    createdUser: async (data: BodyUser): Promise<ApiResponseDetail<User>> => {
         try {
-            const response = await axios.post(`${API_URL}/users`, data);
+            const response = await commonRequest("post", `${API_URL}/users`, data);
 
-            if (response.status === 201 || response.status === 200) {
-                return;
-            } else {
-                throw new Error("Failed to create user");
-            }
+            return response.data;
         } catch (error) {
-            console.error("Error creating user:", error);
             throw error;
         }
     },
@@ -88,7 +83,7 @@ const UserService = {
     },
     getDetail: async (token: string): Promise<ApiResponseDetail<User>> => {
         try {
-            const response = await axios.get(`${API_URL}/users/detail`, {
+            const response = await commonRequest('get', `${API_URL}/users/detail`, {}, {
                 headers: {
                     'Authorization': `Bearer ${token}`,
                 }
@@ -96,12 +91,6 @@ const UserService = {
 
             return response.data;
         } catch (error: any) {
-            // if (error.response && error.response.status === 401) {
-            //     throw new Error('401 Unauthorized: Invalid or expired token');
-            // }
-
-            // console.error('Error fetching details:', error);
-            // throw new Error('Failed to fetch details');
             if (isApiError(error)) {
                 if (error.status === 401) {
                     throw error;

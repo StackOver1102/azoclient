@@ -49,7 +49,7 @@ const Sidebar = () => {
             <ul className="space-y-2">
               <li>
                 <Link
-                  href="/order"
+                  href="/new"
                   className="flex items-center space-x-2 p-2 text-base font-normal text-white rounded-lg hover:bg-purple-600 transition duration-200"
                 >
                   <i className="fa-solid fa-cart-shopping text-lg text-white"></i>

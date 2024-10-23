@@ -7,6 +7,7 @@ import withAuth from "@/libs/wrapAuth/warpAuth";
 import UserService, {
   ApiError,
   BodyUser,
+  isApiError,
   ResponseHistoryLogin,
 } from "@/services/UserService";
 import { showErrorToast, showSuccessToast } from "@/services/toastService";
@@ -18,10 +19,10 @@ import { useSelector } from "react-redux";
 import Cookies from "js-cookie";
 import dayjs from "dayjs";
 import { CustomError } from "@/commons/req";
+import { dehydrate, QueryClient, useQuery } from "@tanstack/react-query";
 
 type Props = {
-  error: ApiError;
-  loginHistory: ResponseHistoryLogin[] | null;
+  error: ApiError | null;
   token: string | null;
 };
 export const getServerSideProps: GetServerSideProps<Props> = async (
@@ -29,14 +30,6 @@ export const getServerSideProps: GetServerSideProps<Props> = async (
 ) => {
   const token = context.req.cookies.access_token;
 
-  // if (!token) {
-  //   return {
-  //     redirect: {
-  //       destination: "/signin",
-  //       permanent: false,
-  //     },
-  //   };
-  // }
   if (!token) {
     return {
       props: {
@@ -44,39 +37,48 @@ export const getServerSideProps: GetServerSideProps<Props> = async (
           status: 401,
           message: "Unauthorized: Invalid or expired token",
         },
-        loginHistory: null,
         token: null,
       },
     };
   }
 
-  let loginHistory = null;
-  let error = null;
+  const queryClient = new QueryClient();
 
   try {
-    const response = await UserService.getHistoryLogin(token.trim());
-    console.log("🚀 ~ response:", response);
+    await queryClient.prefetchQuery({
+      queryKey: ["historyLogin", token],
+      queryFn: async () => {
+        const response = await UserService.getHistoryLogin(token);
+        if (!response || !response.data) {
+          throw new Error("No data returned from API");
+        }
+        return response.data;
+      },
+    });
 
-    loginHistory = response.data;
+    return {
+      props: {
+        error: null,
+        token,
+        dehydratedState: dehydrate(queryClient),
+      },
+    };
   } catch (err: any) {
-    error = err.message || "Failed to fetch login history";
-    console.error("Error fetching login history:", err);
+    return {
+      props: {
+        error: {
+          status: 500,
+          message: "Failed to fetch data",
+        },
+        token: null,
+        dehydratedState: dehydrate(queryClient), // Trả về empty state nếu có lỗi
+      },
+    };
   }
-
-  // Return the data and any error to the component
-  return {
-    props: {
-      loginHistory,
-      error,
-      token,
-    },
-  };
 };
 
 const Setting = (props: Props) => {
-  const { loginHistory, error, token } = props;
-  console.log("🚀 ~ Setting ~ token:", token);
-  console.log("🚀 ~ Setting ~ error:", error);
+  const { error, token } = props;
   const router = useRouter();
   if (!token || error?.status === 401) {
     // Show error toast message
@@ -85,6 +87,72 @@ const Setting = (props: Props) => {
     Cookies.remove("access_token");
     return;
   }
+
+  const { data: loginHistory } = useQuery({
+    queryKey: ["historyLogin", token],
+    queryFn: async () => {
+      try {
+        // Gọi API và chỉ trả về dữ liệu `user` (lấy `data` từ `ApiResponseDetail<User>`)
+        const response = await UserService.getHistoryLogin(token ?? "");
+        if (!response || !response.data) {
+          throw new Error("No data returned from API");
+        }
+
+        return response.data;
+      } catch (error: unknown) {
+        if (isApiError(error)) {
+          if (error.status === 401) {
+            showErrorToast("Invalid or expired token, please login again");
+            Cookies.remove("access_token");
+            router.push("/signin");
+          } else {
+            throw error;
+          }
+        } else {
+          console.error("Unexpected error occurred:", error);
+          throw new Error("An unexpected error occurred");
+        }
+      }
+    },
+    staleTime: 1000 * 60 * 5, // Cache dữ liệu trong 5 phút
+    gcTime: 1000 * 60 * 10, // Giữ cache trong 10 phút
+    retry: 1, // Chỉ thử lại 1 lần nếu có lỗi
+    refetchOnWindowFocus: false, // Không tự động refetch khi quay lại tab
+    // enabled: !!token,
+  });
+
+  const { data: user } = useQuery({
+    queryKey: ["userDetail", token],
+    queryFn: async () => {
+      try {
+        // Gọi API và chỉ trả về dữ liệu `user` (lấy `data` từ `ApiResponseDetail<User>`)
+        const response = await UserService.getDetail(token ?? "");
+        if (!response || !response.data) {
+          throw new Error("No data returned from API");
+        }
+        return response.data;
+      } catch (error: unknown) {
+        if (isApiError(error)) {
+          if (error.status === 401) {
+            showErrorToast("Invalid or expired token, please login again");
+            Cookies.remove("access_token");
+            router.push("/signin");
+          } else {
+            throw error;
+          }
+        } else {
+          console.error("Unexpected error occurred:", error);
+          throw new Error("An unexpected error occurred");
+        }
+      }
+    },
+    staleTime: 1000 * 60 * 5, // Cache dữ liệu trong 5 phút
+    gcTime: 1000 * 60 * 10, // Giữ cache trong 10 phút
+    retry: 1, // Chỉ thử lại 1 lần nếu có lỗi
+    refetchOnWindowFocus: false, // Không tự động refetch khi quay lại tab
+    enabled: !!token,
+  });
+
   const [formData, setFormData] = useState({
     email: "",
     phone: "",
@@ -93,24 +161,11 @@ const Setting = (props: Props) => {
     confirmPassword: "",
   });
   const [showLoader, setShowLoader] = useState<Boolean>(false);
- 
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
-  // const handleGetDetailsUser = async (accessToken: string) => {
-  //   try {
-  //     const userDetails = await UserService.getDetail(accessToken);
-  //     // dispatch(updateUser({ ...userDetails, access_token: accessToken }));
-  //     return userDetails;
-  //   } catch (error: any) {
-  //     showErrorToast("Get information user failed");
-  //     if (error.message.includes("401 Unauthorized")) {
-  //       router.push("/signin");
-  //     }
-  //   }
-  // };
-  // const userLogin = useSelector((state: RootState) => state.user);
 
   const mutation = useMutationHooks(
     async ({ userData, token }: { userData: BodyUser; token: string }) => {
@@ -197,16 +252,15 @@ const Setting = (props: Props) => {
       token,
     });
   };
-
-  // useEffect(() => {
-  //   if (token) {
-  //     setFormData({
-  //       ...formData,
-  //       ["email"]: userLogin.email,
-  //       ["phone"]: userLogin.phoneNumber,
-  //     });
-  //   }
-  // }, [userLogin]);
+  useEffect(() => {
+    if (user) {
+      setFormData({
+        ...formData,
+        ["email"]: user?.email,
+        ["phone"]: user.phonenumber,
+      });
+    }
+  }, [user]);
 
   return (
     <div className="flex">
@@ -215,12 +269,11 @@ const Setting = (props: Props) => {
       <Sidebar />
       {/* Main content */}
       <div className="flex-1 lg:ml-64">
-        {/* <Header
+        <Header
           logo="/images/logo4.png"
-          user={userLogin}
           token={token}
           type={TypeHearder.OTHE}
-        /> */}
+        />
 
         {/* Settings Title */}
         <div className="px-6 pt-6">

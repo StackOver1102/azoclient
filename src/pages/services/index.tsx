@@ -1,11 +1,7 @@
 import Header from "@/components/Header/Header";
 import Sidebar from "@/components/Sidebar/Sidebar";
 import { TypeHearder } from "@/types/enum";
-import {
-  DehydratedState,
-  QueryClient,
-  dehydrate,
-} from "@tanstack/react-query";
+import { DehydratedState, QueryClient, dehydrate } from "@tanstack/react-query";
 import { GetServerSideProps } from "next";
 import React from "react";
 import { useSelector } from "react-redux";
@@ -44,13 +40,15 @@ export const getServerSideProps: GetServerSideProps<Props> = async (
     // Prefetch dữ liệu từ product service
     await queryClient.prefetchQuery({
       queryKey: ["product"],
-      queryFn: ProductService.fetchProducts,
+      queryFn: async () => {
+        return await ProductService.fetchProducts();
+      },
     });
 
     return {
       props: {
         token,
-        dehydratedState: dehydrate(queryClient), // Đảm bảo có dữ liệu dehydrated
+        dehydratedState: dehydrate(queryClient),
       },
     };
   } catch (error) {
@@ -68,24 +66,20 @@ export const getServerSideProps: GetServerSideProps<Props> = async (
 };
 const Service = (props: Props) => {
   const { token } = props;
-  // console.log("🚀 ~ Service ~ dehydratedState:", dehydratedState)
-
-  // const userLogin = useSelector((state: RootState) => state.user);
 
   return (
     <div className="flex">
       <Sidebar />
       <div className="flex-1 lg:ml-64">
-        {/* <Header
+        <Header
           logo="/images/logo4.png"
-          user={userLogin}
           type={TypeHearder.OTHE}
           token={token}
-        /> */}
+        />
         <div className="grid grid-cols-1 gap-4 p-6">
           <div className="bg-white p-6 rounded-lg shadow-md">
             <div className="overflow-x-auto">
-              {/* <Table userLogin={userLogin} /> */}
+              <Table token={token} />
             </div>
           </div>
         </div>

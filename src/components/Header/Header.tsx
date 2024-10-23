@@ -3,22 +3,58 @@ import Link from "next/link";
 import CustomImage from "../Image/Image";
 import { useTranslation } from "react-i18next";
 import { TypeHearder } from "@/types/enum";
-import { User } from "@/services/UserService";
+import UserService, { isApiError, User } from "@/services/UserService";
+import { useQuery } from "@tanstack/react-query";
+import { showErrorToast } from "@/services/toastService";
+import Cookies from "js-cookie";
+import { useRouter } from "next/router";
 
 interface HeaderProps {
   logo: string;
   token: string | null;
-  user: User | null;
-  type: TypeHearder;
+  type: TypeHearder
 }
 
 const Header: React.FC<HeaderProps> = ({
   logo,
   token,
-  // user,
   type = TypeHearder.OTHE,
 }) => {
   const { t } = useTranslation("common");
+  const router = useRouter();
+
+  const { data: user } = useQuery({
+    queryKey: ["userDetail", token],
+    queryFn: async () => {
+      try {
+        // Gọi API và chỉ trả về dữ liệu `user` (lấy `data` từ `ApiResponseDetail<User>`)
+        const response = await UserService.getDetail(token ?? "");
+        if (!response || !response.data) {
+          throw new Error("No data returned from API");
+        }
+        return response.data;
+      } catch (error: unknown) {
+        if (isApiError(error)) {
+          if (error.status === 401) {
+            showErrorToast("Invalid or expired token, please login again");
+            Cookies.remove("access_token");
+            router.push("/signin");
+          } else {
+            throw error;
+          }
+        } else {
+          console.error("Unexpected error occurred:", error);
+          throw new Error("An unexpected error occurred");
+        }
+      }
+    },
+    staleTime: 1000 * 60 * 5, // Cache dữ liệu trong 5 phút
+    gcTime: 1000 * 60 * 10, // Giữ cache trong 10 phút
+    retry: 1, // Chỉ thử lại 1 lần nếu có lỗi
+    refetchOnWindowFocus: false, // Không tự động refetch khi quay lại tab
+    enabled: !!token,
+  });
+
   const access_token = token;
   const [color, setColor] = useState(false); // Quản lý trạng thái màu sắc
   const [open, setOpen] = useState(false); // Quản lý trạng thái mở/đóng của thanh menu
@@ -272,7 +308,7 @@ const Header: React.FC<HeaderProps> = ({
                     href="/pro/#pricing"
                     className=" inline-flex items-center text-green-700 hover:text-white border border-green-700 hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center ml-3"
                   >
-                    {/* $ {user?.money} */}
+                    $ {user?.money}
                   </a>
                   <svg
                     data-bs-toggle="offcanvas"
