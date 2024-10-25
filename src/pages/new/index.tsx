@@ -2,7 +2,6 @@ import Header from "@/components/Header/Header";
 import SelectDropdown from "@/components/Select/Select";
 import Sidebar from "@/components/Sidebar/Sidebar";
 import { useMutationHooks } from "@/hooks/useMutationHook";
-import { RootState } from "@/libs/redux/store";
 import OrderService, { BodyCreateOrder } from "@/services/OrderService";
 import ProductService, {
   Product,
@@ -16,7 +15,6 @@ import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 
 const NewOrder = () => {
-  const userLogin = useSelector((state: RootState) => state.user);
   const [platforms, setPlatforms] = useState<string[]>([]);
   const [category, setCategory] = useState<string[]>([]);
   const [service, setService] = useState<Product[]>([]);
@@ -144,50 +142,50 @@ const NewOrder = () => {
     }
   );
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  // const handleSubmit = async (e: React.FormEvent) => {
+  //   e.preventDefault();
 
-    if(!userLogin.access_token){
-      showErrorToast("Please login.");
-      router.push("/signin")
-      return
-    }
-    // Validate form
-    if (!product || !link || !quantity) {
-      showErrorToast("Please fill in both fields.");
-      return;
-    }
+  //   if(!userLogin.access_token){
+  //     showErrorToast("Please login.");
+  //     router.push("/signin")
+  //     return
+  //   }
+  //   // Validate form
+  //   if (!product || !link || !quantity) {
+  //     showErrorToast("Please fill in both fields.");
+  //     return;
+  //   }
     
-    const totalMoney = quantity * product.rate
+  //   const totalMoney = quantity * product.rate
 
-    if(totalMoney > userLogin.money){
-      showErrorToast(`You do not have enough money. Your balance: ${userLogin.money}, required: ${totalMoney}.`);
-      return;
-    }
+  //   if(totalMoney > userLogin.money){
+  //     showErrorToast(`You do not have enough money. Your balance: ${userLogin.money}, required: ${totalMoney}.`);
+  //     return;
+  //   }
 
-    const data = {
-      service: product.value,
-      link,
-      quantity
-    };
+  //   const data = {
+  //     service: product.value,
+  //     link,
+  //     quantity
+  //   };
 
-    try {
-      await mutation.mutateAsync(data);
-    } catch (error: any) {
-      console.log("🚀 ~ handleSubmit ~ error:", error);
-      // showErrorToast(`Login failed: ${error.message}`);
-    }
-  };
+  //   try {
+  //     await mutation.mutateAsync(data);
+  //   } catch (error: any) {
+  //     console.log("🚀 ~ handleSubmit ~ error:", error);
+  //     // showErrorToast(`Login failed: ${error.message}`);
+  //   }
+  // };
 
   return (
     <div className="flex">
       <Sidebar />
       <div className="flex-1 lg:ml-64">
-        <Header
+        {/* <Header
           logo="/images/logo4.png"
-          userInfo={userLogin}
+          // userInfo={userLogin}
           type={TypeHearder.OTHE}
-        />
+        /> */}
 
         {/* New Order Heading */}
         <div className="px-6 pt-6">
@@ -263,7 +261,7 @@ const NewOrder = () => {
               <div>
                 <button
                   className="w-full p-3 bg-blue-600 text-white rounded-md"
-                  onClick={handleSubmit}
+                  // onClick={handleSubmit}
                 >
                   Submit
                 </button>

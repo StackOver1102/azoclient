@@ -1,4 +1,4 @@
-import CustomImage from "../Image/Image";
+import Image from "next/image";
 
 const FooterBottom = () => {
     return (
@@ -6,7 +6,7 @@ const FooterBottom = () => {
         <div className="flex flex-col lg:flex-row items-center justify-between">
           <a href="/" className="mb-4 lg:mb-0">
             {/* <img alt="Logo" src="/path/to/logo.png" className="h-[80px] lg:h-[100px]" /> */}
-            <CustomImage src="/images/logo4.png" className="h-[80px] lg:h-[100px]" alt="Logo" height={80} width={120}/>
+            <Image src="/images/logo4.png" className="h-[80px] lg:h-[100px]" alt="Logo" height={80} width={120}/>
           </a>
           <span className="text-gray-600 text-base md:text-lg text-center">
             © 2022 1TAP SMM Panel - Social Services

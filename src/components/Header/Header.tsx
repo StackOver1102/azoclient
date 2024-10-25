@@ -8,6 +8,7 @@ import { useQuery } from "@tanstack/react-query";
 import { showErrorToast } from "@/services/toastService";
 import Cookies from "js-cookie";
 import { useRouter } from "next/router";
+import Image from "next/image";
 
 interface HeaderProps {
   logo: string;
@@ -92,7 +93,7 @@ const Header: React.FC<HeaderProps> = ({
             >
               <div className="container flex flex-wrap justify-between items-center mx-auto">
                 <Link href="/" className="flex items-center">
-                  <CustomImage
+                  <Image
                     src={logo}
                     className="mr-3 h-[70px]"
                     alt="Logo"
@@ -271,16 +272,20 @@ const Header: React.FC<HeaderProps> = ({
                   </button> */}
                   <div className="flex justify-between items-center">
                     <Link href="/" className="flex">
-                      <img
+                      <Image
                         alt="Logo"
                         src={logo}
                         className="hidden lg:inline h-[70px]"
+                        height={70}
+                        width={100}
                       />
-                      <img
+                      <Image
                         alt="Logo"
                         src={logo}
                         className="lg:hidden h-[50px] w-[100px] ml-10"
-                      ></img>
+                        height={50}
+                        width={100}
+                      ></Image>
                     </Link>
                   </div>
                   {/* <div className="ml-6 xl:ml-16 xl:pl-4">

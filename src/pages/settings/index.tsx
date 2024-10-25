@@ -64,6 +64,22 @@ export const getServerSideProps: GetServerSideProps<Props> = async (
       },
     };
   } catch (err: any) {
+    if (isApiError(err)) {
+      const errorCode = err.status;
+      if (errorCode === 401) {
+        await UserService.logout(token);
+      }
+      return {
+        props: {
+          error: {
+            status: errorCode,
+            message: err.data?.error || "Failed to fetch user details",
+          },
+          token,
+          dehydratedState: dehydrate(queryClient),
+        },
+      };
+    }
     return {
       props: {
         error: {
@@ -88,7 +104,7 @@ const Setting = (props: Props) => {
     return;
   }
 
-  const { data: loginHistory } = useQuery({
+  const { data: loginHistory, isLoading } = useQuery({
     queryKey: ["historyLogin", token],
     queryFn: async () => {
       try {
@@ -121,7 +137,7 @@ const Setting = (props: Props) => {
     // enabled: !!token,
   });
 
-  const { data: user } = useQuery({
+  const { data: user, isLoading: isLoadingUser } = useQuery({
     queryKey: ["userDetail", token],
     queryFn: async () => {
       try {
@@ -160,7 +176,12 @@ const Setting = (props: Props) => {
     newPassword: "",
     confirmPassword: "",
   });
+
   const [showLoader, setShowLoader] = useState<Boolean>(false);
+
+  if (isLoading) {
+    return <Loading />;
+  }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -268,7 +289,7 @@ const Setting = (props: Props) => {
       {/* Sidebar */}
       <Sidebar />
       {/* Main content */}
-      <div className="flex-1 lg:ml-64">
+      <div className="flex-1 lg:ml-64 bg-[#f9fafb]">
         <Header
           logo="/images/logo4.png"
           token={token}
@@ -283,7 +304,7 @@ const Setting = (props: Props) => {
         {/* Security Settings Section */}
         <div className="p-6">
           {/* Card Wrapper */}
-          <div className="bg-white rounded-lg shadow-md">
+          <div className="bg-white rounded-lg shadow-custom">
             {/* Card Header */}
             <div className="border-b border-gray-300 px-6 py-4">
               <h3 className="text-xl font-semibold text-gray-800">Security</h3>
@@ -366,7 +387,7 @@ const Setting = (props: Props) => {
         {/* Sign-in history Section */}
         <div className="p-6">
           {/* Card Wrapper */}
-          <div className="bg-white rounded-lg shadow-md">
+          <div className="bg-white rounded-lg shadow-custom">
             {/* Card Header */}
             <div className="border-b border-gray-300 px-6 py-4">
               <h3 className="text-xl font-semibold text-gray-800">

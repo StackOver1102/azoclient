@@ -3,7 +3,11 @@
 import Footer from "@/components/Footer/Footer";
 import Header from "@/components/Header/Header";
 import CustomImage from "@/components/Image/Image";
-import UserService, { ApiError, User } from "@/services/UserService";
+import UserService, {
+  ApiError,
+  User,
+  isApiError,
+} from "@/services/UserService";
 import { showErrorToast } from "@/services/toastService";
 import { TypeHearder } from "@/types/enum";
 import { dehydrate, QueryClient } from "@tanstack/react-query";
@@ -13,6 +17,7 @@ import { useState } from "react";
 import CountUp from "react-countup";
 import { useInView } from "react-intersection-observer";
 import Cookies from "js-cookie";
+import Image from "next/image";
 type Props = {
   token: string | null;
   error: ApiError | null;
@@ -65,6 +70,22 @@ export const getServerSideProps: GetServerSideProps<Props> = async (
       },
     };
   } catch (err: any) {
+    if (isApiError(err)) {
+      const errorCode = err.status;
+      if (errorCode === 401) {
+        await UserService.logout(token);
+      }
+      return {
+        props: {
+          error: {
+            status: errorCode,
+            message: err.data?.error || "Failed to fetch user details",
+          },
+          token,
+          dehydratedState: dehydrate(queryClient),
+        },
+      };
+    }
     return {
       props: {
         error: {
@@ -141,7 +162,7 @@ export default function Home(prop: Props) {
             {/* Grid với 3 cột */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mt-12">
               <div className="grid2-item">
-                <CustomImage
+                <Image
                   src={`/images/2.png`}
                   className="max-h-[280px] mb-9"
                   alt="Logo"
@@ -163,7 +184,7 @@ export default function Home(prop: Props) {
               </div>
 
               <div className="grid2-item">
-                <CustomImage
+                <Image
                   src={`/images/8.png`}
                   className="max-h-[280px] mb-9"
                   alt="Logo"
@@ -185,7 +206,7 @@ export default function Home(prop: Props) {
               </div>
 
               <div className="grid2-item">
-                <CustomImage
+                <Image
                   src={`/images/12.png`}
                   className="max-h-[280px] mb-9"
                   alt="Logo"

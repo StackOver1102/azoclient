@@ -138,6 +138,18 @@ const UserService = {
             }
         }
     },
+    logout: async (token: string): Promise<void> => {
+        try {
+            const response = await commonRequest("post", `${API_URL}/users/logout`, {}, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                },
+            })
+            return response.data
+        } catch (error) {
+            throw error
+        }
+    }
 }
 
 export default UserService;

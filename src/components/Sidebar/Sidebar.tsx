@@ -1,8 +1,13 @@
 import Link from "next/link";
 import CustomImage from "../Image/Image"; // Assuming CustomImage is a custom image component
 import { useState } from "react";
+import Image from "next/image";
 
-const Sidebar = () => {
+type Props = {
+  isLogin: boolean;
+};
+const Sidebar = (props: Props) => {
+  const { isLogin } = props;
   const [isOpen, setIsOpen] = useState(false);
 
   const handleCloseSidebar = () => {
@@ -37,7 +42,7 @@ const Sidebar = () => {
         {/* Sidebar links and logo */}
         <div className="flex-grow">
           <div className="flex justify-center mb-6">
-            <CustomImage
+            <Image
               alt="Logo"
               src={"/images/logo4.png"}
               className="h-[150px]"
@@ -45,9 +50,9 @@ const Sidebar = () => {
               width={196}
             />
           </div>
-          <div className="h-full px-3 pb-4">
+          <div className="h-full px-3 pb-4 flex flex-grow">
             <ul className="space-y-2">
-              <li>
+              <li className={`${isLogin ? "" : "hidden"}`}>
                 <Link
                   href="/new"
                   className="flex items-center space-x-2 p-2 text-base font-normal text-white rounded-lg hover:bg-purple-600 transition duration-200"
@@ -56,18 +61,18 @@ const Sidebar = () => {
                   <span className="text-xl">New Order</span>
                 </Link>
               </li>
-              <li>
+              <li className={`${isLogin ? "" : "hidden"}`}>
                 <Link
-                  href="/profile"
+                  href="/mass"
                   className="flex items-center space-x-2 p-2 text-base font-normal text-white rounded-lg hover:bg-purple-600 transition duration-200"
                 >
                   <i className="fa-solid fa-user text-lg text-white"></i>
                   <span className="text-xl">Mass Order</span>
                 </Link>
               </li>
-              <li>
+              <li className={`${isLogin ? "" : "hidden"}`}>
                 <Link
-                  href="/settings"
+                  href="/orders"
                   className="flex items-center space-x-2 p-2 text-base font-normal text-white rounded-lg hover:bg-purple-600 transition duration-200"
                 >
                   <i className="fa-solid fa-cog text-lg text-white"></i>
@@ -83,7 +88,7 @@ const Sidebar = () => {
                   <span className="text-xl">Services</span>
                 </Link>
               </li>
-              <li>
+              <li className={`${isLogin ? "" : "hidden"}`}>
                 <Link
                   href="/refill"
                   className="flex items-center space-x-2 p-2 text-base font-normal text-white rounded-lg hover:bg-purple-600 transition duration-200"
@@ -92,9 +97,9 @@ const Sidebar = () => {
                   <span className="text-xl">Refill</span>
                 </Link>
               </li>
-              <li>
+              <li className={`${isLogin ? "" : "hidden"}`}>
                 <Link
-                  href="/add-funds"
+                  href="/addfunds"
                   className="flex items-center space-x-2 p-2 text-base font-normal text-white rounded-lg hover:bg-purple-600 transition duration-200"
                 >
                   <i className="fa-solid fa-money-bill-wave text-lg text-white"></i>
@@ -110,7 +115,7 @@ const Sidebar = () => {
                   <span className="text-xl">Support</span>
                 </Link>
               </li>
-              <li>
+              <li className={`${isLogin ? "" : "hidden"}`}>
                 <Link
                   href="/settings"
                   className="flex items-center space-x-2 p-2 text-base font-normal text-white rounded-lg hover:bg-purple-600 transition duration-200"
@@ -119,7 +124,7 @@ const Sidebar = () => {
                   <span className="text-xl">Settings</span>
                 </Link>
               </li>
-              <li>
+              <li className={`${isLogin ? "" : "hidden"}`}>
                 <Link
                   href="/cashflow"
                   className="flex items-center space-x-2 p-2 text-base font-normal text-white rounded-lg hover:bg-purple-600 transition duration-200"
@@ -128,7 +133,7 @@ const Sidebar = () => {
                   <span className="text-xl">Cash Flow</span>
                 </Link>
               </li>
-              <li>
+              {/* <li>
                 <Link
                   href="/affiliate"
                   className="flex items-center space-x-2 p-2 text-base font-normal text-white rounded-lg hover:bg-purple-600 transition duration-200"
@@ -136,14 +141,32 @@ const Sidebar = () => {
                   <i className="fa-solid fa-user-friends text-lg text-white"></i>
                   <span className="text-xl">Affiliate</span>
                 </Link>
-              </li>
+              </li> */}
               <li>
                 <Link
-                  href="/api-documentation"
+                  href="/apidoc"
                   className="flex items-center space-x-2 p-2 text-base font-normal text-white rounded-lg hover:bg-purple-600 transition duration-200"
                 >
                   <i className="fa-solid fa-file-code text-lg text-white"></i>
-                  <span className="text-xl">API Documentation</span>
+                  <span className="text-xl">API</span>
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/signin"
+                  className="flex items-center space-x-2 p-2 text-base font-normal text-white rounded-lg hover:bg-purple-600 transition duration-200"
+                >
+                  <i className="fa-solid fa-right-to-bracket text-lg text-white"></i>
+                  <span className="text-xl">Sign in</span>
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/signup"
+                  className="flex items-center space-x-2 p-2 text-base font-normal text-white rounded-lg hover:bg-purple-600 transition duration-200"
+                >
+                  <i className="fa-solid fa-right-to-bracket text-lg text-white"></i>
+                  <span className="text-xl">Sign up</span>
                 </Link>
               </li>
             </ul>

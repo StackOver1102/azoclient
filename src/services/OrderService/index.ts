@@ -17,6 +17,30 @@ const OrderService = {
             throw error;
         }
     },
+    getAllOrder: async (token: string) => {
+        try {
+            const response = await commonRequest('get', `${API_URL}/orders`, {}, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                },
+            });
+            return response.data;
+        } catch (error) {
+            throw error;
+        }
+    },
+    getDetail: async (token: string) => {
+        try {
+            const response = await commonRequest('get', `${API_URL}/orders`, {}, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                },
+            });
+            return response.data;
+        } catch (error) {
+            throw error;
+        }
+    }
 };
 
 export default OrderService;

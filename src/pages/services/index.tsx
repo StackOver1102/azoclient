@@ -7,6 +7,7 @@ import React from "react";
 import { useSelector } from "react-redux";
 import ProductService from "@/services/ProductService";
 import Table from "./__component/Table";
+import UserService, { isApiError } from "@/services/UserService";
 type Props = {
   token: string | null;
   dehydratedState: DehydratedState;
@@ -51,7 +52,23 @@ export const getServerSideProps: GetServerSideProps<Props> = async (
         dehydratedState: dehydrate(queryClient),
       },
     };
-  } catch (error) {
+  } catch (error: any) {
+    if (isApiError(error)) {
+      const errorCode = error.status;
+      if (errorCode === 401) {
+        await UserService.logout(token);
+      }
+      return {
+        props: {
+          error: {
+            status: errorCode,
+            message: error.data?.error || "Failed to fetch user details",
+          },
+          token,
+          dehydratedState: dehydrate(queryClient),
+        },
+      };
+    }
     return {
       props: {
         error: {
@@ -76,8 +93,8 @@ const Service = (props: Props) => {
           type={TypeHearder.OTHE}
           token={token}
         />
-        <div className="grid grid-cols-1 gap-4 p-6">
-          <div className="bg-white p-6 rounded-lg shadow-md">
+        <div className="grid grid-cols-1 gap-4 p-6 bg-[#f9fafb]">
+          <div className="bg-white p-6 rounded-lg shadow-custom">
             <div className="overflow-x-auto">
               <Table token={token} />
             </div>
