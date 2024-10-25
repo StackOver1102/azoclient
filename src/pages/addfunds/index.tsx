@@ -1,11 +1,13 @@
 import Header from "@/components/Header/Header";
 import CustomImage from "@/components/Image/Image";
 import Sidebar from "@/components/Sidebar/Sidebar";
+import { showErrorToast } from "@/services/toastService";
 import { ApiError } from "@/services/UserService";
 import { TypeHearder } from "@/types/enum";
 import { GetServerSideProps } from "next";
 import React, { useState } from "react";
 import CountUp from "react-countup";
+import Cookies from "js-cookie";
 
 type Props = {
   error: ApiError | null;
@@ -40,6 +42,14 @@ export const getServerSideProps: GetServerSideProps<Props> = async (
 
 const AddFunds = (props: Props) => {
   const { error, token } = props;
+  if (!token || error?.status === 401) {
+    // Show error toast message
+    showErrorToast("Unauthorized: Invalid or expired token please login again");
+    // persistor.purge();
+    Cookies.remove("access_token");
+    return;
+  }
+
   const [activeTab, setActiveTab] = useState("addFunds");
 
   // Function to handle tab switching
@@ -50,7 +60,7 @@ const AddFunds = (props: Props) => {
   return (
     <div className="flex">
       {/* Sidebar (adjust or import as needed) */}
-      <Sidebar />
+      <Sidebar isLogin={token ? true : false} />
 
       {/* Main content */}
       <div className="flex-1 lg:ml-64 bg-[#f9fafb]">

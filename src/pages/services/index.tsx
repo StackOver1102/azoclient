@@ -86,7 +86,7 @@ const Service = (props: Props) => {
 
   return (
     <div className="flex">
-      <Sidebar />
+      <Sidebar isLogin={token ? true : false} />
       <div className="flex-1 lg:ml-64">
         <Header
           logo="/images/logo4.png"

@@ -15,16 +15,18 @@ const Toastobjects: ToastOptions = {
 
 export const showSuccessToast = (message: string = "Action successful") => {
   // Ensure that the toast is only shown if there's no active toast
-  if (toastId === null || !toast.isActive(toastId)) {
-    toastId = toast.success(message, Toastobjects);
-  }
+  // if (toastId === null || !toast.isActive(toastId)) {
+  //   toastId = toast.success(message, Toastobjects);
+  // }
+  toastId = toast.success(message, Toastobjects);
 };
 
 export const showErrorToast = (message: string = "Action failed") => {
   // Ensure that the toast is only shown if there's no active toast
-  if (toastId === null || !toast.isActive(toastId)) {
-    toastId = toast.error(message, Toastobjects);
-  }
+  // if (toastId === null || !toast.isActive(toastId)) {
+  //   toastId = toast.error(message, Toastobjects);
+  // }
+  toastId = toast.error(message, Toastobjects);
 };
 
 export const resetToast = () => {

@@ -3,6 +3,7 @@ import Sidebar from "@/components/Sidebar/Sidebar";
 import { ApiError } from "@/services/UserService";
 import { TypeHearder } from "@/types/enum";
 import { GetServerSideProps } from "next";
+import Link from "next/link";
 import React, { useState } from "react";
 
 type Props = {
@@ -197,7 +198,10 @@ const Apidoc = (props: Props) => {
                 </tr>
                 <tr className="hover:bg-gray-50 transition-colors">
                   <td className="px-6 py-4 text-gray-700">orders</td>
-                  <td className="px-6 py-4 text-gray-700">"Order IDs separated by comma (E.g: 123,456,789) (Limit 100)"</td>
+                  <td className="px-6 py-4 text-gray-700">
+                    "Order IDs separated by comma (E.g: 123,456,789) (Limit
+                    100)"
+                  </td>
                 </tr>
               </tbody>
             </table>
@@ -388,7 +392,7 @@ const Apidoc = (props: Props) => {
   return (
     <div className="flex">
       {/* Sidebar */}
-      <Sidebar />
+      <Sidebar isLogin={token ? true : false} />
 
       {/* Main content */}
       <div className="flex-1 lg:ml-64 bg-[#f9fafb] min-h-screen">
@@ -427,51 +431,68 @@ const Apidoc = (props: Props) => {
                   <tr className="border">
                     <td className="font-semibold px-4 py-2 border">API Key</td>
                     <td className="font-semibold px-4 py-2 border">
-                      <span>c8f48*********</span>
-                      <span className="ml-2 text-gray-500">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                          className="inline h-5 w-5"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth="2"
-                            d="M4 12v1m1 8v-8m16 0v8m0 0a2 2 0 01-2 2H7a2 2 0 01-2-2v-8m14-8v1m-5-4v1m0 5V5m-5 0v1m0 5V5m0 5v5"
-                          />
-                        </svg>
-                      </span>
+                      {token ? (
+                        <>
+                          <span>c8f48*********</span>
+                          <span className="ml-2 text-gray-500">
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                              className="inline h-5 w-5"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth="2"
+                                d="M4 12v1m1 8v-8m16 0v8m0 0a2 2 0 01-2 2H7a2 2 0 01-2-2v-8m14-8v1m-5-4v1m0 5V5m-5 0v1m0 5V5m0 5v5"
+                              />
+                            </svg>
+                          </span>
+                        </>
+                      ) : (
+                        <span>
+                          <Link href="/signup" className="text-[#009ef7]">
+                            Sign up
+                          </Link>{" "}
+                          or{" "}
+                          <Link href="/signin" className="text-[#009ef7]">
+                            Sign in
+                          </Link>{" "}
+                          now to get key
+                        </span>
+                      )}
                     </td>
                   </tr>
                   <tr className="border">
                     <td className="font-semibold px-4 py-2 border">
                       HTTP Method
                     </td>
-                    <td className="px-4 py-2 border">POST</td>
+                    <td className="font-semibold px-4 py-2 border">
+                      <span>POST</span>
+                    </td>
                   </tr>
                   <tr className="border">
                     <td className="font-semibold px-4 py-2 border">
                       Content-Type
                     </td>
-                    <td className="px-4 py-2 border">
+                    <td className="font-semibold px-4 py-2 border">
                       application/x-www-form-urlencoded
                     </td>
                   </tr>
                   <tr className="border">
                     <td className="font-semibold px-4 py-2 border">Response</td>
-                    <td className="px-4 py-2 border">JSON</td>
+                    <td className="font-semibold px-4 py-2 border">JSON</td>
                   </tr>
                 </tbody>
               </table>
             </div>
 
             {/* Parameters and Example Response Section */}
-            <div className="flex flex-col md:flex-row bg-white shadow-lg rounded-lg">
+            <div className="flex flex-col md:flex-row ">
               {/* Tabs navigation */}
-              <ul className="flex md:flex-col  w-80 p-4 rounded-l-lg ">
+              <ul className="flex flex-col md:w-80 p-4 rounded-l-lg space-y-3">
                 <li
                   className={`cursor-pointer px-4 py-2 rounded-md ${
                     activeTab === Tab.Service
@@ -492,7 +513,6 @@ const Apidoc = (props: Props) => {
                 >
                   {Tab.Add}
                 </li>
-
                 <li
                   className={`cursor-pointer px-4 py-2 rounded-md ${
                     activeTab === Tab.Status
@@ -503,7 +523,6 @@ const Apidoc = (props: Props) => {
                 >
                   {Tab.Status}
                 </li>
-
                 <li
                   className={`cursor-pointer px-4 py-2 rounded-md ${
                     activeTab === Tab.MultipleStatus
@@ -514,7 +533,6 @@ const Apidoc = (props: Props) => {
                 >
                   {Tab.MultipleStatus}
                 </li>
-
                 <li
                   className={`cursor-pointer px-4 py-2 rounded-md ${
                     activeTab === Tab.CreateRefill
@@ -525,7 +543,6 @@ const Apidoc = (props: Props) => {
                 >
                   {Tab.CreateRefill}
                 </li>
-
                 <li
                   className={`cursor-pointer px-4 py-2 rounded-md ${
                     activeTab === Tab.CreateMultipleRefill
@@ -536,7 +553,6 @@ const Apidoc = (props: Props) => {
                 >
                   {Tab.CreateMultipleRefill}
                 </li>
-
                 <li
                   className={`cursor-pointer px-4 py-2 rounded-md ${
                     activeTab === Tab.RefillStatus
@@ -547,7 +563,6 @@ const Apidoc = (props: Props) => {
                 >
                   {Tab.RefillStatus}
                 </li>
-
                 <li
                   className={`cursor-pointer px-4 py-2 rounded-md ${
                     activeTab === Tab.Balance
@@ -561,7 +576,9 @@ const Apidoc = (props: Props) => {
               </ul>
 
               {/* Tab content */}
-              <div className="flex-1 mb-5">{renderContent()}</div>
+              <div className="flex-1 p-5 mb-5 overflow-auto">
+                {renderContent()}
+              </div>
             </div>
           </div>
         </div>

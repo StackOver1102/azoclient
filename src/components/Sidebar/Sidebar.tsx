@@ -1,8 +1,6 @@
 import Link from "next/link";
-import CustomImage from "../Image/Image"; // Assuming CustomImage is a custom image component
 import { useState } from "react";
 import Image from "next/image";
-
 type Props = {
   isLogin: boolean;
 };
@@ -50,7 +48,7 @@ const Sidebar = (props: Props) => {
               width={196}
             />
           </div>
-          <div className="h-full px-3 pb-4 flex flex-grow">
+          <div className="h-full px-3 pb-4 overflow-y-auto custom-scrollbar">
             <ul className="space-y-2">
               <li className={`${isLogin ? "" : "hidden"}`}>
                 <Link
@@ -133,15 +131,6 @@ const Sidebar = (props: Props) => {
                   <span className="text-xl">Cash Flow</span>
                 </Link>
               </li>
-              {/* <li>
-                <Link
-                  href="/affiliate"
-                  className="flex items-center space-x-2 p-2 text-base font-normal text-white rounded-lg hover:bg-purple-600 transition duration-200"
-                >
-                  <i className="fa-solid fa-user-friends text-lg text-white"></i>
-                  <span className="text-xl">Affiliate</span>
-                </Link>
-              </li> */}
               <li>
                 <Link
                   href="/apidoc"
@@ -151,24 +140,28 @@ const Sidebar = (props: Props) => {
                   <span className="text-xl">API</span>
                 </Link>
               </li>
-              <li>
-                <Link
-                  href="/signin"
-                  className="flex items-center space-x-2 p-2 text-base font-normal text-white rounded-lg hover:bg-purple-600 transition duration-200"
-                >
-                  <i className="fa-solid fa-right-to-bracket text-lg text-white"></i>
-                  <span className="text-xl">Sign in</span>
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/signup"
-                  className="flex items-center space-x-2 p-2 text-base font-normal text-white rounded-lg hover:bg-purple-600 transition duration-200"
-                >
-                  <i className="fa-solid fa-right-to-bracket text-lg text-white"></i>
-                  <span className="text-xl">Sign up</span>
-                </Link>
-              </li>
+              {!isLogin && (
+                <>
+                  <li>
+                    <Link
+                      href="/signin"
+                      className="flex items-center space-x-2 p-2 text-base font-normal text-white rounded-lg hover:bg-purple-600 transition duration-200"
+                    >
+                      <i className="fa-solid fa-right-to-bracket text-lg text-white"></i>
+                      <span className="text-xl">Sign in</span>
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      href="/signup"
+                      className="flex items-center space-x-2 p-2 text-base font-normal text-white rounded-lg hover:bg-purple-600 transition duration-200"
+                    >
+                      <i className="fa-solid fa-right-to-bracket text-lg text-white"></i>
+                      <span className="text-xl">Sign up</span>
+                    </Link>
+                  </li>
+                </>
+              )}
             </ul>
           </div>
         </div>

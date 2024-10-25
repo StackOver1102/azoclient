@@ -8,13 +8,55 @@ import ProductService, {
   ResponseProduct,
 } from "@/services/ProductService";
 import { showErrorToast, showSuccessToast } from "@/services/toastService";
+import { ApiError } from "@/services/UserService";
 import { TypeHearder } from "@/types/enum";
 import { useQuery } from "@tanstack/react-query";
+import { GetServerSideProps } from "next";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
+import Cookies from "js-cookie";
 
-const NewOrder = () => {
+type Props = {
+  error: ApiError | null;
+  token: string | null;
+};
+
+export const getServerSideProps: GetServerSideProps<Props> = async (
+  context
+) => {
+  const token = context.req.cookies.access_token;
+
+  if (!token) {
+    return {
+      props: {
+        error: {
+          status: 401,
+          message: "Unauthorized: Invalid or expired token",
+        },
+        token: null,
+      },
+    };
+  }
+
+  let error = null;
+
+  return {
+    props: {
+      error,
+      token,
+    },
+  };
+};
+
+const NewOrder = (props: Props) => {
+  const { error, token } = props;
+  if (!token || error?.status === 401) {
+    // Show error toast message
+    showErrorToast("Unauthorized: Invalid or expired token please login again");
+    // persistor.purge();
+    Cookies.remove("access_token");
+    return;
+  }
   const [platforms, setPlatforms] = useState<string[]>([]);
   const [category, setCategory] = useState<string[]>([]);
   const [service, setService] = useState<Product[]>([]);
@@ -155,7 +197,7 @@ const NewOrder = () => {
   //     showErrorToast("Please fill in both fields.");
   //     return;
   //   }
-    
+
   //   const totalMoney = quantity * product.rate
 
   //   if(totalMoney > userLogin.money){
@@ -179,13 +221,13 @@ const NewOrder = () => {
 
   return (
     <div className="flex">
-      <Sidebar />
+      <Sidebar isLogin={token ? true : false} />
       <div className="flex-1 lg:ml-64">
-        {/* <Header
+        <Header
           logo="/images/logo4.png"
-          // userInfo={userLogin}
           type={TypeHearder.OTHE}
-        /> */}
+          token={token}
+        />
 
         {/* New Order Heading */}
         <div className="px-6 pt-6">

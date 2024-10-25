@@ -1,10 +1,12 @@
 import Header from "@/components/Header/Header";
 import Sidebar from "@/components/Sidebar/Sidebar";
+import { showErrorToast } from "@/services/toastService";
 import { ApiError } from "@/services/UserService";
 import { TypeHearder } from "@/types/enum";
 import { GetServerSideProps } from "next";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
+import Cookies from "js-cookie";
 
 type Props = {
   error: ApiError | null;
@@ -48,7 +50,13 @@ const splitIntoChunks = (array, chunkSize) => {
 
 const ClashFlow = (props: Props) => {
   const { error, token } = props;
-
+  if (!token || error?.status === 401) {
+    // Show error toast message
+    showErrorToast("Unauthorized: Invalid or expired token please login again");
+    // persistor.purge();
+    Cookies.remove("access_token");
+    return;
+  }
   const data = [
     {
       id: 1,
@@ -2292,7 +2300,7 @@ const ClashFlow = (props: Props) => {
   return (
     <div className="flex">
       {/* Sidebar */}
-      <Sidebar />
+      <Sidebar isLogin={token ? true : false} />
 
       {/* Main content */}
       <div className="flex-1 lg:ml-64 bg-[#f9fafb] min-h-screen">

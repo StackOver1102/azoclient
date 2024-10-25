@@ -42,7 +42,7 @@ const Support = (props: Props) => {
   return (
     <div className="flex ">
       {/* Sidebar (adjust or import as needed) */}
-      <Sidebar />
+      <Sidebar isLogin={token ? true : false} />
 
       {/* Main content */}
       <div className="flex-1 lg:ml-64 bg-[#f9fafb]">

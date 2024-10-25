@@ -15,7 +15,6 @@ import { TypeHearder } from "@/types/enum";
 import { GetServerSideProps } from "next";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
 import Cookies from "js-cookie";
 import dayjs from "dayjs";
 import { CustomError } from "@/commons/req";
@@ -287,7 +286,7 @@ const Setting = (props: Props) => {
     <div className="flex">
       {showLoader && <Loading />}
       {/* Sidebar */}
-      <Sidebar />
+      <Sidebar isLogin={token ? true : false} />
       {/* Main content */}
       <div className="flex-1 lg:ml-64 bg-[#f9fafb]">
         <Header
