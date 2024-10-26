@@ -18,6 +18,7 @@ import CountUp from "react-countup";
 import { useInView } from "react-intersection-observer";
 import Cookies from "js-cookie";
 import Image from "next/image";
+import OrderService from "@/services/OrderService";
 type Props = {
   token: string | null;
   error: ApiError | null;
@@ -58,7 +59,24 @@ export const getServerSideProps: GetServerSideProps<Props> = async (
             throw new Error("No data returned from API");
           }
           return response.data;
-        } catch (error) {}
+        } catch (error) {
+          throw error;
+        }
+      },
+    });
+
+    await queryClient.prefetchQuery({
+      queryKey: ["order", token],
+      queryFn: async () => {
+        try {
+          const responseOrder = await OrderService.getAllOrder(token);
+          if (!responseOrder || !responseOrder.data) {
+            throw new Error("No data returned from API");
+          }
+          return responseOrder.data;
+        } catch (error) {
+          throw error;
+        }
       },
     });
 

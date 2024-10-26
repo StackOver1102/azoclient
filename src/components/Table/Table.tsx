@@ -1,14 +1,23 @@
-import Link from "next/link";
-import React from "react";
+import React, { useState } from "react";
 import Badge from "../Badge/Badge";
+import DateRangePickerComponent from "../DatePick/DateRangePickerComponent";
 
 export default function Table() {
+  const [dateRange, setDateRange] = useState({
+    start: "",
+    end: "",
+  });
+
+  const handleDateChange = (start: string, end: string) => {
+    setDateRange({ start, end });
+  };
+
   return (
     <div className="space-y-4">
       {/* Filters Section */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
         {/* Filter Dropdown - 15% width */}
-        <div className="relative w-[15%]">
+        <div className="relative ">
           <select className="block appearance-none w-full bg-white border border-gray-300 text-gray-700 py-2 px-4 pr-8 rounded leading-tight focus:outline-none focus:ring-blue-500">
             <option value="all">All</option>
             <option value="in-progress">In progress</option>
@@ -27,12 +36,26 @@ export default function Table() {
         </div>
 
         {/* Second Filter Dropdown - 15% width */}
-        <div className="relative w-[15%]">
-          <select className="block appearance-none w-full bg-white border border-gray-300 text-gray-700 py-2 px-4 pr-8 rounded leading-tight focus:outline-none focus:ring-blue-500">
-            <option value="all">All</option>
-            <option value="in-progress">In progress</option>
-            <option value="completed">Completed</option>
-            <option value="pending">Pending</option>
+        {/* <div className="relative inline-block">
+          <label
+            htmlFor="dateRange"
+            className="block text-gray-700 font-medium mb-1"
+          >
+            Pick date range
+          </label>
+          <select
+            id="dateRange"
+            className="block appearance-none w-full bg-white border border-gray-300 text-gray-700 py-2 px-4 pr-8 rounded-lg leading-tight focus:outline-none focus:ring-blue-500"
+            onChange={handleDateChange}
+            value={selectedDate} // Hiển thị giá trị đã chọn
+          >
+            <option value="Pick date range">Pick date range</option>
+            <option value="Today">Today</option>
+            <option value="Yesterday">Yesterday</option>
+            <option value="Last 7 days">Last 7 days</option>
+            <option value="This month">This month</option>
+            <option value="Last month">Last month</option>
+            <option value="Custom range">Custom range</option>
           </select>
           <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
             <svg
@@ -43,14 +66,15 @@ export default function Table() {
               <path d="M7 10l5 5 5-5H7z" />
             </svg>
           </div>
-        </div>
-
+        </div> */}
+        <DateRangePickerComponent onDateChange={handleDateChange} />
         {/* Search Type Dropdown - 15% width */}
-        <div className="relative w-[15%]">
+        <div className="relative ">
           <select className="block appearance-none w-full bg-white border border-gray-300 text-gray-700 py-2 px-4 pr-8 rounded leading-tight focus:outline-none focus:ring-blue-500">
-            <option value="id">ID</option>
-            <option value="name">Name</option>
-            <option value="status">Status</option>
+            <option selected>Search Type</option>
+            <option value="id">Order Id</option>
+            <option value="name">Links</option>
+            <option value="status">Service</option>
           </select>
           <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
             <svg

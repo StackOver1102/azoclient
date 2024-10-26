@@ -1,3 +1,4 @@
+import 'daterangepicker/daterangepicker.css';
 import "@/styles/globals.css";
 import type { AppProps } from "next/app";
 import { appWithTranslation } from "next-i18next";
@@ -11,7 +12,10 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Head from "next/head";
-import React from "react";
+import React, { useEffect } from "react";
+import $ from 'jquery';
+import 'daterangepicker';
+
 
 function App({ Component, pageProps }: AppProps) {
   const [queryClient] = React.useState(
@@ -26,6 +30,10 @@ function App({ Component, pageProps }: AppProps) {
         },
       })
   );
+  // useEffect(() => {
+  //   // Optional: Đảm bảo rằng jQuery hoạt động đúng trong môi trường Next.js
+  //   window.$ = window.jQuery = $;
+  // }, []);
   return (
     <QueryClientProvider client={queryClient}>
       <HydrationBoundary state={pageProps.dehydratedState}>

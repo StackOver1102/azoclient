@@ -87,13 +87,16 @@ const Service = (props: Props) => {
   return (
     <div className="flex">
       <Sidebar isLogin={token ? true : false} />
-      <div className="flex-1 lg:ml-64">
+      <div className="flex-1 lg:ml-64  bg-[#f9fafb]">
         <Header
           logo="/images/logo4.png"
           type={TypeHearder.OTHE}
           token={token}
         />
-        <div className="grid grid-cols-1 gap-4 p-6 bg-[#f9fafb]">
+        <div className="px-6 pt-6">
+          <h2 className="text-2xl font-bold text-gray-900">Services</h2>
+        </div>
+        <div className="grid grid-cols-1 gap-4 p-6">
           <div className="bg-white p-6 rounded-lg shadow-custom">
             <div className="overflow-x-auto">
               <Table token={token} />

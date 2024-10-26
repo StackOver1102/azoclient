@@ -2,6 +2,7 @@ import ProductService, { ResponseProduct } from "@/services/ProductService";
 import { useQuery } from "@tanstack/react-query";
 import Badge from "@/components/Badge/Badge";
 import Loading from "@/components/Loading/Loading";
+import Link from "next/link";
 export interface Badges {
   label: string;
   bg: string;
@@ -93,13 +94,13 @@ function Table(props: Props) {
                       token ? "" : "hidden"
                     } `}
                   >
-                    <a
+                    <Link
                       target="_blank"
-                      href="new?service=2071"
+                      href={`new?service=${product._id}`}
                       className="border border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-white rounded-sm py-1 px-4 whitespace-nowrap"
                     >
                       Order
-                    </a>
+                    </Link>
                   </td>
                 </tr>
               );

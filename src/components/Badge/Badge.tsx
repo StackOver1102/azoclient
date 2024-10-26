@@ -1,3 +1,6 @@
+'use client';
+import { useEffect, useState } from 'react';
+
 export interface Badges {
   label: string;
   bg: string;
@@ -7,37 +10,34 @@ export interface Badges {
 export interface PropsBadge {
   range: number;
 }
-export default function Badge(props: PropsBadge) {
-  const { range } = props;
+
+export default function Badge({ range }: PropsBadge) {
   const badges: Badges[] = [
-    { label: "Exclusive", bg: "bg-red-100", text: "text-red-800" },
-    { label: "Owner", bg: "bg-red-100", text: "text-red-800" },
-    { label: "Provider Direct", bg: "bg-red-100", text: "text-red-800" },
-    { label: "Best Seller", bg: "bg-red-100", text: "text-red-800" },
-    { label: "Promotion", bg: "bg-green-100", text: "text-green-800" },
-    { label: "Recommendation", bg: "bg-green-100", text: "text-green-800" },
-    { label: "Instant", bg: "bg-green-100", text: "text-green-800" },
-    { label: "Super Fast", bg: "bg-green-100", text: "text-green-800" },
-    { label: "Real", bg: "bg-green-100", text: "text-green-800" },
-    { label: "30 days Refill", bg: "bg-green-100", text: "text-green-800" },
+    { label: 'Exclusive', bg: 'bg-red-100', text: 'text-red-800' },
+    { label: 'Owner', bg: 'bg-red-100', text: 'text-red-800' },
+    { label: 'Provider Direct', bg: 'bg-red-100', text: 'text-red-800' },
+    { label: 'Best Seller', bg: 'bg-red-100', text: 'text-red-800' },
+    { label: 'Promotion', bg: 'bg-green-100', text: 'text-green-800' },
+    { label: 'Recommendation', bg: 'bg-green-100', text: 'text-green-800' },
+    { label: 'Instant', bg: 'bg-green-100', text: 'text-green-800' },
+    { label: 'Super Fast', bg: 'bg-green-100', text: 'text-green-800' },
+    { label: 'Real', bg: 'bg-green-100', text: 'text-green-800' },
+    { label: '30 days Refill', bg: 'bg-green-100', text: 'text-green-800' },
   ];
 
-  function getRandomBadges(badgeList: Badges[], count: number) {
-    const redBadges = badgeList.filter(
-      (badge) => badge.text === "text-red-800"
-    );
-    const otherBadges = badgeList.filter(
-      (badge) => badge.text !== "text-red-800"
-    );
+  const [randomBadges, setRandomBadges] = useState<Badges[]>([]);
 
-    const shuffled = otherBadges.sort(() => 0.5 - Math.random());
+  useEffect(() => {
+    function getRandomBadges(badgeList: Badges[], count: number) {
+      const redBadges = badgeList.filter((badge) => badge.text === 'text-red-800');
+      const otherBadges = badgeList.filter((badge) => badge.text !== 'text-red-800');
+      const shuffledOtherBadges = [...otherBadges].sort(() => 0.5 - Math.random());
+      return [...redBadges, ...shuffledOtherBadges].slice(0, count);
+    }
 
-    const combinedBadges = [...redBadges, ...shuffled];
-
-    return combinedBadges.slice(0, count);
-  }
-
-  const randomBadges = getRandomBadges(badges, range);
+    // Chọn ngẫu nhiên chỉ trên client
+    setRandomBadges(getRandomBadges(badges, range));
+  }, [range]);
 
   return (
     <>

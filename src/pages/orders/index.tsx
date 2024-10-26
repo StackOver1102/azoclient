@@ -2,10 +2,13 @@ import Header from "@/components/Header/Header";
 import Sidebar from "@/components/Sidebar/Sidebar";
 import Table from "@/components/Table/Table";
 import { showErrorToast } from "@/services/toastService";
-import { ApiError } from "@/services/UserService";
+import { ApiError, isApiError } from "@/services/UserService";
 import { TypeHearder } from "@/types/enum";
 import { GetServerSideProps } from "next";
 import Cookies from "js-cookie";
+import OrderService from "@/services/OrderService";
+import { useQuery } from "@tanstack/react-query";
+import { useRouter } from "next/router";
 
 type Props = {
   error: ApiError | null;
@@ -46,18 +49,56 @@ const Order = (props: Props) => {
     Cookies.remove("access_token");
     return;
   }
+  const router = useRouter();
+  const { data: orders } = useQuery({
+    queryKey: ["userDetail", token],
+    queryFn: async () => {
+      try {
+        // Gọi API và chỉ trả về dữ liệu `user` (lấy `data` từ `ApiResponseDetail<User>`)
+        const response = await OrderService.getAllOrder(token);
+        if (!response || !response.data) {
+          throw new Error("No data returned from API");
+        }
+        return response.data;
+      } catch (error: unknown) {
+        if (isApiError(error)) {
+          if (error.status === 401) {
+            showErrorToast("Invalid or expired token, please login again");
+            Cookies.remove("access_token");
+            router.push("/signin");
+          } else {
+            throw error;
+          }
+        } else {
+          console.error("Unexpected error occurred:", error);
+          throw new Error("An unexpected error occurred");
+        }
+      }
+    },
+    staleTime: 1000 * 60 * 5, // Cache dữ liệu trong 5 phút
+    gcTime: 1000 * 60 * 10, // Giữ cache trong 10 phút
+    retry: 1, // Chỉ thử lại 1 lần nếu có lỗi
+    refetchOnWindowFocus: false, // Không tự động refetch khi quay lại tab
+    enabled: !!token,
+  });
+
 
   return (
     <div className="flex">
       <Sidebar isLogin={token ? true : false} />
-      <div className="flex-1 lg:ml-64">
+      <div className="flex-1 lg:ml-64 bg-[#f9fafb]">
         <Header
           logo="/images/logo4.png"
           token={token}
           type={TypeHearder.OTHE}
         />
-        <div className="grid grid-cols-1 gap-4 p-6">
-          <div className="bg-white p-6 rounded-lg shadow-md">
+
+        <div className="px-6 pt-6">
+          <h2 className="text-2xl font-bold text-gray-900">New Order</h2>
+        </div>
+
+        <div className="grid grid-cols-1 gap-4 p-6 ">
+          <div className="bg-white p-6 rounded-lg shadow-custom">
             <div className="overflow-x-auto">
               <Table />
             </div>

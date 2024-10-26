@@ -1,4 +1,4 @@
-import { commonRequest } from "@/commons/req";
+import { ApiResponseDetail, commonRequest } from "@/commons/req";
 import { API_URL } from "../UserService";
 
 export interface Product {
@@ -11,7 +11,7 @@ export interface Product {
     rate: number,
     refill: Boolean,
     value: string,
-    description?: string 
+    description?: string
 }
 export interface ResponseProduct {
     _id: string,
@@ -28,6 +28,14 @@ const ProductService = {
             throw error;
         }
     },
+    getDetail: async (id: string): Promise<ApiResponseDetail<Product>> => {
+        try {
+            const response = await commonRequest('get', `${API_URL}/products/${id}`, {}, {})
+            return response.data
+        } catch (error) {
+            throw error
+        }
+    }
 };
 
 export default ProductService;

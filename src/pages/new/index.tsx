@@ -15,10 +15,12 @@ import { GetServerSideProps } from "next";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 import Cookies from "js-cookie";
+import Loading from "@/components/Loading/Loading";
 
 type Props = {
   error: ApiError | null;
   token: string | null;
+  initialProduct: Product | null;
 };
 
 export const getServerSideProps: GetServerSideProps<Props> = async (
@@ -34,22 +36,36 @@ export const getServerSideProps: GetServerSideProps<Props> = async (
           message: "Unauthorized: Invalid or expired token",
         },
         token: null,
+        initialProduct: null,
       },
     };
   }
 
-  let error = null;
+  const serviceId = context.query.service as string | undefined;
+  let initialProduct = null;
+
+  if (serviceId) {
+    try {
+      const response = await ProductService.getDetail(serviceId);
+      initialProduct = response.data ?? null;
+    } catch (error) {
+      console.error("Error fetching product details:", error);
+      // Optional: You can set an error object or message to be displayed in the component
+    }
+  }
 
   return {
     props: {
-      error,
+      error: null,
       token,
+      initialProduct,
     },
   };
 };
 
 const NewOrder = (props: Props) => {
-  const { error, token } = props;
+  const { error, token, initialProduct } = props;
+  console.log("🚀 ~ NewOrder ~ initialProduct:", initialProduct)
   if (!token || error?.status === 401) {
     // Show error toast message
     showErrorToast("Unauthorized: Invalid or expired token please login again");
@@ -62,6 +78,7 @@ const NewOrder = (props: Props) => {
   const [service, setService] = useState<Product[]>([]);
   const [selectedPlatform, setSelectedPlatform] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  console.log("🚀 ~ NewOrder ~ selectedCategory:", selectedCategory)
   const [resetSelected, setResetSelected] = useState<boolean>(false);
   const [product, setProduct] = useState<Product>();
   const [link, setLink] = useState<string>("");
@@ -69,7 +86,7 @@ const NewOrder = (props: Props) => {
   const [showLoader, setShowLoader] = useState<Boolean>(false);
   const router = useRouter();
 
-  const { data } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ["product"],
     queryFn: ProductService.fetchProducts,
   });
@@ -88,11 +105,13 @@ const NewOrder = (props: Props) => {
       const platformArray = Array.from(platformsSet);
       setPlatforms(platformArray);
 
-      if (platformArray.length > 0) {
+      if (platformArray.length > 0 && !initialProduct) {
         setSelectedPlatform(platformArray[0]); // Chọn giá trị platform đầu tiên
+      } else if (initialProduct) {
+        setSelectedPlatform(initialProduct.platform);
       }
     }
-  }, [data]);
+  }, [data, initialProduct]);
 
   // Lọc category dựa trên platform đã chọn và set giá trị mặc định
   useEffect(() => {
@@ -111,15 +130,16 @@ const NewOrder = (props: Props) => {
         }
       });
 
-      const categoryArray = Array.from(categorySet);
-      setCategory(categoryArray);
+      setCategory(Array.from(categorySet));
       setService(Array.from(productSet));
 
-      if (categoryArray.length > 0) {
-        setSelectedCategory(categoryArray[0]); // Chọn giá trị category đầu tiên
+      if (initialProduct && initialProduct._id) {
+        setSelectedCategory(initialProduct._id);
+      } else if (categorySet.size > 0) {
+        setSelectedCategory(Array.from(categorySet)[0]);
       }
     }
-  }, [data, selectedPlatform]);
+  }, [data, selectedPlatform, initialProduct]);
 
   // Lọc service dựa trên category và platform đã chọn
   useEffect(() => {
@@ -229,111 +249,119 @@ const NewOrder = (props: Props) => {
           token={token}
         />
 
-        {/* New Order Heading */}
-        <div className="px-6 pt-6">
-          <h2 className="text-2xl font-bold text-gray-900">New order</h2>
-        </div>
+        {isLoading ? (
+          <Loading />
+        ) : (
+          <>
+            ({/* New Order Heading */}
+            <div className="px-6 pt-6">
+              <h2 className="text-2xl font-bold text-gray-900">New order</h2>
+            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-[60%,40%] p-6">
+              <div className="bg-white p-6 rounded-lg shadow-md">
+                <div className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-[30%,70%]">
+                    <div>
+                      <label className="block mb-2 text-sm font-medium text-gray-700">
+                        Social media
+                      </label>
+                      <SelectDropdown
+                        badge={false}
+                        data={platforms}
+                        onSelect={handleSelect}
+                        resetSelected={resetSelected}
+                      />
+                    </div>
+                    <div className="xl:pl-4">
+                      <label className="block mb-2 text-sm font-medium text-gray-700">
+                        Category
+                      </label>
+                      <SelectDropdown
+                        badge={false}
+                        data={category}
+                        onSelect={handleSelectCategory}
+                        resetSelected={resetSelected}
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block mb-2 text-sm font-medium text-gray-700">
+                      Service
+                    </label>
+                    <SelectDropdown
+                      badge={true}
+                      data={service}
+                      onSelect={handleSelectProduct}
+                      resetSelected={resetSelected}
+                    />
+                  </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-[60%,40%] p-6">
-          <div className="bg-white p-6 rounded-lg shadow-md">
-            <div className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-[30%,70%]">
-                <div>
-                  <label className="block mb-2 text-sm font-medium text-gray-700">
-                    Social media
-                  </label>
-                  <SelectDropdown
-                    badge={false}
-                    data={platforms}
-                    onSelect={handleSelect}
-                    resetSelected={resetSelected}
+                  {/* Link Input */}
+                  <div>
+                    <label className="block mb-2 text-sm font-medium text-gray-700">
+                      Link
+                    </label>
+                    <textarea
+                      placeholder="Enter your link"
+                      className="w-full p-2 border border-gray-300 rounded-md resize-y" // Sử dụng resize-y để cho phép kéo dài chiều cao
+                      rows={3} // Số dòng mặc định
+                      onChange={(e) => setLink(e.target.value)}
+                    ></textarea>
+                  </div>
+
+                  {/* Quantity Input */}
+                  <div>
+                    <label className="block mb-2 text-sm font-medium text-gray-700">
+                      Quantity
+                    </label>
+                    <input
+                      type="number"
+                      placeholder={`From ${product?.min} to ${product?.max}`}
+                      className="w-full p-2 border border-gray-300 rounded-md"
+                      onChange={(e) => setQuantity(Number(e.target.value))}
+                    />
+                  </div>
+
+                  {/* Submit Button */}
+                  <div>
+                    <button
+                      className="w-full p-3 bg-blue-600 text-white rounded-md"
+                      // onClick={handleSubmit}
+                    >
+                      Submit
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-6 flex flex-col gap-4">
+                {" "}
+                {/* Sử dụng flexbox cho layout */}
+                {/* Khung 1 */}
+                <div className="bg-white p-4 rounded-lg shadow-md border border-blue-400 flex items-center">
+                  <img
+                    src="https://cdn.mypanel.link/sw177w/3y6jfcfgmm14jned.gif"
+                    className="w-10 h-10 "
+                    alt="icon"
+                  />
+                  <h2 className="text-xl font-bold text-blue-500 text-center flex-1">
+                    {product?.label}
+                  </h2>
+                </div>
+                {/* Khung 2 */}
+                <div className="bg-white p-6 rounded-lg shadow-md border border-cyan-300">
+                  <h2 className="text-xl font-semibold mb-4">⚠️ Note:</h2>
+                  <div
+                    dangerouslySetInnerHTML={{
+                      __html: product?.description ?? "",
+                    }}
                   />
                 </div>
-                <div className="xl:pl-4">
-                  <label className="block mb-2 text-sm font-medium text-gray-700">
-                    Category
-                  </label>
-                  <SelectDropdown
-                    badge={false}
-                    data={category}
-                    onSelect={handleSelectCategory}
-                    resetSelected={resetSelected}
-                  />
-                </div>
-              </div>
-              <div>
-                <label className="block mb-2 text-sm font-medium text-gray-700">
-                  Service
-                </label>
-                <SelectDropdown
-                  badge={true}
-                  data={service}
-                  onSelect={handleSelectProduct}
-                  resetSelected={resetSelected}
-                />
-              </div>
-
-              {/* Link Input */}
-              <div>
-                <label className="block mb-2 text-sm font-medium text-gray-700">
-                  Link
-                </label>
-                <textarea
-                  placeholder="Enter your link"
-                  className="w-full p-2 border border-gray-300 rounded-md resize-y" // Sử dụng resize-y để cho phép kéo dài chiều cao
-                  rows={3} // Số dòng mặc định
-                  onChange={(e) => setLink(e.target.value)}
-                ></textarea>
-              </div>
-
-              {/* Quantity Input */}
-              <div>
-                <label className="block mb-2 text-sm font-medium text-gray-700">
-                  Quantity
-                </label>
-                <input
-                  type="number"
-                  placeholder={`From ${product?.min} to ${product?.max}`}
-                  className="w-full p-2 border border-gray-300 rounded-md"
-                  onChange={(e) => setQuantity(Number(e.target.value))}
-                />
-              </div>
-
-              {/* Submit Button */}
-              <div>
-                <button
-                  className="w-full p-3 bg-blue-600 text-white rounded-md"
-                  // onClick={handleSubmit}
-                >
-                  Submit
-                </button>
               </div>
             </div>
-          </div>
-
-          <div className="p-6 flex flex-col gap-4">
-            {" "}
-            {/* Sử dụng flexbox cho layout */}
-            {/* Khung 1 */}
-            <div className="bg-white p-4 rounded-lg shadow-md border border-blue-400 flex items-center">
-              <img
-                src="https://cdn.mypanel.link/sw177w/3y6jfcfgmm14jned.gif"
-                className="w-10 h-10 "
-                alt="icon"
-              />
-              <h2 className="text-xl font-bold text-blue-500 text-center flex-1">
-                {product?.label}
-              </h2>
-            </div>
-            {/* Khung 2 */}
-            <div className="bg-white p-6 rounded-lg shadow-md border border-cyan-300">
-              <h2 className="text-xl font-semibold mb-4">⚠️ Note:</h2>
-              <div
-                dangerouslySetInnerHTML={{ __html: product?.description ?? "" }}
-              />
-            </div>
-          </div>
-        </div>
+            )
+          </>
+        )}
       </div>
     </div>
   );

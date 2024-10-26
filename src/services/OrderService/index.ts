@@ -1,5 +1,5 @@
-import { commonRequest } from "@/commons/req";
-import { API_URL } from "../UserService";
+import { ApiResponse, commonRequest } from "@/commons/req";
+import { API_URL, User } from "../UserService";
 
 export interface BodyCreateOrder {  // Xuất interface BodyCreateOrder
     quantity: number;
@@ -7,6 +7,26 @@ export interface BodyCreateOrder {  // Xuất interface BodyCreateOrder
     service: string;
 }
 
+export interface OrderItem {
+    quantity: number;
+    link: string;
+    service: string;
+    order?: string;
+    name?: string;
+    keyword?: string;
+  }
+  
+  export interface Orders {
+    user: User;
+    totalPrice: number;
+    orderItems: OrderItem[];
+    origin: string;
+    orderStatus: string;
+    charge: number;
+    remains: number;
+    start_count: number;
+  }
+  
 const OrderService = {
     createOrder: async (data: BodyCreateOrder) => {
         try {
@@ -17,7 +37,7 @@ const OrderService = {
             throw error;
         }
     },
-    getAllOrder: async (token: string) => {
+    getAllOrder: async (token: string): Promise<ApiResponse<Orders>> => {
         try {
             const response = await commonRequest('get', `${API_URL}/orders`, {}, {
                 headers: {
