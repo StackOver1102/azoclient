@@ -3,6 +3,7 @@ import Sidebar from "@/components/Sidebar/Sidebar";
 import { ApiError } from "@/services/UserService";
 import { TypeHearder } from "@/types/enum";
 import { GetServerSideProps } from "next";
+import Link from "next/link";
 import React from "react";
 
 type Props = {
@@ -26,18 +27,16 @@ export const getServerSideProps: GetServerSideProps<Props> = async (
     };
   }
 
-  let error = null;
-
   return {
     props: {
-      error,
+      error: null,
       token,
     },
   };
 };
 
 const Support = (props: Props) => {
-  const { error, token } = props;
+  const { token } = props;
 
   return (
     <div className="flex ">
@@ -82,7 +81,7 @@ const Support = (props: Props) => {
                       Telegram
                     </span>
                     <span className="block text-gray-800 font-bold text-base">
-                      @lethang1dg
+                      @mrroon3y
                     </span>
                   </div>
                 </div>
@@ -96,7 +95,7 @@ const Support = (props: Props) => {
                       Whatsapp
                     </span>
                     <span className="block text-gray-800 font-bold text-base">
-                      +84917557227
+                      +84985822626
                     </span>
                   </div>
                 </div>
@@ -110,7 +109,7 @@ const Support = (props: Props) => {
                       Phone
                     </span>
                     <span className="block text-gray-800 font-bold text-base">
-                      0917557227
+                      0985822626
                     </span>
                   </div>
                 </div>
@@ -124,9 +123,12 @@ const Support = (props: Props) => {
                 </li>
                 <li>
                   For deposit issues, please contact FB:{" "}
-                  <a href="#" className="text-[#009ef7]">
-                    Nguyễn Mạnh Hùng
-                  </a>
+                  <Link
+                    href="https://www.facebook.com/profile.php?id=61566361872877"
+                    className="text-[#009ef7]"
+                  >
+                    Minh Lê
+                  </Link>
                 </li>
               </ul>
             </div>

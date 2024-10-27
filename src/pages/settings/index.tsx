@@ -19,6 +19,8 @@ import Cookies from "js-cookie";
 import dayjs from "dayjs";
 import { CustomError } from "@/commons/req";
 import { dehydrate, QueryClient, useQuery } from "@tanstack/react-query";
+import { useUserDetail } from "@/hooks/fetch/useUserDetail";
+import Pagination from "@/components/Pagination/Pagination";
 
 type Props = {
   error: ApiError | null;
@@ -62,7 +64,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async (
         dehydratedState: dehydrate(queryClient),
       },
     };
-  } catch (err: any) {
+  } catch (err: unknown) {
     if (isApiError(err)) {
       const errorCode = err.status;
       if (errorCode === 401) {
@@ -95,53 +97,24 @@ export const getServerSideProps: GetServerSideProps<Props> = async (
 const Setting = (props: Props) => {
   const { error, token } = props;
   const router = useRouter();
-  if (!token || error?.status === 401) {
-    // Show error toast message
-    showErrorToast("Unauthorized: Invalid or expired token please login again");
-    // persistor.purge();
-    Cookies.remove("access_token");
-    return;
-  }
+
+  useEffect(() => {
+    if (!token || error?.status === 401) {
+      // Show error toast message and redirect
+      showErrorToast(
+        "Unauthorized: Invalid or expired token, please login again"
+      );
+      Cookies.remove("access_token");
+      router.push("/signin");
+    }
+  }, [token, error, router]);
 
   const { data: loginHistory, isLoading } = useQuery({
     queryKey: ["historyLogin", token],
     queryFn: async () => {
       try {
-        // Gọi API và chỉ trả về dữ liệu `user` (lấy `data` từ `ApiResponseDetail<User>`)
-        const response = await UserService.getHistoryLogin(token ?? "");
-        if (!response || !response.data) {
-          throw new Error("No data returned from API");
-        }
-
-        return response.data;
-      } catch (error: unknown) {
-        if (isApiError(error)) {
-          if (error.status === 401) {
-            showErrorToast("Invalid or expired token, please login again");
-            Cookies.remove("access_token");
-            router.push("/signin");
-          } else {
-            throw error;
-          }
-        } else {
-          console.error("Unexpected error occurred:", error);
-          throw new Error("An unexpected error occurred");
-        }
-      }
-    },
-    staleTime: 1000 * 60 * 5, // Cache dữ liệu trong 5 phút
-    gcTime: 1000 * 60 * 10, // Giữ cache trong 10 phút
-    retry: 1, // Chỉ thử lại 1 lần nếu có lỗi
-    refetchOnWindowFocus: false, // Không tự động refetch khi quay lại tab
-    // enabled: !!token,
-  });
-
-  const { data: user, isLoading: isLoadingUser } = useQuery({
-    queryKey: ["userDetail", token],
-    queryFn: async () => {
-      try {
-        // Gọi API và chỉ trả về dữ liệu `user` (lấy `data` từ `ApiResponseDetail<User>`)
-        const response = await UserService.getDetail(token ?? "");
+        // Call API and return user data
+        const response = await UserService.getHistoryLogin(token!);
         if (!response || !response.data) {
           throw new Error("No data returned from API");
         }
@@ -161,12 +134,14 @@ const Setting = (props: Props) => {
         }
       }
     },
-    staleTime: 1000 * 60 * 5, // Cache dữ liệu trong 5 phút
-    gcTime: 1000 * 60 * 10, // Giữ cache trong 10 phút
-    retry: 1, // Chỉ thử lại 1 lần nếu có lỗi
-    refetchOnWindowFocus: false, // Không tự động refetch khi quay lại tab
+    staleTime: 1000 * 60 * 5, // Cache data for 5 minutes
+    gcTime: 1000 * 60 * 10, // Keep cache for 10 minutes
+    retry: 1, // Retry once if there's an error
+    refetchOnWindowFocus: false, // Do not refetch on window focus
     enabled: !!token,
   });
+
+  const { data: user } = useUserDetail(token!);
 
   const [formData, setFormData] = useState({
     email: "",
@@ -176,12 +151,27 @@ const Setting = (props: Props) => {
     confirmPassword: "",
   });
 
-  const [showLoader, setShowLoader] = useState<Boolean>(false);
+  const [showLoader, setShowLoader] = useState<boolean>(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+  const totalPages = Math.ceil((loginHistory?.length || 0) / itemsPerPage);
 
-  if (isLoading) {
-    return <Loading />;
-  }
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
 
+  const handlePrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  const currentItems = loginHistory?.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
@@ -244,6 +234,8 @@ const Setting = (props: Props) => {
       phoneNumber: formData.phone,
     };
 
+    if (!token) return;
+
     await mutation.mutateAsync({
       userData: data,
       token,
@@ -267,6 +259,7 @@ const Setting = (props: Props) => {
       password: formData.newPassword,
     };
 
+    if (!token) return;
     await mutation.mutateAsync({
       userData: data,
       token,
@@ -280,11 +273,11 @@ const Setting = (props: Props) => {
         ["phone"]: user.phonenumber,
       });
     }
-  }, [user]);
+  }, [user, formData]);
 
   return (
     <div className="flex">
-      {showLoader && <Loading />}
+      {(showLoader || isLoading) && <Loading />}
       {/* Sidebar */}
       <Sidebar isLogin={token ? true : false} />
       {/* Main content */}
@@ -422,7 +415,7 @@ const Setting = (props: Props) => {
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
                     {/* Example Row 1 */}
-                    {loginHistory?.map((item: ResponseHistoryLogin, index) => (
+                    {currentItems?.map((item: ResponseHistoryLogin, index) => (
                       <tr key={index}>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                           {item.ipAddress}
@@ -439,6 +432,15 @@ const Setting = (props: Props) => {
                     ))}
                   </tbody>
                 </table>
+
+                {/* Pagination Component */}
+
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  onPrevPage={handlePrevPage}
+                  onNextPage={handleNextPage}
+                />
               </div>
             </div>
           </div>

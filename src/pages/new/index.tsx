@@ -16,11 +16,14 @@ import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 import Cookies from "js-cookie";
 import Loading from "@/components/Loading/Loading";
+import { useUserDetail } from "@/hooks/fetch/useUserDetail";
+import { CustomError } from "@/commons/req";
+import withAuth from "@/libs/wrapAuth/warpAuth";
+import Image from "next/image";
 
 type Props = {
   error: ApiError | null;
   token: string | null;
-  initialProduct: Product | null;
 };
 
 export const getServerSideProps: GetServerSideProps<Props> = async (
@@ -36,60 +39,49 @@ export const getServerSideProps: GetServerSideProps<Props> = async (
           message: "Unauthorized: Invalid or expired token",
         },
         token: null,
-        initialProduct: null,
       },
     };
-  }
-
-  const serviceId = context.query.service as string | undefined;
-  let initialProduct = null;
-
-  if (serviceId) {
-    try {
-      const response = await ProductService.getDetail(serviceId);
-      initialProduct = response.data ?? null;
-    } catch (error) {
-      console.error("Error fetching product details:", error);
-      // Optional: You can set an error object or message to be displayed in the component
-    }
   }
 
   return {
     props: {
       error: null,
       token,
-      initialProduct,
     },
   };
 };
 
 const NewOrder = (props: Props) => {
-  const { error, token, initialProduct } = props;
-  console.log("🚀 ~ NewOrder ~ initialProduct:", initialProduct)
-  if (!token || error?.status === 401) {
-    // Show error toast message
-    showErrorToast("Unauthorized: Invalid or expired token please login again");
-    // persistor.purge();
-    Cookies.remove("access_token");
-    return;
-  }
+  const { error, token } = props;
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!token || error?.status === 401) {
+      // Show error toast message and redirect
+      showErrorToast(
+        "Unauthorized: Invalid or expired token, please login again"
+      );
+      Cookies.remove("access_token");
+      router.push("/signin");
+    }
+  }, [token, error, router]);
   const [platforms, setPlatforms] = useState<string[]>([]);
   const [category, setCategory] = useState<string[]>([]);
   const [service, setService] = useState<Product[]>([]);
   const [selectedPlatform, setSelectedPlatform] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  console.log("🚀 ~ NewOrder ~ selectedCategory:", selectedCategory)
   const [resetSelected, setResetSelected] = useState<boolean>(false);
   const [product, setProduct] = useState<Product>();
   const [link, setLink] = useState<string>("");
   const [quantity, setQuantity] = useState<number>(0);
-  const [showLoader, setShowLoader] = useState<Boolean>(false);
-  const router = useRouter();
+  const [showLoader, setShowLoader] = useState<boolean>(false);
 
   const { data, isLoading } = useQuery({
     queryKey: ["product"],
     queryFn: ProductService.fetchProducts,
   });
+
+  const { data: user } = useUserDetail(token!);
 
   // Lấy platform và set giá trị mặc định
   useEffect(() => {
@@ -105,13 +97,11 @@ const NewOrder = (props: Props) => {
       const platformArray = Array.from(platformsSet);
       setPlatforms(platformArray);
 
-      if (platformArray.length > 0 && !initialProduct) {
+      if (platformArray.length > 0) {
         setSelectedPlatform(platformArray[0]); // Chọn giá trị platform đầu tiên
-      } else if (initialProduct) {
-        setSelectedPlatform(initialProduct.platform);
       }
     }
-  }, [data, initialProduct]);
+  }, [data]);
 
   // Lọc category dựa trên platform đã chọn và set giá trị mặc định
   useEffect(() => {
@@ -133,13 +123,11 @@ const NewOrder = (props: Props) => {
       setCategory(Array.from(categorySet));
       setService(Array.from(productSet));
 
-      if (initialProduct && initialProduct._id) {
-        setSelectedCategory(initialProduct._id);
-      } else if (categorySet.size > 0) {
+      if (categorySet.size > 0) {
         setSelectedCategory(Array.from(categorySet)[0]);
       }
     }
-  }, [data, selectedPlatform, initialProduct]);
+  }, [data, selectedPlatform]);
 
   // Lọc service dựa trên category và platform đã chọn
   useEffect(() => {
@@ -167,7 +155,8 @@ const NewOrder = (props: Props) => {
   }, [data, selectedPlatform, selectedCategory]);
 
   const handleSelect = (selected: string | null) => {
-    setSelectedPlatform(selected);
+    console.log("🚀 ~ handleSelect ~ selected:", selected);
+    // setSelectedPlatform(selected);
   };
 
   const handleSelectCategory = (selected: string | null) => {
@@ -183,8 +172,18 @@ const NewOrder = (props: Props) => {
   };
 
   const mutation = useMutationHooks(
-    async (userData: BodyCreateOrder) => {
-      return await OrderService.createOrder(userData);
+    async ({
+      userData,
+      token,
+    }: {
+      userData: BodyCreateOrder;
+      token: string;
+    }) => {
+      try {
+        return await OrderService.createOrder(userData, token);
+      } catch (error) {
+        throw error;
+      }
     },
     {
       onMutate: () => {
@@ -194,9 +193,26 @@ const NewOrder = (props: Props) => {
         setShowLoader(false);
         showSuccessToast("Create order successful");
       },
-      onError: () => {
-        setShowLoader(false);
-        showErrorToast("Create order Failed");
+      onError: (error: CustomError) => {
+        if (error.status) {
+          const statusCode = error.status;
+          const message = error.data.error;
+          if (statusCode === 400) {
+            showErrorToast(`${message}.`);
+          } else if (statusCode === 401) {
+            showErrorToast("Unauthorized: You need to log in again.");
+            // persistor.purge();
+            router.push("/signin");
+          } else if (statusCode === 500) {
+            showErrorToast("The server is busy, please try again later.");
+          } else {
+            showErrorToast(
+              `An error occurred: ${error.message || "Unknown error"}`
+            );
+          }
+        } else {
+          showErrorToast("The server is busy, please try again later.");
+        }
       },
       onSettled: () => {
         setShowLoader(false);
@@ -204,43 +220,42 @@ const NewOrder = (props: Props) => {
     }
   );
 
-  // const handleSubmit = async (e: React.FormEvent) => {
-  //   e.preventDefault();
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
 
-  //   if(!userLogin.access_token){
-  //     showErrorToast("Please login.");
-  //     router.push("/signin")
-  //     return
-  //   }
-  //   // Validate form
-  //   if (!product || !link || !quantity) {
-  //     showErrorToast("Please fill in both fields.");
-  //     return;
-  //   }
+    // Validate form
+    if (!product || !link || !quantity) {
+      showErrorToast("Please fill in both fields.");
+      return;
+    }
 
-  //   const totalMoney = quantity * product.rate
+    const totalMoney = quantity * product.rate;
 
-  //   if(totalMoney > userLogin.money){
-  //     showErrorToast(`You do not have enough money. Your balance: ${userLogin.money}, required: ${totalMoney}.`);
-  //     return;
-  //   }
+    if (user && totalMoney > user.money) {
+      showErrorToast(
+        `You do not have enough money. Your balance: ${user.money}, required: ${totalMoney}.`
+      );
+      return;
+    }
 
-  //   const data = {
-  //     service: product.value,
-  //     link,
-  //     quantity
-  //   };
+    const data = {
+      service: product.value,
+      link,
+      quantity,
+    };
 
-  //   try {
-  //     await mutation.mutateAsync(data);
-  //   } catch (error: any) {
-  //     console.log("🚀 ~ handleSubmit ~ error:", error);
-  //     // showErrorToast(`Login failed: ${error.message}`);
-  //   }
-  // };
+    try {
+      if (!token) return;
+      await mutation.mutateAsync({ userData: data, token });
+    } catch (error) {
+      console.log("🚀 ~ handleSubmit ~ error:", error);
+      // showErrorToast(`Login failed: ${error.message}`);
+    }
+  };
 
   return (
     <div className="flex">
+      {showLoader && <Loading />}
       <Sidebar isLogin={token ? true : false} />
       <div className="flex-1 lg:ml-64">
         <Header
@@ -269,7 +284,8 @@ const NewOrder = (props: Props) => {
                         badge={false}
                         data={platforms}
                         onSelect={handleSelect}
-                        resetSelected={resetSelected}
+                        image={true}
+                        // resetSelected={resetSelected}
                       />
                     </div>
                     <div className="xl:pl-4">
@@ -280,7 +296,8 @@ const NewOrder = (props: Props) => {
                         badge={false}
                         data={category}
                         onSelect={handleSelectCategory}
-                        resetSelected={resetSelected}
+                        image={true}
+                        // resetSelected={resetSelected}
                       />
                     </div>
                   </div>
@@ -293,6 +310,7 @@ const NewOrder = (props: Props) => {
                       data={service}
                       onSelect={handleSelectProduct}
                       resetSelected={resetSelected}
+                      image={true}
                     />
                   </div>
 
@@ -326,7 +344,7 @@ const NewOrder = (props: Props) => {
                   <div>
                     <button
                       className="w-full p-3 bg-blue-600 text-white rounded-md"
-                      // onClick={handleSubmit}
+                      onClick={handleSubmit}
                     >
                       Submit
                     </button>
@@ -339,10 +357,12 @@ const NewOrder = (props: Props) => {
                 {/* Sử dụng flexbox cho layout */}
                 {/* Khung 1 */}
                 <div className="bg-white p-4 rounded-lg shadow-md border border-blue-400 flex items-center">
-                  <img
+                  <Image
                     src="https://cdn.mypanel.link/sw177w/3y6jfcfgmm14jned.gif"
                     className="w-10 h-10 "
                     alt="icon"
+                    width={24}
+                    height={24}
                   />
                   <h2 className="text-xl font-bold text-blue-500 text-center flex-1">
                     {product?.label}
@@ -367,4 +387,4 @@ const NewOrder = (props: Props) => {
   );
 };
 
-export default NewOrder;
+export default withAuth(NewOrder);

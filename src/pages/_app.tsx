@@ -12,9 +12,10 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Head from "next/head";
-import React, { useEffect } from "react";
-import $ from 'jquery';
+import React from "react";
 import 'daterangepicker';
+import { DefaultSeo } from "next-seo";
+import SEO from "../../next-seo.config";
 
 
 function App({ Component, pageProps }: AppProps) {
@@ -30,10 +31,7 @@ function App({ Component, pageProps }: AppProps) {
         },
       })
   );
-  // useEffect(() => {
-  //   // Optional: Đảm bảo rằng jQuery hoạt động đúng trong môi trường Next.js
-  //   window.$ = window.jQuery = $;
-  // }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       <HydrationBoundary state={pageProps.dehydratedState}>
@@ -43,6 +41,7 @@ function App({ Component, pageProps }: AppProps) {
             href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
           />
         </Head>
+        <DefaultSeo {...SEO} />
         <Component {...pageProps} />
         <ToastContainer position="top-right" autoClose={5000} />
         <ReactQueryDevtools initialIsOpen={false} /> {/* Optional: devtools */}

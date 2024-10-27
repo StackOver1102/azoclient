@@ -4,7 +4,6 @@ import { TypeHearder } from "@/types/enum";
 import { DehydratedState, QueryClient, dehydrate } from "@tanstack/react-query";
 import { GetServerSideProps } from "next";
 import React from "react";
-import { useSelector } from "react-redux";
 import ProductService from "@/services/ProductService";
 import Table from "./__component/Table";
 import UserService, { isApiError } from "@/services/UserService";
@@ -52,7 +51,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async (
         dehydratedState: dehydrate(queryClient),
       },
     };
-  } catch (error: any) {
+  } catch (error: unknown) {
     if (isApiError(error)) {
       const errorCode = error.status;
       if (errorCode === 401) {

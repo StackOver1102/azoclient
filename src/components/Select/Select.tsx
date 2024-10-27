@@ -5,12 +5,19 @@ import Badge from "../Badge/Badge";
 interface PropsSelect<T> {
   badge: boolean;
   data: T[] | string[];
-  onSelect: (selected: T | string | null) => void;
+  onSelect?: (selected: T | string | null) => void;
   resetSelected?: boolean;
+  id?: string;
+  image: boolean;
+  className?: string;
 }
-
+interface OptionType {
+  value: string;
+  label: string;
+  rate: number;
+}
 export default function SelectDropdown<T>(props: PropsSelect<T>) {
-  const { badge, data, onSelect, resetSelected } = props;
+  const { badge, data, onSelect, resetSelected, image, className } = props;
   const [selectedOption, setSelectedOption] = useState<T | string | null>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState(""); // Thêm state cho search term
@@ -44,7 +51,7 @@ export default function SelectDropdown<T>(props: PropsSelect<T>) {
 
   // Chọn giá trị mặc định (giá trị đầu tiên) nếu chưa có selectedOption
   useEffect(() => {
-    if (!selectedOption && data.length > 0) {
+    if (!selectedOption && data.length > 0 && onSelect) {
       setSelectedOption(data[0]); // Chọn giá trị đầu tiên trong data
       onSelect(data[0]); // Gọi onSelect để cập nhật giá trị mặc định
     }
@@ -55,7 +62,7 @@ export default function SelectDropdown<T>(props: PropsSelect<T>) {
     if (typeof option === "string") {
       return option.toLowerCase().includes(searchTerm.toLowerCase());
     } else if (typeof option === "object" && option !== null) {
-      const obj = option as any;
+      const obj = option as any; // eslint-disable-line @typescript-eslint/no-explicit-any
       return obj.label.toLowerCase().includes(searchTerm.toLowerCase());
     }
     return false;
@@ -65,7 +72,7 @@ export default function SelectDropdown<T>(props: PropsSelect<T>) {
     if (typeof option === "string") {
       return <span className="text-nowrap">{option}</span>;
     } else if (typeof option === "object" && option !== null) {
-      const obj = option as any; // Cast as generic object
+      const obj = option as any; // eslint-disable-line @typescript-eslint/no-explicit-any
       return (
         <div className="flex flex-col">
           <div className="sm:flex items-center">
@@ -86,9 +93,16 @@ export default function SelectDropdown<T>(props: PropsSelect<T>) {
 
   const handleOptionSelect = (option: T | string) => {
     setSelectedOption(option);
-    onSelect(option); // Gọi callback khi chọn một option
+    if (onSelect) onSelect(option); // Gọi callback khi chọn một option
     setIsOpen(false);
   };
+
+  const selectedOptionText =
+    typeof selectedOption === "string"
+      ? selectedOption
+      : `${(selectedOption as OptionType).value} - ${
+          (selectedOption as OptionType).label
+        } - ${(selectedOption as OptionType).rate}`;
 
   return (
     <div className="relative w-full" ref={dropdownRef}>
@@ -98,19 +112,17 @@ export default function SelectDropdown<T>(props: PropsSelect<T>) {
       >
         {selectedOption ? (
           <div className="flex items-center">
-            <CustomImage
-              src="https://cdn.mypanel.link/sw177w/3y6jfcfgmm14jned.gif"
-              alt="option"
-              className="w-6 h-6 mr-2"
-              width={24}
-              height={24}
-            />
+            {image && (
+              <CustomImage
+                src="https://cdn.mypanel.link/sw177w/3y6jfcfgmm14jned.gif"
+                alt="option"
+                className="w-6 h-6 mr-2"
+                width={24}
+                height={24}
+              />
+            )}
             <span>
-              {typeof selectedOption === "string"
-                ? selectedOption
-                : `${(selectedOption as any).value} - ${
-                    (selectedOption as any).label
-                  } - ${(selectedOption as any).rate}`}
+              {selectedOptionText}
             </span>
           </div>
         ) : (
@@ -134,7 +146,13 @@ export default function SelectDropdown<T>(props: PropsSelect<T>) {
       </button>
 
       {isOpen && (
-        <div className="absolute z-10 w-full bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
+        <div
+          className={
+            className
+              ? className
+              : "absolute z-10 w-full bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto"
+          }
+        >
           {/* Thêm input để người dùng nhập từ khóa tìm kiếm */}
           <input
             type="text"
@@ -153,20 +171,22 @@ export default function SelectDropdown<T>(props: PropsSelect<T>) {
                   className={`select-none relative py-2 pl-4 pr-4 cursor-pointer hover:bg-gray-100 ${
                     typeof selectedOption === "object" &&
                     selectedOption !== null &&
-                    (selectedOption as any)?.id === (option as any)?.id
+                    (selectedOption as any)?.id === (option as any)?.id // eslint-disable-line @typescript-eslint/no-explicit-any
                       ? "text-blue-500 font-bold"
                       : ""
                   }`}
-                  role="option"
+                  // role="option"
                 >
                   <div className="flex items-center">
-                    <CustomImage
-                      src="https://cdn.mypanel.link/sw177w/3y6jfcfgmm14jned.gif"
-                      alt="option"
-                      className="w-6 h-6 mr-2"
-                      width={24}
-                      height={24}
-                    />
+                    {image && (
+                      <CustomImage
+                        src="https://cdn.mypanel.link/sw177w/3y6jfcfgmm14jned.gif"
+                        alt="option"
+                        className="w-6 h-6 mr-2"
+                        width={24}
+                        height={24}
+                      />
+                    )}
                     <div className="flex-grow truncate">
                       {renderOptionContent(option)}
                     </div>

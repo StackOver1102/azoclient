@@ -3,8 +3,7 @@ import Sidebar from "@/components/Sidebar/Sidebar";
 import { ApiError } from "@/services/UserService";
 import { TypeHearder } from "@/types/enum";
 import { GetServerSideProps } from "next";
-import Link from "next/link";
-import React, { useEffect, useState } from "react";
+import React from "react";
 
 type Props = {
   error: ApiError | null;
@@ -15,7 +14,6 @@ export const getServerSideProps: GetServerSideProps<Props> = async (
   context
 ) => {
   const token = context.req.cookies.access_token;
-  const id = context.params?.id
   if (!token) {
     return {
       props: {
@@ -28,25 +26,21 @@ export const getServerSideProps: GetServerSideProps<Props> = async (
     };
   }
 
-  
-
-  let error = null;
-
   return {
     props: {
-      error,
+      error: null,
       token,
     },
   };
 };
 
 const ClashFlow = (props: Props) => {
-  const { error, token } = props;
+  const { token } = props;
 
   return (
     <div className="flex">
       {/* Sidebar */}
-      <Sidebar />
+      <Sidebar isLogin={token ? true : false} />
 
       {/* Main content */}
       <div className="flex-1 lg:ml-64 bg-[#f9fafb] min-h-screen">

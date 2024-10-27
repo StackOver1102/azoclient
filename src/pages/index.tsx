@@ -2,21 +2,14 @@
 
 import Footer from "@/components/Footer/Footer";
 import Header from "@/components/Header/Header";
-import CustomImage from "@/components/Image/Image";
-import UserService, {
-  ApiError,
-  User,
-  isApiError,
-} from "@/services/UserService";
-import { showErrorToast } from "@/services/toastService";
+import UserService, { ApiError, isApiError } from "@/services/UserService";
 import { TypeHearder } from "@/types/enum";
 import { dehydrate, QueryClient } from "@tanstack/react-query";
-import { GetServerSideProps, GetStaticProps } from "next";
+import { GetServerSideProps } from "next";
 import Link from "next/link";
 import { useState } from "react";
 import CountUp from "react-countup";
 import { useInView } from "react-intersection-observer";
-import Cookies from "js-cookie";
 import Image from "next/image";
 import OrderService from "@/services/OrderService";
 type Props = {
@@ -66,7 +59,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async (
     });
 
     await queryClient.prefetchQuery({
-      queryKey: ["order", token],
+      queryKey: ["orders", token],
       queryFn: async () => {
         try {
           const responseOrder = await OrderService.getAllOrder(token);
@@ -87,7 +80,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async (
         dehydratedState: dehydrate(queryClient), // Pass dehydrate state to hydrate client side
       },
     };
-  } catch (err: any) {
+  } catch (err: any) {  // eslint-disable-line @typescript-eslint/no-explicit-any
     if (isApiError(err)) {
       const errorCode = err.status;
       if (errorCode === 401) {
@@ -118,7 +111,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async (
 };
 
 export default function Home(prop: Props) {
-  const { token, error } = prop;
+  const { token } = prop;
   // if (!user) {
   //   showErrorToast("User not found!");
   //   Cookies.remove("access_token");
@@ -132,7 +125,7 @@ export default function Home(prop: Props) {
   // }
 
   const [counterOn, setCounterOn] = useState(false);
-  const { ref, inView } = useInView({
+  const { ref } = useInView({
     triggerOnce: true, // Kích hoạt một lần khi phần tử vào khung nhìn
     onChange: (inView) => setCounterOn(inView),
   });
@@ -241,7 +234,7 @@ export default function Home(prop: Props) {
                 </div>
                 <div className="font-bold text-[#a1a5b7] text-xl">
                   You have balance in your account, so now you can place orders
-                  with services you want. That's easy
+                  with services you want. That&apos;s easy
                 </div>
               </div>
             </div>
@@ -434,10 +427,12 @@ export default function Home(prop: Props) {
                   use the service again.
                 </p>
                 <div className="flex items-center">
-                  <img
+                  <Image
                     src="/images/300-1.jpg"
                     className="w-14 h-14 rounded-full mr-4"
                     alt="Paul Miles"
+                    width={56}
+                    height={56}
                   />
                   <div>
                     <p className="text-gray-900 dark:text-white font-bold">
@@ -472,10 +467,12 @@ export default function Home(prop: Props) {
                   His service is amazing and I will continue to use it.
                 </p>
                 <div className="flex items-center">
-                  <img
+                  <Image
                     src="/images/300-1.jpg"
                     className="w-14 h-14 rounded-full mr-4"
                     alt="Janya Clebert"
+                    width={56}
+                    height={56}
                   />
                   <div>
                     <p className="text-gray-900 dark:text-white font-bold">
@@ -510,10 +507,12 @@ export default function Home(prop: Props) {
                   advise anyone to go to him. He will get the job done!
                 </p>
                 <div className="flex items-center">
-                  <img
+                  <Image
                     src="/images/300-1.jpg"
                     className="w-14 h-14 rounded-full mr-4"
                     alt="Steave Brown"
+                    width={56}
+                    height={56}
                   />
                   <div>
                     <p className="text-gray-900 dark:text-white font-bold">

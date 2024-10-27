@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import Badge from "@/components/Badge/Badge";
 import Loading from "@/components/Loading/Loading";
 import Link from "next/link";
+import Image from "next/image";
 export interface Badges {
   label: string;
   bg: string;
@@ -34,10 +35,11 @@ function Table(props: Props) {
             <tr className="bg-gray-100" key={item._id}>
               <td colSpan={10} className="text-xl font-bold whitespace-nowrap">
                 <div className="flex items-center">
-                  <img
+                  <Image
                     src="https://cdn.mypanel.link/sw177w/3y6jfcfgmm14jned.gif"
                     className="mr-2"
-                    width="18px"
+                    width={24}
+                    height={24}
                     alt="icon"
                   />
                   <div className="flex flex-col tracking-wide">{item._id}</div>

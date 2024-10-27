@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import UserService from "@/services/UserService";
 
-function getHistoryLogin(token: string) {
+function useHistoryLogin(token: string) {
     return useQuery({
         queryKey: ['historyLogin', token],
         queryFn: async () => {
@@ -11,7 +11,7 @@ function getHistoryLogin(token: string) {
                     throw new Error('No login history found'); // Throw an error if data is null or undefined
                 }
                 return data;
-            } catch (error: any) {
+            } catch (error: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
                 throw {
                     status: error.response?.status || 500,
                     message: error.response?.data?.message || 'Failed to fetch login history',
@@ -25,4 +25,4 @@ function getHistoryLogin(token: string) {
     });
 }
 
-export default getHistoryLogin;
+export default useHistoryLogin;

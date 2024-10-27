@@ -1,10 +1,15 @@
+import { CustomError } from "@/commons/req";
 import Header from "@/components/Header/Header";
 import Sidebar from "@/components/Sidebar/Sidebar";
-import { ApiError } from "@/services/UserService";
+import { useMutationHooks } from "@/hooks/useMutationHook";
+import { showErrorToast, showSuccessToast } from "@/services/toastService";
+import UserService, { ApiError } from "@/services/UserService";
 import { TypeHearder } from "@/types/enum";
 import { GetServerSideProps } from "next";
 import Link from "next/link";
+import { useRouter } from "next/router";
 import React, { useState } from "react";
+import Loading from "@/components/Loading/Loading";
 
 type Props = {
   error: ApiError | null;
@@ -38,21 +43,19 @@ export const getServerSideProps: GetServerSideProps<Props> = async (
     };
   }
 
-  let error = null;
-
   return {
     props: {
-      error,
+      error: null,
       token,
     },
   };
 };
 
 const Apidoc = (props: Props) => {
-  const { error, token } = props;
+  const { token } = props;
 
   const [activeTab, setActiveTab] = useState(Tab.Service);
-
+  const [showLoader, setShowLoader] = useState<boolean>(false);
   const renderContent = () => {
     switch (activeTab) {
       case Tab.Service:
@@ -76,7 +79,7 @@ const Apidoc = (props: Props) => {
                 </tr>
                 <tr className="hover:bg-gray-50 transition-colors">
                   <td className="px-6 py-4 text-gray-700">action</td>
-                  <td className="px-6 py-4 text-gray-700">"services"</td>
+                  <td className="px-6 py-4 text-gray-700">services</td>
                 </tr>
               </tbody>
             </table>
@@ -118,7 +121,7 @@ const Apidoc = (props: Props) => {
                 </tr>
                 <tr className="hover:bg-gray-50 transition-colors">
                   <td className="px-6 py-4 text-gray-700">action</td>
-                  <td className="px-6 py-4 text-gray-700">"add"</td>
+                  <td className="px-6 py-4 text-gray-700">add</td>
                 </tr>
               </tbody>
             </table>
@@ -152,7 +155,7 @@ const Apidoc = (props: Props) => {
                 </tr>
                 <tr className="hover:bg-gray-50 transition-colors">
                   <td className="px-6 py-4 text-gray-700">action</td>
-                  <td className="px-6 py-4 text-gray-700">"status"</td>
+                  <td className="px-6 py-4 text-gray-700">status</td>
                 </tr>
                 <tr className="hover:bg-gray-50 transition-colors">
                   <td className="px-6 py-4 text-gray-700">order</td>
@@ -194,13 +197,13 @@ const Apidoc = (props: Props) => {
                 </tr>
                 <tr className="hover:bg-gray-50 transition-colors">
                   <td className="px-6 py-4 text-gray-700">action</td>
-                  <td className="px-6 py-4 text-gray-700">"refill"</td>
+                  <td className="px-6 py-4 text-gray-700">refill</td>
                 </tr>
                 <tr className="hover:bg-gray-50 transition-colors">
                   <td className="px-6 py-4 text-gray-700">orders</td>
                   <td className="px-6 py-4 text-gray-700">
-                    "Order IDs separated by comma (E.g: 123,456,789) (Limit
-                    100)"
+                    Order IDs separated by comma (E.g: 123,456,789) (Limit
+                    &quot;100&quot;)
                   </td>
                 </tr>
               </tbody>
@@ -250,7 +253,7 @@ const Apidoc = (props: Props) => {
                 </tr>
                 <tr className="hover:bg-gray-50 transition-colors">
                   <td className="px-6 py-4 text-gray-700">action</td>
-                  <td className="px-6 py-4 text-gray-700">"refill"</td>
+                  <td className="px-6 py-4 text-gray-700">refill</td>
                 </tr>
                 <tr className="hover:bg-gray-50 transition-colors">
                   <td className="px-6 py-4 text-gray-700">order</td>
@@ -289,7 +292,7 @@ const Apidoc = (props: Props) => {
                 </tr>
                 <tr className="hover:bg-gray-50 transition-colors">
                   <td className="px-6 py-4 text-gray-700">action</td>
-                  <td className="px-6 py-4 text-gray-700">"refill"</td>
+                  <td className="px-6 py-4 text-gray-700">refill</td>
                 </tr>
                 <tr className="hover:bg-gray-50 transition-colors">
                   <td className="px-6 py-4 text-gray-700">orders</td>
@@ -330,7 +333,7 @@ const Apidoc = (props: Props) => {
                 </tr>
                 <tr className="hover:bg-gray-50 transition-colors">
                   <td className="px-6 py-4 text-gray-700">action</td>
-                  <td className="px-6 py-4 text-gray-700">"refill_status"</td>
+                  <td className="px-6 py-4 text-gray-700">refill_status</td>
                 </tr>
                 <tr className="hover:bg-gray-50 transition-colors">
                   <td className="px-6 py-4 text-gray-700">refill</td>
@@ -369,7 +372,7 @@ const Apidoc = (props: Props) => {
                 </tr>
                 <tr className="hover:bg-gray-50 transition-colors">
                   <td className="px-6 py-4 text-gray-700">action</td>
-                  <td className="px-6 py-4 text-gray-700">"balance"</td>
+                  <td className="px-6 py-4 text-gray-700">balance</td>
                 </tr>
               </tbody>
             </table>
@@ -389,10 +392,73 @@ const Apidoc = (props: Props) => {
     }
   };
 
+  const router = useRouter();
+  const mutation = useMutationHooks(
+    async ({ token }: { token: string }) => {
+      try {
+        return await UserService.changeApikey(token);
+      } catch (error) {
+        throw error;
+      }
+    },
+    {
+      onMutate: () => {
+        setShowLoader(true);
+      },
+      onSuccess: () => {
+        setShowLoader(false);
+        showSuccessToast("Change api key successful");
+      },
+      onError: (error: CustomError) => {
+        if (error.status) {
+          const statusCode = error.status;
+          const message = error.data.error;
+          if (statusCode === 400) {
+            showErrorToast(`${message}.`);
+          } else if (statusCode === 401) {
+            showErrorToast("Unauthorized: You need to log in again.");
+            // persistor.purge();
+            router.push("/signin");
+          } else if (statusCode === 500) {
+            showErrorToast("The server is busy, please try again later.");
+          } else {
+            showErrorToast(
+              `An error occurred: ${error.message || "Unknown error"}`
+            );
+          }
+        } else {
+          showErrorToast("The server is busy, please try again later.");
+        }
+      },
+      onSettled: () => {
+        setShowLoader(false);
+      },
+    }
+  );
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (token) {
+      try {
+        await mutation.mutateAsync({ token });
+      } catch (error) {
+        console.log("🚀 ~ handleSubmit ~ error:", error);
+        // showErrorToast(`Login failed: ${error.message}`);
+      }
+    }
+  };
+
+  const { data } = mutation;
+  const apiKey = data?.data;
+
+  const displayApiKey = apiKey ? `${apiKey}` : "a4da3*********";
+
   return (
     <div className="flex">
       {/* Sidebar */}
       <Sidebar isLogin={token ? true : false} />
+
+      {showLoader && <Loading />}
 
       {/* Main content */}
       <div className="flex-1 lg:ml-64 bg-[#f9fafb] min-h-screen">
@@ -433,22 +499,14 @@ const Apidoc = (props: Props) => {
                     <td className="font-semibold px-4 py-2 border">
                       {token ? (
                         <>
-                          <span>c8f48*********</span>
+                          <span className="text-[#f1416c]">
+                            {displayApiKey}
+                          </span>
                           <span className="ml-2 text-gray-500">
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              stroke="currentColor"
-                              className="inline h-5 w-5"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth="2"
-                                d="M4 12v1m1 8v-8m16 0v8m0 0a2 2 0 01-2 2H7a2 2 0 01-2-2v-8m14-8v1m-5-4v1m0 5V5m-5 0v1m0 5V5m0 5v5"
-                              />
-                            </svg>
+                            <i
+                              className="fa fa-refresh inline h-5 w-5 hover:cursor-pointer"
+                              onClick={handleSubmit}
+                            ></i>
                           </span>
                         </>
                       ) : (

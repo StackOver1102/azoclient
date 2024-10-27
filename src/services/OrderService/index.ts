@@ -14,9 +14,9 @@ export interface OrderItem {
     order?: string;
     name?: string;
     keyword?: string;
-  }
-  
-  export interface Orders {
+}
+
+export interface Orders {
     user: User;
     totalPrice: number;
     orderItems: OrderItem[];
@@ -25,15 +25,20 @@ export interface OrderItem {
     charge: number;
     remains: number;
     start_count: number;
-  }
-  
+    createdAt: Date;
+    updatedAt: Date
+}
+
 const OrderService = {
-    createOrder: async (data: BodyCreateOrder) => {
+    createOrder: async (data: BodyCreateOrder, token: string) => {
         try {
-            const response = await commonRequest('post', `${API_URL}/orders`, { orderService: data });
+            const response = await commonRequest('post', `${API_URL}/orders`, { orderService: data }, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                },
+            });
             return response.data;
-        } catch (error: any) {
-            console.error('Error fetching data: ', error.message);
+        } catch (error) {
             throw error;
         }
     },
@@ -59,6 +64,18 @@ const OrderService = {
             return response.data;
         } catch (error) {
             throw error;
+        }
+    },
+    createMassOrder: async (orders: string, token: string): Promise<ApiResponse<Orders>> => {
+        try {
+            const response = await commonRequest('post', `${API_URL}/orders/massOrder`, { orders }, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                },
+            });
+            return response.data;
+        } catch (error) {
+            throw error
         }
     }
 };

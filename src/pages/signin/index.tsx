@@ -9,12 +9,12 @@ import UserService, {
   BodyLoginUser,
   ResponseLogin,
 } from "@/services/UserService";
-import Cookies from 'js-cookie';
+import Cookies from "js-cookie";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [showLoader, setShowLoader] = useState<Boolean>(false);
+  const [showLoader, setShowLoader] = useState<boolean>(false);
   const router = useRouter();
 
   const mutation = useMutationHooks<ResponseLogin, Error, BodyLoginUser>(
@@ -38,7 +38,7 @@ const Login = () => {
           router.push("/");
         }
       },
-      onError: (error: any) => {
+      onError: (error: any) => {  // eslint-disable-line @typescript-eslint/no-explicit-any
         setShowLoader(false);
 
         // Extract the error message from the error object
@@ -72,7 +72,7 @@ const Login = () => {
 
       setEmail("");
       setPassword("");
-    } catch (error: any) {
+    } catch (error) {
       console.log("🚀 ~ handleSubmit ~ error:", error);
       // showErrorToast(`Login failed: ${error.message}`);
     }
@@ -82,6 +82,7 @@ const Login = () => {
 
   const isLoading = status === "pending";
 
+  
   return (
     <>
       {isLoading || showLoader ? (
@@ -112,7 +113,7 @@ const Login = () => {
               </Link>
             </div>
 
-            <form className="space-y-6">
+            <form className="space-y-6" onSubmit={handleSubmit}>
               <div>
                 <label
                   htmlFor="email"
@@ -173,8 +174,7 @@ const Login = () => {
               </div>
 
               <button
-                type="button"
-                onClick={handleSubmit}
+                type="submit"
                 className="w-full bg-[#009ef7] text-white font-semibold py-2 rounded-lg hover:bg-[#007bbd] transition"
               >
                 Sign In

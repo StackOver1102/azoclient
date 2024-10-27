@@ -1,100 +1,178 @@
-import React, { useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import Badge from "../Badge/Badge";
 import DateRangePickerComponent from "../DatePick/DateRangePickerComponent";
+import { Orders } from "@/services/OrderService";
+import dayjs from "dayjs";
+import SelectDropdown from "../Select/Select";
+import Pagination from "../Pagination/Pagination";
+import Image from "next/image";
+import Link from "next/link";
 
-export default function Table() {
-  const [dateRange, setDateRange] = useState({
-    start: "",
-    end: "",
-  });
+type Props = {
+  data: Orders[];
+};
+
+const StatusSelect = [
+  "Pending",
+  "Processing",
+  "In progress",
+  "Completed",
+  "Partial",
+  "Canceled",
+];
+
+const SearchSelect = ["Orders Id", "Links", "Service"];
+
+export default function Table(props: Props) {
+  const { data } = props;
+
+  const [dateRange, setDateRange] = useState({ start: "", end: "" });
+  const [filterStatus, setFilterStatus] = useState<string | null>("");
+  const [searchType, setSearchType] = useState<string | null>(null);
+  const [searchKeyword, setSearchKeyword] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10; // Số mục trên mỗi trang
+  const [currentItems, setCurrentItems] = useState<Orders[]>([]);
+
+  const totalPages = Math.ceil(data.length / itemsPerPage);
 
   const handleDateChange = (start: string, end: string) => {
     setDateRange({ start, end });
+    setCurrentPage(1); // Reset về trang đầu tiên khi thay đổi bộ lọc
   };
+
+  const handleSelect = (selected: string | null) => {
+    setFilterStatus(selected);
+    setCurrentPage(1);
+  };
+
+  const handleSearchTypeChange = (selectedType: string | null) => {
+    setSearchType(selectedType);
+  };
+
+  const handleSearchKeywordChange = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    setSearchKeyword(event.target.value);
+  };
+
+  const handleSearch = () => {
+    setCurrentPage(1); // Reset về trang đầu tiên khi thực hiện tìm kiếm
+  };
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  const handlePrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  // Hàm lọc dữ liệu
+  const filterData = useCallback(() => {
+    let filtered = data;
+
+    // Lọc theo trạng thái
+    if (filterStatus) {
+      filtered = filtered.filter((item) => item.orderStatus === filterStatus);
+    }
+
+    // Lọc theo phạm vi ngày
+    if (dateRange.start && dateRange.end) {
+      const startDate = new Date(dateRange.start);
+      startDate.setHours(0, 0, 0, 0);
+
+      const endDate = new Date(dateRange.end);
+      endDate.setHours(0, 0, 0, 0);
+
+      filtered = filtered.filter((item) => {
+        const createdAt = new Date(item.createdAt);
+        createdAt.setHours(0, 0, 0, 0);
+        return createdAt >= startDate && createdAt <= endDate;
+      });
+    }
+
+    // Lọc theo từ khóa tìm kiếm
+    if (searchType && searchKeyword) {
+      filtered = filtered.filter((item) => {
+        if (searchType === "Orders Id") {
+          return item.orderItems[0].order?.includes(searchKeyword);
+        }
+        if (searchType === "Links") {
+          return item.orderItems[0].link.includes(searchKeyword);
+        }
+        if (searchType === "Service") {
+          return item.orderItems[0].name
+            ?.toLowerCase()
+            .includes(searchKeyword.toLowerCase());
+        }
+        return true;
+      });
+    }
+
+    return filtered;
+  }, [data, filterStatus, dateRange, searchType, searchKeyword]);
+
+  // Cập nhật dữ liệu hiển thị mỗi khi dữ liệu hoặc bộ lọc thay đổi
+  useEffect(() => {
+    const filtered = filterData();
+    const indexOfLastItem = currentPage * itemsPerPage;
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+    console.log("🚀 ~ useEffect ~ indexOfFirstItem:", indexOfFirstItem);
+
+    setCurrentItems(filtered.slice(indexOfFirstItem, indexOfLastItem));
+  }, [filterData, currentPage, itemsPerPage]);
 
   return (
     <div className="space-y-4">
       {/* Filters Section */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
         {/* Filter Dropdown - 15% width */}
-        <div className="relative ">
-          <select className="block appearance-none w-full bg-white border border-gray-300 text-gray-700 py-2 px-4 pr-8 rounded leading-tight focus:outline-none focus:ring-blue-500">
-            <option value="all">All</option>
-            <option value="in-progress">In progress</option>
-            <option value="completed">Completed</option>
-            <option value="pending">Pending</option>
-          </select>
-          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-            <svg
-              className="fill-current h-4 w-4"
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 20 20"
-            >
-              <path d="M7 10l5 5 5-5H7z" />
-            </svg>
-          </div>
+        <div className="relative">
+          <SelectDropdown
+            data={StatusSelect}
+            badge={false}
+            image={false}
+            onSelect={handleSelect}
+            className="fixed z-10 xl:w-[380px] w-[318px] bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto"
+          />
         </div>
 
         {/* Second Filter Dropdown - 15% width */}
-        {/* <div className="relative inline-block">
-          <label
-            htmlFor="dateRange"
-            className="block text-gray-700 font-medium mb-1"
-          >
-            Pick date range
-          </label>
-          <select
-            id="dateRange"
-            className="block appearance-none w-full bg-white border border-gray-300 text-gray-700 py-2 px-4 pr-8 rounded-lg leading-tight focus:outline-none focus:ring-blue-500"
-            onChange={handleDateChange}
-            value={selectedDate} // Hiển thị giá trị đã chọn
-          >
-            <option value="Pick date range">Pick date range</option>
-            <option value="Today">Today</option>
-            <option value="Yesterday">Yesterday</option>
-            <option value="Last 7 days">Last 7 days</option>
-            <option value="This month">This month</option>
-            <option value="Last month">Last month</option>
-            <option value="Custom range">Custom range</option>
-          </select>
-          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-            <svg
-              className="fill-current h-4 w-4"
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 20 20"
-            >
-              <path d="M7 10l5 5 5-5H7z" />
-            </svg>
-          </div>
-        </div> */}
-        <DateRangePickerComponent onDateChange={handleDateChange} />
+        <DateRangePickerComponent
+          start={dateRange.start}
+          end={dateRange.end}
+          onDateChange={handleDateChange}
+        />
+
         {/* Search Type Dropdown - 15% width */}
-        <div className="relative ">
-          <select className="block appearance-none w-full bg-white border border-gray-300 text-gray-700 py-2 px-4 pr-8 rounded leading-tight focus:outline-none focus:ring-blue-500">
-            <option selected>Search Type</option>
-            <option value="id">Order Id</option>
-            <option value="name">Links</option>
-            <option value="status">Service</option>
-          </select>
-          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-            <svg
-              className="fill-current h-4 w-4"
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 20 20"
-            >
-              <path d="M7 10l5 5 5-5H7z" />
-            </svg>
-          </div>
+        <div className="relative">
+          <SelectDropdown
+            data={SearchSelect}
+            onSelect={handleSearchTypeChange}
+            badge={false}
+            image={false}
+            className="fixed z-10 xl:w-[380px] w-[318px] bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto"
+          />
         </div>
 
         {/* Search Input with Search Button - Remaining space */}
         <div className="relative flex-grow">
           <input
             type="text"
-            className="bg-white border border-gray-300 text-gray-700 py-2 px-4 w-full rounded leading-tight focus:outline-none focus:ring-blue-500"
+            className="bg-white h-[42px] border border-gray-300 text-gray-700 py-2 px-4 w-full rounded leading-tight focus:outline-none focus:ring-blue-500"
             placeholder="Search"
+            value={searchKeyword}
+            onChange={handleSearchKeywordChange}
           />
-          <button className="absolute inset-y-0 right-0 bg-blue-500 px-3 flex items-center justify-center rounded-r text-white">
+          <button
+            className="absolute inset-y-0 right-0 bg-blue-500 px-3 flex items-center justify-center rounded-r text-white"
+            onClick={handleSearch}
+          >
             <svg
               className="h-5 w-5"
               fill="none"
@@ -116,111 +194,136 @@ export default function Table() {
       {/* Table Section */}
       <table className="min-w-full table-fixed border-collapse shadow-sm rounded-lg text-sm">
         <tbody>
-          {/* Header Row */}
           <tr className="bg-gray-200 rounded-t-lg">
             <th colSpan={10} className="p-2 border-b border-gray-300">
               <div className="flex items-center space-x-2">
                 <input className="h-4 w-4 cb-all" type="checkbox" />
                 <label className="ml-2 text-xs text-gray-600 count-selected"></label>
-                <button
-                  className="bg-blue-500 text-white text-xs px-2 py-1 ml-2 rounded hidden"
-                  type="button"
-                  style={{ display: "none" }}
-                >
-                  Copy ID
-                </button>
-                <button
-                  className="bg-teal-500 text-white text-xs px-2 py-1 ml-2 rounded hidden"
-                  type="button"
-                  style={{ display: "none" }}
-                >
-                  Refill
-                </button>
               </div>
             </th>
           </tr>
 
-          {/* Data Row */}
-          <tr className="bg-white hover:bg-gray-50 border-b">
-            {/* First column - 10% width */}
-            <td className="border-t border-gray-300 p-2 w-[10%]">
-              <div className="flex items-center whitespace-nowrap">
-                <input className="h-4 w-4 cb-all" type="checkbox" />
-                <span className="font-bold text-gray-700 text-sm pl-2 truncate">
-                  ID: 19785587
-                </span>
-              </div>
-              <p className="m-0 font-bold text-blue-500 text-sm">
-                <span className="text-[#009ef7] whitespace-nowrap">
-                  In progress
-                </span>
-              </p>
-              <p className="m-0 text-xs text-gray-500">2024-10-21 21:58:32</p>
-              <p className="m-0 text-xs text-gray-500">2024-10-22 20:42:38</p>
-            </td>
+          {currentItems.length > 0 ? (
+            currentItems.map((item: Orders, index) => (
+              <tr className="bg-white hover:bg-gray-50 border-b" key={index}>
+                <td className="border-t border-gray-300 p-2 w-[10%]">
+                  <div className="flex items-center whitespace-nowrap">
+                    <input className="h-4 w-4 cb-all" type="checkbox" />
+                    <span className="font-bold text-gray-700 text-sm pl-2 truncate">
+                      ID: {item.orderItems[0].order}
+                    </span>
+                  </div>
+                  <p className="m-0 font-bold text-blue-500 text-sm">
+                    <span className="text-[#009ef7] whitespace-nowrap">
+                      {item.orderStatus}
+                    </span>
+                  </p>
+                  <p className="m-0 text-xs text-gray-500">
+                    {dayjs(new Date(item.createdAt)).format(
+                      "YYYY-MM-DD HH:mm:ss"
+                    )}
+                  </p>
+                  <p className="m-0 text-xs text-gray-500">
+                    {dayjs(new Date(item.updatedAt)).format(
+                      "YYYY-MM-DD HH:mm:ss"
+                    )}
+                  </p>
+                </td>
 
-            {/* Middle column - this will automatically fill the remaining width */}
-            <td className="border-t border-gray-300 p-2">
-              <div>
-                <p className="m-0 text-gray-700 flex items-center text-sm truncate">
-                  <img
-                    src="https://cdn.mypanel.link/4cgr8h/ewzs0f9k8ic2932y.gif"
-                    className="w-3 h-3 mr-2"
-                  />
-                  <span className="text-gray-800 font-bold truncate">2198</span>{" "}
-                  | TikTok Live Chat Custom Comments [VIETNAM]
-                </p>
-                <div className="mt-1 flex flex-wrap gap-1">
-                  <Badge range={9} />
-                </div>
-                <p className="mt-1 text-xs break-words">
-                  <a
-                    href="https://vt.tiktok.com/ZSje9qGTS/"
-                    className="text-[#009ef7] truncate"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    https://vt.tiktok.com/ZSje9qGTS/
-                  </a>
-                </p>
-              </div>
-              <div className="text-right">
-                <a
-                  href="/new?service=2198"
-                  className="text-blue-500 font-bold mr-2 text-xs whitespace-nowrap"
-                >
-                  Reorder
-                </a>
-                <a
-                  href="javascript:;"
-                  className="text-red-500 font-bold text-xs whitespace-nowrap"
-                >
-                  Report
-                </a>
-              </div>
-            </td>
+                {/* Middle column - this will automatically fill the remaining width */}
+                <td className="border-t border-gray-300 p-2">
+                  <div>
+                    <p className="m-0 text-gray-700 flex items-center text-sm truncate">
+                      <Image
+                        src="https://cdn.mypanel.link/4cgr8h/ewzs0f9k8ic2932y.gif"
+                        className="w-3 h-3 mr-2"
+                        alt="logo"
+                      />
+                      <span className="text-gray-800 font-bold truncate mr-1">
+                        {item.orderItems[0].order}
+                      </span>
+                      | {item.orderItems[0].name}
+                    </p>
+                    <div className="mt-1 flex flex-wrap gap-1">
+                      <Badge range={9} />
+                    </div>
+                    <p className="mt-1 text-xs break-words">
+                      <React.Fragment key={index}>
+                        {item.orderItems[0].link
+                          .split("\n")
+                          .map((link, linkIndex) => (
+                            <a
+                              key={linkIndex}
+                              href={link}
+                              className="text-[#009ef7] truncate block overflow-hidden whitespace-nowrap text-ellipsis max-w-xs"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              {link}
+                            </a>
+                          ))}
+                      </React.Fragment>
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <Link
+                      href="/new?service=2198"
+                      className="text-blue-500 font-bold mr-2 text-xs whitespace-nowrap"
+                    >
+                      Reorder
+                    </Link>
+                    <Link
+                      href="#"
+                      className="text-red-500 font-bold text-xs whitespace-nowrap"
+                    >
+                      Report
+                    </Link>
+                  </div>
+                </td>
 
-            {/* Last column - 10% width */}
-            <td className="border-t border-gray-300 p-2 w-[10%]">
-              <p className="font-bold text-sm">
-                <span className="text-gray-600">Charge:</span>
-                <a href="/cashflow?id=19785587" className="text-blue-500">
-                  $0.0228
-                </a>
-              </p>
-              <p className="font-bold text-sm">
-                <span className="text-gray-600">Quantity:</span> 19
-              </p>
-              <p className="font-bold text-sm">
-                <span className="text-gray-600">Start count:</span> 0
-              </p>
-              <p className="font-bold text-sm">
-                <span className="text-gray-600">Remains:</span> 13
-              </p>
-            </td>
-          </tr>
+                {/* Last column - 10% width */}
+                <td className="border-t border-gray-300 p-2 w-[10%]">
+                  <p className="font-bold text-sm">
+                    <span className="text-gray-600">Charge:</span>
+                    <Link
+                      href="/cashflow?id=19785587"
+                      className="text-blue-500"
+                    >
+                      $ {item.charge}
+                    </Link>
+                  </p>
+                  <p className="font-bold text-sm">
+                    <span className="text-gray-600">Quantity:</span>{" "}
+                    {item.orderItems[0].quantity}
+                  </p>
+                  <p className="font-bold text-sm">
+                    <span className="text-gray-600">Start count:</span>{" "}
+                    {item.start_count}
+                  </p>
+                  <p className="font-bold text-sm">
+                    <span className="text-gray-600">Remains:</span>{" "}
+                    {item.remains}
+                  </p>
+                </td>
+              </tr>
+            ))
+          ) : (
+            <tr>
+              <td colSpan={10} className="text-center p-4 text-gray-500">
+                No orders found
+              </td>
+            </tr>
+          )}
         </tbody>
       </table>
+
+      {/* Pagination Controls */}
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPrevPage={handlePrevPage}
+        onNextPage={handleNextPage}
+      />
     </div>
   );
 }

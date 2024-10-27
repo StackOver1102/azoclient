@@ -1,6 +1,5 @@
 import Header from "@/components/Header/Header";
 import Sidebar from "@/components/Sidebar/Sidebar";
-import Table from "@/components/Table/Table";
 import { showErrorToast } from "@/services/toastService";
 import { ApiError, isApiError } from "@/services/UserService";
 import { TypeHearder } from "@/types/enum";
@@ -8,8 +7,9 @@ import { GetServerSideProps } from "next";
 import Cookies from "js-cookie";
 import OrderService from "@/services/OrderService";
 import { useQuery } from "@tanstack/react-query";
+import withAuth from "@/libs/wrapAuth/warpAuth";
 import { useRouter } from "next/router";
-import { useState } from "react";
+import { useEffect } from "react";
 
 type Props = {
   error: ApiError | null;
@@ -33,11 +33,9 @@ export const getServerSideProps: GetServerSideProps<Props> = async (
     };
   }
 
-  let error = null;
-
   return {
     props: {
-      error,
+      error: null,
       token,
     },
   };
@@ -47,17 +45,22 @@ const Refill = (props: Props) => {
   const { error, token } = props;
   const router = useRouter();
 
-  if (!token || error?.status === 401) {
-    showErrorToast("Unauthorized: Invalid or expired token please login again");
-    Cookies.remove("access_token");
-    return;
-  }
+  useEffect(() => {
+    if (!token || error?.status === 401) {
+      // Show error toast message and redirect
+      showErrorToast(
+        "Unauthorized: Invalid or expired token, please login again"
+      );
+      Cookies.remove("access_token");
+      router.push("/signin");
+    }
+  }, [token, error, router]);
 
   const { data: orders } = useQuery({
     queryKey: ["userDetail", token],
     queryFn: async () => {
       try {
-        const response = await OrderService.getAllOrder(token);
+        const response = await OrderService.getAllOrder(token!);
         if (!response || !response.data) {
           throw new Error("No data returned from API");
         }
@@ -192,8 +195,8 @@ const Refill = (props: Props) => {
                     orders.map((order, index) => (
                       <tr key={index} className="border-t border-gray-200">
                         <td className="px-4 py-2">{index + 1}</td>
-                        <td className="px-4 py-2">{order.orderId}</td>
-                        <td className="px-4 py-2">{order.created}</td>
+                        <td className="px-4 py-2">1</td>
+                        <td className="px-4 py-2">2</td>
                       </tr>
                     ))
                   ) : (
@@ -216,4 +219,4 @@ const Refill = (props: Props) => {
   );
 };
 
-export default Refill;
+export default withAuth(Refill);

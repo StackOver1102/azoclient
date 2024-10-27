@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 export interface Badges {
   label: string;
@@ -12,7 +12,7 @@ export interface PropsBadge {
 }
 
 export default function Badge({ range }: PropsBadge) {
-  const badges: Badges[] = [
+  const badges = useMemo(() => [
     { label: 'Exclusive', bg: 'bg-red-100', text: 'text-red-800' },
     { label: 'Owner', bg: 'bg-red-100', text: 'text-red-800' },
     { label: 'Provider Direct', bg: 'bg-red-100', text: 'text-red-800' },
@@ -23,7 +23,7 @@ export default function Badge({ range }: PropsBadge) {
     { label: 'Super Fast', bg: 'bg-green-100', text: 'text-green-800' },
     { label: 'Real', bg: 'bg-green-100', text: 'text-green-800' },
     { label: '30 days Refill', bg: 'bg-green-100', text: 'text-green-800' },
-  ];
+  ], []);
 
   const [randomBadges, setRandomBadges] = useState<Badges[]>([]);
 
@@ -37,7 +37,7 @@ export default function Badge({ range }: PropsBadge) {
 
     // Chọn ngẫu nhiên chỉ trên client
     setRandomBadges(getRandomBadges(badges, range));
-  }, [range]);
+  }, [range, badges]);
 
   return (
     <>

@@ -9,6 +9,7 @@ const withAuth = <P extends object>(WrappedComponent: ComponentType<P>) => {
     useEffect(() => {
       // Lấy token từ cookie
       const token = Cookies.get('access_token');
+      console.log("🚀 ~ useEffect ~ token:", token)
       if (!token) {
         // Chuyển hướng đến trang signin nếu không có token
         router.replace('/signin'); 

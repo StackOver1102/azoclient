@@ -7,6 +7,8 @@ import { GetServerSideProps } from "next";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
 import Cookies from "js-cookie";
+import Pagination from "@/components/Pagination/Pagination";
+import withAuth from "@/libs/wrapAuth/warpAuth";
 
 type Props = {
   error: ApiError | null;
@@ -30,11 +32,9 @@ export const getServerSideProps: GetServerSideProps<Props> = async (
     };
   }
 
-  let error = null;
-
   return {
     props: {
-      error,
+      error: null,
       token,
     },
   };
@@ -50,13 +50,16 @@ const splitIntoChunks = (array, chunkSize) => {
 
 const ClashFlow = (props: Props) => {
   const { error, token } = props;
-  if (!token || error?.status === 401) {
-    // Show error toast message
-    showErrorToast("Unauthorized: Invalid or expired token please login again");
-    // persistor.purge();
-    Cookies.remove("access_token");
-    return;
-  }
+
+  useEffect(() => {
+    if (!token || error?.status === 401) {
+      // Show error toast message and redirect
+      showErrorToast(
+        "Unauthorized: Invalid or expired token, please login again"
+      );
+      Cookies.remove("access_token");
+    }
+  }, [token, error]);
   const data = [
     {
       id: 1,
@@ -2360,7 +2363,7 @@ const ClashFlow = (props: Props) => {
             {/* Conditional rendering for empty results */}
             {isFiltered && filteredData.length === 0 ? (
               <p className="text-center text-gray-500">
-                No results found for "{orderID}"
+                No results found for &quot;{orderID}&quot;
               </p>
             ) : (
               <div className="flex flex-wrap">
@@ -2412,31 +2415,12 @@ const ClashFlow = (props: Props) => {
             )}
 
             {/* Pagination Controls */}
-            <div className="flex justify-between mt-4">
-              <button
-                className={`px-4 py-2 bg-gray-200 rounded ${
-                  currentPage === 1 ? "opacity-50 cursor-not-allowed" : ""
-                }`}
-                onClick={handlePrevPage}
-                disabled={currentPage === 1}
-              >
-                Previous
-              </button>
-              <p className="text-gray-500">
-                Page {currentPage} of {totalPages}
-              </p>
-              <button
-                className={`px-4 py-2 bg-gray-200 rounded ${
-                  currentPage === totalPages
-                    ? "opacity-50 cursor-not-allowed"
-                    : ""
-                }`}
-                onClick={handleNextPage}
-                disabled={currentPage === totalPages}
-              >
-                Next
-              </button>
-            </div>
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPrevPage={handlePrevPage}
+              onNextPage={handleNextPage}
+            />
           </div>
         </div>
       </div>
@@ -2444,4 +2428,4 @@ const ClashFlow = (props: Props) => {
   );
 };
 
-export default ClashFlow;
+export default withAuth(ClashFlow);

@@ -49,6 +49,10 @@ export type ApiError = {
         statusCode: number; // HTTP status code (should match the outer status)
     };
 };
+
+export interface ResponseChangeApi {
+    apiKey: string
+}
 export function isApiError(error: unknown): error is ApiError {
     return typeof error === 'object' && error !== null && 'status' in error && 'message' in error;
 }
@@ -68,7 +72,7 @@ const UserService = {
         try {
             const result = await axios.post(`${API_URL}/users/login`, data);
             return result.data.data;
-        } catch (error: any) {
+        } catch (error: any) {  // eslint-disable-line @typescript-eslint/no-explicit-any
             if (axios.isAxiosError(error)) {
                 if (error.response && error.response.status === 400) {
                     const errorMessage = error.response.data?.message || "Bad Request";
@@ -90,7 +94,7 @@ const UserService = {
             });
 
             return response.data;
-        } catch (error: any) {
+        } catch (error: any) {  // eslint-disable-line @typescript-eslint/no-explicit-any
             if (isApiError(error)) {
                 if (error.status === 401) {
                     throw error;
@@ -146,6 +150,18 @@ const UserService = {
                 },
             })
             return response.data
+        } catch (error) {
+            throw error
+        }
+    },
+    changeApikey: async (token: string): Promise<ApiResponse<ResponseChangeApi>> => {
+        try {
+            const result = await commonRequest("post", `${API_URL}/users/updateApiKey`, {}, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                },
+            });
+            return result.data;
         } catch (error) {
             throw error
         }

@@ -9,7 +9,7 @@ export interface Product {
     origin: string,
     platform: string,
     rate: number,
-    refill: Boolean,
+    refill: boolean,
     value: string,
     description?: string
 }
@@ -23,8 +23,7 @@ const ProductService = {
         try {
             const response = await commonRequest('get', `${API_URL}/products`);
             return response.data.data;
-        } catch (error: any) {
-            console.error('Error fetching data: ', error.message);
+        } catch (error) {  
             throw error;
         }
     },

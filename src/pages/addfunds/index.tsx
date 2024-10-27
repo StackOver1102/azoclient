@@ -5,9 +5,10 @@ import { showErrorToast } from "@/services/toastService";
 import { ApiError } from "@/services/UserService";
 import { TypeHearder } from "@/types/enum";
 import { GetServerSideProps } from "next";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import CountUp from "react-countup";
 import Cookies from "js-cookie";
+import withAuth from "@/libs/wrapAuth/warpAuth";
 
 type Props = {
   error: ApiError | null;
@@ -30,11 +31,9 @@ export const getServerSideProps: GetServerSideProps<Props> = async (
     };
   }
 
-  let error = null;
-
   return {
     props: {
-      error,
+      error: null,
       token,
     },
   };
@@ -42,18 +41,20 @@ export const getServerSideProps: GetServerSideProps<Props> = async (
 
 const AddFunds = (props: Props) => {
   const { error, token } = props;
-  if (!token || error?.status === 401) {
-    // Show error toast message
-    showErrorToast("Unauthorized: Invalid or expired token please login again");
-    // persistor.purge();
-    Cookies.remove("access_token");
-    return;
-  }
+  useEffect(() => {
+    if (!token || error?.status === 401) {
+      // Show error toast message and redirect
+      showErrorToast(
+        "Unauthorized: Invalid or expired token, please login again"
+      );
+      Cookies.remove("access_token");
+    }
+  }, [token, error]);
 
   const [activeTab, setActiveTab] = useState("addFunds");
 
   // Function to handle tab switching
-  const handleTabSwitch = (tab: any) => {
+  const handleTabSwitch = (tab: string) => {
     setActiveTab(tab);
   };
 
@@ -255,4 +256,4 @@ const AddFunds = (props: Props) => {
   );
 };
 
-export default AddFunds;
+export default withAuth(AddFunds);

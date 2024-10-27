@@ -9,6 +9,9 @@ import Cookies from "js-cookie";
 import OrderService from "@/services/OrderService";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/router";
+import Loading from "@/components/Loading/Loading";
+import withAuth from "@/libs/wrapAuth/warpAuth";
+import { useEffect } from "react";
 
 type Props = {
   error: ApiError | null;
@@ -31,11 +34,9 @@ export const getServerSideProps: GetServerSideProps<Props> = async (
     };
   }
 
-  let error = null;
-
   return {
     props: {
-      error,
+      error: null,
       token,
     },
   };
@@ -43,19 +44,24 @@ export const getServerSideProps: GetServerSideProps<Props> = async (
 
 const Order = (props: Props) => {
   const { error, token } = props;
-  if (!token || error?.status === 401) {
-    // Show error toast message
-    showErrorToast("Unauthorized: Invalid or expired token please login again");
-    Cookies.remove("access_token");
-    return;
-  }
   const router = useRouter();
-  const { data: orders } = useQuery({
-    queryKey: ["userDetail", token],
+
+  useEffect(() => {
+    if (!token || error?.status === 401) {
+      // Show error toast message and redirect
+      showErrorToast(
+        "Unauthorized: Invalid or expired token, please login again"
+      );
+      Cookies.remove("access_token");
+      router.push("/signin");
+    }
+  }, [token, error, router]);
+  const { data: orders, isLoading } = useQuery({
+    queryKey: ["orders", token],
     queryFn: async () => {
       try {
         // Gọi API và chỉ trả về dữ liệu `user` (lấy `data` từ `ApiResponseDetail<User>`)
-        const response = await OrderService.getAllOrder(token);
+        const response = await OrderService.getAllOrder(token!);
         if (!response || !response.data) {
           throw new Error("No data returned from API");
         }
@@ -82,6 +88,7 @@ const Order = (props: Props) => {
     enabled: !!token,
   });
 
+  if (isLoading) return <Loading />;
 
   return (
     <div className="flex">
@@ -100,7 +107,7 @@ const Order = (props: Props) => {
         <div className="grid grid-cols-1 gap-4 p-6 ">
           <div className="bg-white p-6 rounded-lg shadow-custom">
             <div className="overflow-x-auto">
-              <Table />
+              <Table data={orders ?? []} />
             </div>
           </div>
         </div>
@@ -109,4 +116,4 @@ const Order = (props: Props) => {
   );
 };
 
-export default Order;
+export default withAuth(Order);
