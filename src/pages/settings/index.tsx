@@ -273,7 +273,7 @@ const Setting = (props: Props) => {
         ["phone"]: user.phonenumber,
       });
     }
-  }, [user, formData]);
+  }, [user]);
 
   return (
     <div className="flex">
@@ -346,7 +346,7 @@ const Setting = (props: Props) => {
                 <Input
                   label="New Password"
                   name="newPassword"
-                  type="password"
+                  type="password" 
                   value={formData.newPassword}
                   placeholder="Enter new password"
                   onChange={handleChange}

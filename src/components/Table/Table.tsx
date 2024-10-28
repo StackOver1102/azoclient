@@ -100,13 +100,13 @@ export default function Table(props: Props) {
     if (searchType && searchKeyword) {
       filtered = filtered.filter((item) => {
         if (searchType === "Orders Id") {
-          return item.orderItems[0].order?.includes(searchKeyword);
+          return item.orderItems.order?.includes(searchKeyword);
         }
         if (searchType === "Links") {
-          return item.orderItems[0].link.includes(searchKeyword);
+          return item.orderItems.link.includes(searchKeyword);
         }
         if (searchType === "Service") {
-          return item.orderItems[0].name
+          return item.orderItems.name
             ?.toLowerCase()
             .includes(searchKeyword.toLowerCase());
         }
@@ -210,7 +210,7 @@ export default function Table(props: Props) {
                   <div className="flex items-center whitespace-nowrap">
                     <input className="h-4 w-4 cb-all" type="checkbox" />
                     <span className="font-bold text-gray-700 text-sm pl-2 truncate">
-                      ID: {item.orderItems[0].order}
+                      ID: {item.orderItems.order}
                     </span>
                   </div>
                   <p className="m-0 font-bold text-blue-500 text-sm">
@@ -238,18 +238,20 @@ export default function Table(props: Props) {
                         src="https://cdn.mypanel.link/4cgr8h/ewzs0f9k8ic2932y.gif"
                         className="w-3 h-3 mr-2"
                         alt="logo"
+                        width={12}
+                        height={12}
                       />
                       <span className="text-gray-800 font-bold truncate mr-1">
-                        {item.orderItems[0].order}
+                        {item.orderItems.order}
                       </span>
-                      | {item.orderItems[0].name}
+                      | {item.orderItems.name}
                     </p>
                     <div className="mt-1 flex flex-wrap gap-1">
-                      <Badge range={9} />
+                      <Badge badges={item.orderItems.badges || []} />
                     </div>
                     <p className="mt-1 text-xs break-words">
                       <React.Fragment key={index}>
-                        {item.orderItems[0].link
+                        {item.orderItems.link
                           .split("\n")
                           .map((link, linkIndex) => (
                             <a
@@ -294,7 +296,7 @@ export default function Table(props: Props) {
                   </p>
                   <p className="font-bold text-sm">
                     <span className="text-gray-600">Quantity:</span>{" "}
-                    {item.orderItems[0].quantity}
+                    {item.orderItems.quantity}
                   </p>
                   <p className="font-bold text-sm">
                     <span className="text-gray-600">Start count:</span>{" "}

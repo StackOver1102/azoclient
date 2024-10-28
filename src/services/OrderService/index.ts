@@ -14,12 +14,13 @@ export interface OrderItem {
     order?: string;
     name?: string;
     keyword?: string;
+    badges?: string[]
 }
 
 export interface Orders {
     user: User;
     totalPrice: number;
-    orderItems: OrderItem[];
+    orderItems: OrderItem;
     origin: string;
     orderStatus: string;
     charge: number;

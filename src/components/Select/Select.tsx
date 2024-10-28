@@ -82,7 +82,7 @@ export default function SelectDropdown<T>(props: PropsSelect<T>) {
           </div>
           {badge && (
             <div className="mt-1 flex flex-wrap">
-              <Badge range={randomInt} />
+              <Badge badges={obj.badges} />
             </div>
           )}
         </div>
@@ -100,9 +100,9 @@ export default function SelectDropdown<T>(props: PropsSelect<T>) {
   const selectedOptionText =
     typeof selectedOption === "string"
       ? selectedOption
-      : `${(selectedOption as OptionType).value} - ${
-          (selectedOption as OptionType).label
-        } - ${(selectedOption as OptionType).rate}`;
+      : `${(selectedOption as OptionType)?.value} - ${
+          (selectedOption as OptionType)?.label
+        } - ${(selectedOption as OptionType)?.rate}`;
 
   return (
     <div className="relative w-full" ref={dropdownRef}>

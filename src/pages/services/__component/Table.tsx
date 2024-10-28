@@ -73,7 +73,7 @@ function Table(props: Props) {
                           </div>
                         </div>
                         <span className="mt-1 space-x-1">
-                          <Badge range={randomInt} />
+                          <Badge badges={product.badges} />
                         </span>
                       </div>
                     </div>

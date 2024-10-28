@@ -11,7 +11,8 @@ export interface Product {
     rate: number,
     refill: boolean,
     value: string,
-    description?: string
+    description?: string,
+    badges: string[]
 }
 export interface ResponseProduct {
     _id: string,
