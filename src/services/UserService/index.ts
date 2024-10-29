@@ -28,7 +28,7 @@ export interface User {
     tokenVersion: number;
     apiKey: string;
     money: number;
-    phonenumber: string;
+    phoneNumber: string;
 }
 
 export interface ResponseHistoryLogin {

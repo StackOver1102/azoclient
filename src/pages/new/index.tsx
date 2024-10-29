@@ -10,7 +10,7 @@ import ProductService, {
 import { showErrorToast, showSuccessToast } from "@/services/toastService";
 import { ApiError } from "@/services/UserService";
 import { TypeHearder } from "@/types/enum";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { GetServerSideProps } from "next";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
@@ -33,15 +33,23 @@ export const getServerSideProps: GetServerSideProps<Props> = async (
 
   if (!token) {
     return {
-      props: {
-        error: {
-          status: 401,
-          message: "Unauthorized: Invalid or expired token",
-        },
-        token: null,
+      redirect: {
+        destination: "/signin",
+        permanent: false,
       },
     };
   }
+  // if (!token) {
+  //   return {
+  //     props: {
+  //       error: {
+  //         status: 401,
+  //         message: "Unauthorized: Invalid or expired token",
+  //       },
+  //       token: null,
+  //     },
+  //   };
+  // }
 
   return {
     props: {
@@ -170,6 +178,7 @@ const NewOrder = (props: Props) => {
   const handleSelectProduct = (selected: Product | string | null) => {
     setProduct(selected as Product);
   };
+  const queryClient = useQueryClient();
 
   const mutation = useMutationHooks(
     async ({
@@ -191,6 +200,9 @@ const NewOrder = (props: Props) => {
       },
       onSuccess: () => {
         setShowLoader(false);
+        queryClient.refetchQueries({ queryKey: ["cashflows", token] });
+        queryClient.invalidateQueries({ queryKey: ["userDetail", token] });
+        queryClient.invalidateQueries({ queryKey: ["orders", token] });
         showSuccessToast("Create order successful");
       },
       onError: (error: CustomError) => {
@@ -256,7 +268,7 @@ const NewOrder = (props: Props) => {
   return (
     <div className="flex">
       {showLoader && <Loading />}
-      <Sidebar isLogin={token ? true : false} />
+      <Sidebar isLogin={token ? true : false} token={token} />
       <div className="flex-1 lg:ml-64">
         <Header
           logo="/images/logo4.png"
@@ -268,7 +280,7 @@ const NewOrder = (props: Props) => {
           <Loading />
         ) : (
           <>
-            ({/* New Order Heading */}
+            {/* New Order Heading */}
             <div className="px-6 pt-6">
               <h2 className="text-2xl font-bold text-gray-900">New order</h2>
             </div>
@@ -285,6 +297,7 @@ const NewOrder = (props: Props) => {
                         data={platforms}
                         onSelect={handleSelect}
                         image={true}
+                        
                         // resetSelected={resetSelected}
                       />
                     </div>

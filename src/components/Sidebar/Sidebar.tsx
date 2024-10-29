@@ -1,15 +1,31 @@
 import Link from "next/link";
 import { useState } from "react";
 import Image from "next/image";
+import UserService from "@/services/UserService";
+import Cookies from "js-cookie";
+import { useRouter } from "next/router";
+
 type Props = {
   isLogin: boolean;
+  token: string | null;
 };
 const Sidebar = (props: Props) => {
-  const { isLogin } = props;
+  const { isLogin, token } = props;
   const [isOpen, setIsOpen] = useState(false);
-
+  const router = useRouter();
   const handleCloseSidebar = () => {
     setIsOpen(false);
+  };
+
+  const handleLogout = async () => {
+    try {
+      await UserService.logout(token!);
+      Cookies.remove("access_token");
+      router.push("/");
+    } catch (error) {
+      router.push("/");
+      console.log("🚀 ~ handleLogout ~ error:", error);
+    }
   };
 
   return (
@@ -86,7 +102,7 @@ const Sidebar = (props: Props) => {
                   <span className="text-xl">Services</span>
                 </Link>
               </li>
-              <li className={`${isLogin ? "" : "hidden"}`}>
+              {/* <li className={`${isLogin ? "" : "hidden"}`}>
                 <Link
                   href="/refill"
                   className="flex items-center space-x-2 p-2 text-base font-normal text-white rounded-lg hover:bg-purple-600 transition duration-200"
@@ -94,7 +110,7 @@ const Sidebar = (props: Props) => {
                   <i className="fa-solid fa-sync text-lg text-white"></i>
                   <span className="text-xl">Refill</span>
                 </Link>
-              </li>
+              </li> */}
               <li className={`${isLogin ? "" : "hidden"}`}>
                 <Link
                   href="/addfunds"
@@ -140,6 +156,18 @@ const Sidebar = (props: Props) => {
                   <span className="text-xl">API</span>
                 </Link>
               </li>
+              {isLogin && (
+                <li>
+                  <a
+                    onClick={handleLogout}
+                    className="flex items-center space-x-2 p-2 text-base font-normal text-white rounded-lg hover:bg-purple-600 transition duration-200"
+                  >
+                    <i className="fa-solid fa-right-to-bracket text-lg text-white"></i>
+                    <span className="text-xl">Log out</span>
+                  </a>
+                </li>
+              )}
+
               {!isLogin && (
                 <>
                   <li>

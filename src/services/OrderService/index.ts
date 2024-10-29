@@ -11,13 +11,14 @@ export interface OrderItem {
     quantity: number;
     link: string;
     service: string;
-    order?: string;
+    order: string;
     name?: string;
     keyword?: string;
     badges?: string[]
 }
 
 export interface Orders {
+    _id: string;
     user: User;
     totalPrice: number;
     orderItems: OrderItem;

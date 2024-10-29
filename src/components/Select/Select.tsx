@@ -10,28 +10,27 @@ interface PropsSelect<T> {
   id?: string;
   image: boolean;
   className?: string;
+  defaultValue?: T | string; // Add defaultValue prop
+  defaultLabel?: string
 }
+
 interface OptionType {
   value: string;
   label: string;
   rate: number;
 }
+
 export default function SelectDropdown<T>(props: PropsSelect<T>) {
-  const { badge, data, onSelect, resetSelected, image, className } = props;
-  const [selectedOption, setSelectedOption] = useState<T | string | null>(null);
+  const { badge, data, onSelect, resetSelected, image, className, defaultValue, defaultLabel } = props;
+  const [selectedOption, setSelectedOption] = useState<T | string | null>(defaultValue || null);
   const [isOpen, setIsOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState(""); // Thêm state cho search term
+  const [searchTerm, setSearchTerm] = useState("");
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const randomInt = Math.floor(Math.random() * 10) + 1;
-
-  // Đóng dropdown khi nhấp ra ngoài
+  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
-      ) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setIsOpen(false);
       }
     };
@@ -40,24 +39,24 @@ export default function SelectDropdown<T>(props: PropsSelect<T>) {
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [dropdownRef]);
+  }, []);
 
-  // Reset selectedOption khi resetSelected thay đổi
+  // Reset selectedOption when resetSelected changes
   useEffect(() => {
     if (resetSelected) {
-      setSelectedOption(null); // Reset selectedOption về null
+      setSelectedOption(null);
     }
   }, [resetSelected]);
 
-  // Chọn giá trị mặc định (giá trị đầu tiên) nếu chưa có selectedOption
+  // Set defaultValue as selectedOption on first render or when defaultValue changes
   useEffect(() => {
-    if (!selectedOption && data.length > 0 && onSelect) {
+    if (!selectedOption && data.length > 0 && onSelect && !defaultLabel) {
       setSelectedOption(data[0]); // Chọn giá trị đầu tiên trong data
       onSelect(data[0]); // Gọi onSelect để cập nhật giá trị mặc định
     }
-  }, [data, selectedOption, onSelect]);
+  }, [data, selectedOption, onSelect, defaultLabel]);
 
-  // Lọc dữ liệu dựa trên search term
+  // Filter data based on search term
   const filteredData = data.filter((option) => {
     if (typeof option === "string") {
       return option.toLowerCase().includes(searchTerm.toLowerCase());
@@ -93,7 +92,7 @@ export default function SelectDropdown<T>(props: PropsSelect<T>) {
 
   const handleOptionSelect = (option: T | string) => {
     setSelectedOption(option);
-    if (onSelect) onSelect(option); // Gọi callback khi chọn một option
+    if (onSelect) onSelect(option);
     setIsOpen(false);
   };
 
@@ -121,12 +120,10 @@ export default function SelectDropdown<T>(props: PropsSelect<T>) {
                 height={24}
               />
             )}
-            <span>
-              {selectedOptionText}
-            </span>
+            <span>{selectedOptionText}</span>
           </div>
         ) : (
-          <span>Select a Service</span>
+          <span>{defaultLabel}</span>
         )}
 
         <svg
@@ -153,13 +150,12 @@ export default function SelectDropdown<T>(props: PropsSelect<T>) {
               : "absolute z-10 w-full bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto"
           }
         >
-          {/* Thêm input để người dùng nhập từ khóa tìm kiếm */}
           <input
             type="text"
             className="w-full px-4 py-2 border-b border-gray-300 focus:outline-none"
             placeholder="Search..."
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)} // Cập nhật search term khi nhập
+            onChange={(e) => setSearchTerm(e.target.value)}
           />
 
           <ul role="listbox">
@@ -175,7 +171,6 @@ export default function SelectDropdown<T>(props: PropsSelect<T>) {
                       ? "text-blue-500 font-bold"
                       : ""
                   }`}
-                  // role="option"
                 >
                   <div className="flex items-center">
                     {image && (

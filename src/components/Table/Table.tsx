@@ -7,9 +7,15 @@ import SelectDropdown from "../Select/Select";
 import Pagination from "../Pagination/Pagination";
 import Image from "next/image";
 import Link from "next/link";
+import { useMutationHooks } from "@/hooks/useMutationHook";
+import RefillService from "@/services/RefillService";
+import { showErrorToast, showSuccessToast } from "@/services/toastService";
+import { CustomError } from "@/commons/req";
+import { useRouter } from "next/router";
 
 type Props = {
   data: Orders[];
+  token: string | null;
 };
 
 const StatusSelect = [
@@ -24,7 +30,7 @@ const StatusSelect = [
 const SearchSelect = ["Orders Id", "Links", "Service"];
 
 export default function Table(props: Props) {
-  const { data } = props;
+  const { data, token } = props;
 
   const [dateRange, setDateRange] = useState({ start: "", end: "" });
   const [filterStatus, setFilterStatus] = useState<string | null>("");
@@ -33,7 +39,7 @@ export default function Table(props: Props) {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10; // Số mục trên mỗi trang
   const [currentItems, setCurrentItems] = useState<Orders[]>([]);
-
+  const router = useRouter();
   const totalPages = Math.ceil(data.length / itemsPerPage);
 
   const handleDateChange = (start: string, end: string) => {
@@ -71,6 +77,52 @@ export default function Table(props: Props) {
       setCurrentPage(currentPage - 1);
     }
   };
+
+  const [showLoader, setShowLoader] = useState<boolean>(false);
+  const mutation = useMutationHooks(
+    async ({ orderId, token }: { orderId: string[]; token: string }) => {
+      try {
+        return await RefillService.createRefill(orderId, token);
+      } catch (error) {
+        throw error;
+      }
+    },
+    {
+      onMutate: () => {
+        setShowLoader(true);
+      },
+      onSuccess: () => {
+        setShowLoader(false);
+        // queryClient.refetchQueries({ queryKey: ["cashflows", token] });
+        // queryClient.invalidateQueries({ queryKey: ["userDetail", token] });
+        showSuccessToast("Create order successful");
+      },
+      onError: (error: CustomError) => {
+        if (error.status) {
+          const statusCode = error.status;
+          const message = error.data.error;
+          if (statusCode === 400) {
+            showErrorToast(`${message}.`);
+          } else if (statusCode === 401) {
+            showErrorToast("Unauthorized: You need to log in again.");
+            // persistor.purge();
+            router.push("/signin");
+          } else if (statusCode === 500) {
+            showErrorToast("The server is busy, please try again later.");
+          } else {
+            showErrorToast(
+              `An error occurred: ${error.message || "Unknown error"}`
+            );
+          }
+        } else {
+          showErrorToast("The server is busy, please try again later.");
+        }
+      },
+      onSettled: () => {
+        setShowLoader(false);
+      },
+    }
+  );
 
   // Hàm lọc dữ liệu
   const filterData = useCallback(() => {
@@ -122,11 +174,49 @@ export default function Table(props: Props) {
     const filtered = filterData();
     const indexOfLastItem = currentPage * itemsPerPage;
     const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-    console.log("🚀 ~ useEffect ~ indexOfFirstItem:", indexOfFirstItem);
 
     setCurrentItems(filtered.slice(indexOfFirstItem, indexOfLastItem));
   }, [filterData, currentPage, itemsPerPage]);
 
+  const [selectedItems, setSelectedItems] = useState<string[]>([]);
+
+  const handleCheckboxChange = (id: string) => {
+    setSelectedItems((prev) => {
+      if (prev.includes(id)) {
+        // Bỏ chọn nếu đã có trong danh sách
+        return prev.filter((item) => item !== id);
+      } else {
+        // Thêm vào danh sách nếu chưa có
+        return [...prev, id];
+      }
+    });
+  };
+
+  const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.checked) {
+      // Chọn tất cả
+      const allIds = currentItems.map((item) => item._id);
+      setSelectedItems(allIds);
+    } else {
+      // Bỏ chọn tất cả
+      setSelectedItems([]);
+    }
+  };
+
+  const handleCopyID = () => {
+    navigator.clipboard.writeText(selectedItems.join(", "));
+    alert("Copied IDs: " + selectedItems.join(", "));
+  };
+
+  const handleRefill = async () => {
+    try {
+      if (!token) return;
+
+      await mutation.mutateAsync({ orderId: selectedItems, token });
+    } catch (error) {
+      console.log(error);
+    }
+  };
   return (
     <div className="space-y-4">
       {/* Filters Section */}
@@ -139,6 +229,7 @@ export default function Table(props: Props) {
             image={false}
             onSelect={handleSelect}
             className="fixed z-10 xl:w-[380px] w-[318px] bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto"
+            defaultLabel="Select a Service"
           />
         </div>
 
@@ -157,6 +248,7 @@ export default function Table(props: Props) {
             badge={false}
             image={false}
             className="fixed z-10 xl:w-[380px] w-[318px] bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto"
+            defaultLabel="Select a Type"
           />
         </div>
 
@@ -197,8 +289,35 @@ export default function Table(props: Props) {
           <tr className="bg-gray-200 rounded-t-lg">
             <th colSpan={10} className="p-2 border-b border-gray-300">
               <div className="flex items-center space-x-2">
-                <input className="h-4 w-4 cb-all" type="checkbox" />
-                <label className="ml-2 text-xs text-gray-600 count-selected"></label>
+                <input
+                  className="h-4 w-4 cb-all"
+                  type="checkbox"
+                  onChange={handleSelectAll}
+                  checked={
+                    selectedItems.length === currentItems.length &&
+                    currentItems.length > 0
+                  }
+                />
+                {selectedItems.length > 0 ? (
+                  <>
+                    <p className="text-sm">
+                      {selectedItems.length} row(s) selected
+                    </p>
+                    <button
+                      onClick={handleCopyID}
+                      className="bg-blue-500 text-white px-4 py-1 rounded text-xs"
+                    >
+                      Copy ID
+                    </button>
+                    <button className="bg-purple-500 text-white px-4 py-1 rounded text-xs" onClick={handleRefill}>
+                      Refill
+                    </button>
+                  </>
+                ) : (
+                  <label className="ml-2 text-xs text-gray-600">
+                    Select All
+                  </label>
+                )}
               </div>
             </th>
           </tr>
@@ -208,7 +327,14 @@ export default function Table(props: Props) {
               <tr className="bg-white hover:bg-gray-50 border-b" key={index}>
                 <td className="border-t border-gray-300 p-2 w-[10%]">
                   <div className="flex items-center whitespace-nowrap">
-                    <input className="h-4 w-4 cb-all" type="checkbox" />
+                    <input
+                      className="h-4 w-4 cb-all"
+                      type="checkbox"
+                      checked={selectedItems.includes(item._id)}
+                      onChange={() =>
+                        handleCheckboxChange(item._id)
+                      }
+                    />
                     <span className="font-bold text-gray-700 text-sm pl-2 truncate">
                       ID: {item.orderItems.order}
                     </span>

@@ -27,33 +27,30 @@ export const getServerSideProps: GetServerSideProps<Props> = async (
   const token = context.req.cookies.access_token;
   const queryClient = new QueryClient();
 
-  if (!token) {
+    if (!token) {
     return {
-      props: {
-        error: {
-          status: 401,
-          message: "Unauthorized: Invalid or expired token",
-        },
-        token: null,
+      redirect: {
+        destination: "/signin",
+        permanent: false,
       },
     };
   }
 
   try {
-    // await queryClient.prefetchQuery({
-    //   queryKey: ["cashflows", token],
-    //   queryFn: async () => {
-    //     try {
-    //       const response = await CashFlowService.getCashFlow(token);
-    //       if (!response || !response.data) {
-    //         throw new Error("No data returned from API");
-    //       }
-    //       return response.data;
-    //     } catch (error) {
-    //       throw error;
-    //     }
-    //   },
-    // });
+    await queryClient.prefetchQuery({
+      queryKey: ["cashflows", token],
+      queryFn: async () => {
+        try {
+          const response = await CashFlowService.getCashFlow(token);
+          if (!response || !response.data) {
+            throw new Error("No data returned from API");
+          }
+          return response.data;
+        } catch (error) {
+          throw error;
+        }
+      },
+    });
 
     return {
       props: {
@@ -180,11 +177,11 @@ const CashFlow = (props: Props) => {
   const handleApplyFilter = () => {
     // Filter data based on the Order ID entered
     if (orderID) {
-      const filtered = data.filter((item) => item.title.includes(orderID));
+      const filtered = (data as CashFlow[]).filter((item:CashFlow) => item.description.includes(orderID));
       setFilteredData(filtered);
       setIsFiltered(true); // Set filtered flag to true
     } else {
-      setFilteredData(data); // Reset to original data if no order ID is entered
+      setFilteredData(data ?? []); // Reset to original data if no order ID is entered
       setIsFiltered(false); // Set filtered flag to false
     }
     setFilterVisible(false); // Hide filter after applying
@@ -194,7 +191,7 @@ const CashFlow = (props: Props) => {
   // Reset Filter
   const handleResetFilter = () => {
     setOrderID(""); // Clear input field
-    setFilteredData(data); // Reset to original data
+    setFilteredData(data ?? []); // Reset to original data
     setIsFiltered(false); // Set filtered flag to false
     setCurrentPage(1); // Reset pagination to the first page
   };
@@ -202,7 +199,7 @@ const CashFlow = (props: Props) => {
   return (
     <div className="flex text-sm">
       {/* Sidebar */}
-      <Sidebar isLogin={token ? true : false} />
+      <Sidebar isLogin={token ? true : false} token={token}/>
 
       {/* Main content */}
       <div className="flex-1 lg:ml-64 bg-[#f9fafb] min-h-screen">
@@ -315,12 +312,12 @@ const CashFlow = (props: Props) => {
                             >
                               {`${
                                 item.type === TypeHistory.addMoney ? "+" : "-"
-                              }${item.amount.toFixed(5)}`}
+                              }${item.amount.toFixed(2)}`}
                             </p>
                           </div>
                           <div>
                             <p className="text-[#A1A5B7] text-[12px] text-right font-semibold ">
-                              10.517038704
+                              {item.amountOld.toFixed(2)}
                             </p>
                           </div>
                         </div>

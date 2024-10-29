@@ -15,22 +15,19 @@ export const getServerSideProps: GetServerSideProps<Props> = async (
 ) => {
   const token = context.req.cookies.access_token;
 
-  if (!token) {
-    return {
-      props: {
-        error: {
-          status: 401,
-          message: "Unauthorized: Invalid or expired token",
-        },
-        token: null,
-      },
-    };
-  }
+  // if (!token) {
+  //   return {
+  //     redirect: {
+  //       destination: "/signin",
+  //       permanent: false,
+  //     },
+  //   };
+  // }
 
   return {
     props: {
       error: null,
-      token,
+      token: token ?? null,
     },
   };
 };
@@ -41,7 +38,7 @@ const Support = (props: Props) => {
   return (
     <div className="flex ">
       {/* Sidebar (adjust or import as needed) */}
-      <Sidebar isLogin={token ? true : false} />
+      <Sidebar isLogin={token ? true : false} token={token} />
 
       {/* Main content */}
       <div className="flex-1 lg:ml-64 bg-[#f9fafb]">

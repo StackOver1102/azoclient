@@ -12,6 +12,7 @@ import React, { useEffect, useState } from "react";
 import Cookies from "js-cookie";
 import Loading from "@/components/Loading/Loading";
 import withAuth from "@/libs/wrapAuth/warpAuth";
+import { useQueryClient } from "@tanstack/react-query";
 
 type Props = {
   error: ApiError | null;
@@ -22,14 +23,11 @@ export const getServerSideProps: GetServerSideProps<Props> = async (
 ) => {
   const token = context.req.cookies.access_token;
 
-  if (!token) {
+    if (!token) {
     return {
-      props: {
-        error: {
-          status: 401,
-          message: "Unauthorized: Invalid or expired token",
-        },
-        token: null,
+      redirect: {
+        destination: "/signin",
+        permanent: false,
       },
     };
   }
@@ -58,6 +56,8 @@ const MassOrder = (props: Props) => {
   }, [token, error, router]);
   const [showLoader, setShowLoader] = useState<boolean>(false);
   const [orderText, setOrderText] = useState<string>("");
+  const queryClient = useQueryClient();
+
   const mutation = useMutationHooks(
     async ({ orderText, token }: { orderText: string; token: string }) => {
       try {
@@ -72,6 +72,9 @@ const MassOrder = (props: Props) => {
       },
       onSuccess: () => {
         setShowLoader(false);
+        queryClient.refetchQueries({ queryKey: ["cashflows", token] });
+        queryClient.invalidateQueries({ queryKey: ["userDetail", token] });
+        queryClient.invalidateQueries({ queryKey: ["orders", token] });
         showSuccessToast("Create order successful");
       },
       onError: (error: CustomError) => {
@@ -122,7 +125,7 @@ const MassOrder = (props: Props) => {
     <div className="flex ">
       {showLoader && <Loading />}
       {/* Sidebar (adjust or import as needed) */}
-      <Sidebar isLogin={token ? true : false} />
+      <Sidebar isLogin={token ? true : false} token={token} />
 
       {/* Main content */}
       <div className="flex-1 lg:ml-64 bg-[#f9fafb]">

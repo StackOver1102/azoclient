@@ -22,14 +22,11 @@ export const getServerSideProps: GetServerSideProps<Props> = async (
 ) => {
   const token = context.req.cookies.access_token;
 
-  if (!token) {
+    if (!token) {
     return {
-      props: {
-        error: {
-          status: 401,
-          message: "Unauthorized: Invalid or expired token",
-        },
-        token: null,
+      redirect: {
+        destination: "/signin",
+        permanent: false,
       },
     };
   }
@@ -56,6 +53,7 @@ const Order = (props: Props) => {
       router.push("/signin");
     }
   }, [token, error, router]);
+
   const { data: orders, isLoading } = useQuery({
     queryKey: ["orders", token],
     queryFn: async () => {
@@ -92,7 +90,7 @@ const Order = (props: Props) => {
 
   return (
     <div className="flex">
-      <Sidebar isLogin={token ? true : false} />
+      <Sidebar isLogin={token ? true : false} token={token} />
       <div className="flex-1 lg:ml-64 bg-[#f9fafb]">
         <Header
           logo="/images/logo4.png"
@@ -107,7 +105,7 @@ const Order = (props: Props) => {
         <div className="grid grid-cols-1 gap-4 p-6 ">
           <div className="bg-white p-6 rounded-lg shadow-custom">
             <div className="overflow-x-auto">
-              <Table data={orders ?? []} />
+              <Table data={orders ?? []} token={token} />
             </div>
           </div>
         </div>

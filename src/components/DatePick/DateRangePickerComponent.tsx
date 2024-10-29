@@ -76,7 +76,7 @@ function DateRangePickerComponent({
   }, [onDateChange, start, end]);
 
   return (
-    <div className="relative inline-block">
+    <div className="relative inline-block w-full">
       <input
         ref={inputRef}
         type="text"

@@ -21,14 +21,11 @@ export const getServerSideProps: GetServerSideProps<Props> = async (
 ) => {
   const token = context.req.cookies.access_token;
 
-  if (!token) {
+    if (!token) {
     return {
-      props: {
-        error: {
-          status: 401,
-          message: "Unauthorized: Invalid or expired token",
-        },
-        token: null,
+      redirect: {
+        destination: "/signin",
+        permanent: false,
       },
     };
   }
@@ -89,7 +86,7 @@ const Refill = (props: Props) => {
 
   return (
     <div className="flex">
-      <Sidebar isLogin={!!token} />
+      <Sidebar isLogin={token ? true : false} token={token} />
       <div className="flex-1 lg:ml-64 bg-[#f9fafb]">
         <Header
           logo="/images/logo4.png"
@@ -108,7 +105,7 @@ const Refill = (props: Props) => {
             <div className="flex space-x-4 mb-4">
               {/* Filter Dropdown 1 */}
               <div className="relative w-1/4">
-                <select className="block w-full appearance-none bg-white border border-gray-300 text-gray-700 py-2 px-4 rounded-lg leading-tight focus:outline-none focus:ring-blue-500">
+                  <select className="block w-full appearance-none bg-white border border-gray-300 text-gray-700 py-2 px-4 rounded-lg leading-tight focus:outline-none focus:ring-blue-500">
                   <option>All</option>
                   {/* Add other filter options as needed */}
                 </select>

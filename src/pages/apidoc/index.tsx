@@ -31,14 +31,11 @@ export const getServerSideProps: GetServerSideProps<Props> = async (
 ) => {
   const token = context.req.cookies.access_token;
 
-  if (!token) {
+    if (!token) {
     return {
-      props: {
-        error: {
-          status: 401,
-          message: "Unauthorized: Invalid or expired token",
-        },
-        token: null,
+      redirect: {
+        destination: "/signin",
+        permanent: false,
       },
     };
   }
@@ -456,7 +453,7 @@ const Apidoc = (props: Props) => {
   return (
     <div className="flex">
       {/* Sidebar */}
-      <Sidebar isLogin={token ? true : false} />
+      <Sidebar isLogin={token ? true : false} token={token}/>
 
       {showLoader && <Loading />}
 
