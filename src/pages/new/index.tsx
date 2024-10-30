@@ -1,6 +1,4 @@
-import Header from "@/components/Header/Header";
 import SelectDropdown from "@/components/Select/Select";
-import Sidebar from "@/components/Sidebar/Sidebar";
 import { useMutationHooks } from "@/hooks/useMutationHook";
 import OrderService, { BodyCreateOrder } from "@/services/OrderService";
 import ProductService, {
@@ -9,7 +7,6 @@ import ProductService, {
 } from "@/services/ProductService";
 import { showErrorToast, showSuccessToast } from "@/services/toastService";
 import { ApiError } from "@/services/UserService";
-import { TypeHearder } from "@/types/enum";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { GetServerSideProps } from "next";
 import { useRouter } from "next/router";
@@ -24,6 +21,7 @@ import Image from "next/image";
 type Props = {
   error: ApiError | null;
   token: string | null;
+  isLayout: boolean
 };
 
 export const getServerSideProps: GetServerSideProps<Props> = async (
@@ -55,6 +53,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async (
     props: {
       error: null,
       token,
+      isLayout: true
     },
   };
 };
@@ -266,137 +265,127 @@ const NewOrder = (props: Props) => {
   };
 
   return (
-    <div className="flex">
-      {showLoader && <Loading />}
-      <Sidebar isLogin={token ? true : false} token={token} />
-      <div className="flex-1 lg:ml-64">
-        <Header
-          logo="/images/logo4.png"
-          type={TypeHearder.OTHE}
-          token={token}
-        />
-
-        {isLoading ? (
-          <Loading />
-        ) : (
-          <>
-            {/* New Order Heading */}
-            <div className="px-6 pt-6">
-              <h2 className="text-2xl font-bold text-gray-900">New order</h2>
-            </div>
-            <div className="grid grid-cols-1 lg:grid-cols-[60%,40%] p-6">
-              <div className="bg-white p-6 rounded-lg shadow-md">
-                <div className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-[30%,70%]">
-                    <div>
-                      <label className="block mb-2 text-sm font-medium text-gray-700">
-                        Social media
-                      </label>
-                      <SelectDropdown
-                        badge={false}
-                        data={platforms}
-                        onSelect={handleSelect}
-                        image={true}
-                        
-                        // resetSelected={resetSelected}
-                      />
-                    </div>
-                    <div className="xl:pl-4">
-                      <label className="block mb-2 text-sm font-medium text-gray-700">
-                        Category
-                      </label>
-                      <SelectDropdown
-                        badge={false}
-                        data={category}
-                        onSelect={handleSelectCategory}
-                        image={true}
-                        // resetSelected={resetSelected}
-                      />
-                    </div>
-                  </div>
+    <>
+      {(isLoading || showLoader) ? (
+        <Loading />
+      ) : (
+        <>
+          {/* New Order Heading */}
+          <div className="px-6 pt-6">
+            <h2 className="text-2xl font-bold text-gray-900">New order</h2>
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-[60%,40%] p-6">
+            <div className="bg-white p-6 rounded-lg shadow-md">
+              <div className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-[30%,70%]">
                   <div>
                     <label className="block mb-2 text-sm font-medium text-gray-700">
-                      Service
+                      Social media
                     </label>
                     <SelectDropdown
-                      badge={true}
-                      data={service}
-                      onSelect={handleSelectProduct}
-                      resetSelected={resetSelected}
+                      badge={false}
+                      data={platforms}
+                      onSelect={handleSelect}
                       image={true}
+
+                    // resetSelected={resetSelected}
                     />
                   </div>
-
-                  {/* Link Input */}
-                  <div>
+                  <div className="xl:pl-4">
                     <label className="block mb-2 text-sm font-medium text-gray-700">
-                      Link
+                      Category
                     </label>
-                    <textarea
-                      placeholder="Enter your link"
-                      className="w-full p-2 border border-gray-300 rounded-md resize-y" // Sử dụng resize-y để cho phép kéo dài chiều cao
-                      rows={3} // Số dòng mặc định
-                      onChange={(e) => setLink(e.target.value)}
-                    ></textarea>
-                  </div>
-
-                  {/* Quantity Input */}
-                  <div>
-                    <label className="block mb-2 text-sm font-medium text-gray-700">
-                      Quantity
-                    </label>
-                    <input
-                      type="number"
-                      placeholder={`From ${product?.min} to ${product?.max}`}
-                      className="w-full p-2 border border-gray-300 rounded-md"
-                      onChange={(e) => setQuantity(Number(e.target.value))}
+                    <SelectDropdown
+                      badge={false}
+                      data={category}
+                      onSelect={handleSelectCategory}
+                      image={true}
+                    // resetSelected={resetSelected}
                     />
                   </div>
-
-                  {/* Submit Button */}
-                  <div>
-                    <button
-                      className="w-full p-3 bg-blue-600 text-white rounded-md"
-                      onClick={handleSubmit}
-                    >
-                      Submit
-                    </button>
-                  </div>
                 </div>
-              </div>
-
-              <div className="p-6 flex flex-col gap-4">
-                {" "}
-                {/* Sử dụng flexbox cho layout */}
-                {/* Khung 1 */}
-                <div className="bg-white p-4 rounded-lg shadow-md border border-blue-400 flex items-center">
-                  <Image
-                    src="https://cdn.mypanel.link/sw177w/3y6jfcfgmm14jned.gif"
-                    className="w-10 h-10 "
-                    alt="icon"
-                    width={24}
-                    height={24}
+                <div>
+                  <label className="block mb-2 text-sm font-medium text-gray-700">
+                    Service
+                  </label>
+                  <SelectDropdown
+                    badge={true}
+                    data={service}
+                    onSelect={handleSelectProduct}
+                    resetSelected={resetSelected}
+                    image={true}
                   />
-                  <h2 className="text-xl font-bold text-blue-500 text-center flex-1">
-                    {product?.label}
-                  </h2>
                 </div>
-                {/* Khung 2 */}
-                <div className="bg-white p-6 rounded-lg shadow-md border border-cyan-300">
-                  <h2 className="text-xl font-semibold mb-4">⚠️ Note:</h2>
-                  <div
-                    dangerouslySetInnerHTML={{
-                      __html: product?.description ?? "",
-                    }}
+
+                {/* Link Input */}
+                <div>
+                  <label className="block mb-2 text-sm font-medium text-gray-700">
+                    Link
+                  </label>
+                  <textarea
+                    placeholder="Enter your link"
+                    className="w-full p-2 border border-gray-300 rounded-md resize-y" // Sử dụng resize-y để cho phép kéo dài chiều cao
+                    rows={3} // Số dòng mặc định
+                    onChange={(e) => setLink(e.target.value)}
+                  ></textarea>
+                </div>
+
+                {/* Quantity Input */}
+                <div>
+                  <label className="block mb-2 text-sm font-medium text-gray-700">
+                    Quantity
+                  </label>
+                  <input
+                    type="number"
+                    placeholder={`From ${product?.min} to ${product?.max}`}
+                    className="w-full p-2 border border-gray-300 rounded-md"
+                    onChange={(e) => setQuantity(Number(e.target.value))}
                   />
+                </div>
+
+                {/* Submit Button */}
+                <div>
+                  <button
+                    className="w-full p-3 bg-blue-600 text-white rounded-md"
+                    onClick={handleSubmit}
+                  >
+                    Submit
+                  </button>
                 </div>
               </div>
             </div>
-            )
-          </>
-        )}
-      </div>
-    </div>
+
+            <div className="p-6 flex flex-col gap-4">
+              {" "}
+              {/* Sử dụng flexbox cho layout */}
+              {/* Khung 1 */}
+              <div className="bg-white p-4 rounded-lg shadow-md border border-blue-400 flex items-center">
+                <Image
+                  src="https://cdn.mypanel.link/sw177w/3y6jfcfgmm14jned.gif"
+                  className="w-10 h-10 "
+                  alt="icon"
+                  width={24}
+                  height={24}
+                />
+                <h2 className="text-xl font-bold text-blue-500 text-center flex-1">
+                  {product?.label}
+                </h2>
+              </div>
+              {/* Khung 2 */}
+              <div className="bg-white p-6 rounded-lg shadow-md border border-cyan-300">
+                <h2 className="text-xl font-semibold mb-4">⚠️ Note:</h2>
+                <div
+                  dangerouslySetInnerHTML={{
+                    __html: product?.description ?? "",
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+          
+        </>
+      )}
+    </>
   );
 };
 

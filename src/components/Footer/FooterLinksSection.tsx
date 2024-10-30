@@ -33,22 +33,22 @@ const FooterLinksSection = () => {
       <div className="flex flex-col">
         <h4 className="font-semibold text-gray-400 mb-6">Contact Us</h4>
         <Link
-          href="/faqs"
+          href="/#"
           className="text-white opacity-75 hover:text-[#009ef7] text-lg mb-4 transition-colors"
         >
-          TRAN ANH TUAN
+          NGUYEN MINH
         </Link>
         <Link
-          href="mailto:tuantranptkm@gmail.com"
+          href="mailto:support@1tap.top"
           className="text-white opacity-75 hover:text-[#009ef7] text-lg mb-4 transition-colors"
         >
-          tuantranptkm@gmail.com
+          support@1tap.top
         </Link>
         <Link
           href="tel:+18569308404"
           className="text-white opacity-75 hover:text-[#009ef7] text-lg mb-4 transition-colors"
         >
-          +1 8569308404
+          +84985822626
         </Link>
       </div>
     </div>

@@ -1,6 +1,3 @@
-import Header from "@/components/Header/Header";
-import Sidebar from "@/components/Sidebar/Sidebar";
-import { TypeHearder } from "@/types/enum";
 import { DehydratedState, QueryClient, dehydrate } from "@tanstack/react-query";
 import { GetServerSideProps } from "next";
 import React from "react";
@@ -14,6 +11,7 @@ type Props = {
     status: number;
     message: string;
   };
+  isLayout: boolean;
 };
 export const getServerSideProps: GetServerSideProps<Props> = async (
   context
@@ -30,6 +28,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async (
         },
         token: null,
         dehydratedState: dehydrate(new QueryClient()), // Trả về empty state
+        isLayout: true
       },
     };
   }
@@ -49,6 +48,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async (
       props: {
         token,
         dehydratedState: dehydrate(queryClient),
+        isLayout: true
       },
     };
   } catch (error: unknown) {
@@ -65,6 +65,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async (
           },
           token,
           dehydratedState: dehydrate(queryClient),
+          isLayout: true
         },
       };
     }
@@ -76,6 +77,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async (
         },
         token: null,
         dehydratedState: dehydrate(queryClient), // Trả về empty state nếu có lỗi
+        isLayout: true
       },
     };
   }
@@ -84,26 +86,18 @@ const Service = (props: Props) => {
   const { token } = props;
 
   return (
-    <div className="flex">
-      <Sidebar isLogin={token ? true : false} token={token} />
-      <div className="flex-1 lg:ml-64  bg-[#f9fafb]">
-        <Header
-          logo="/images/logo4.png"
-          type={TypeHearder.OTHE}
-          token={token}
-        />
-        <div className="px-6 pt-6">
-          <h2 className="text-2xl font-bold text-gray-900">Services</h2>
-        </div>
-        <div className="grid grid-cols-1 gap-4 p-6">
-          <div className="bg-white p-6 rounded-lg shadow-custom">
-            <div className="overflow-x-auto">
-              <Table token={token} />
-            </div>
+    <>
+      <div className="px-6 pt-6">
+        <h2 className="text-2xl font-bold text-gray-900">Services</h2>
+      </div>
+      <div className="grid grid-cols-1 gap-4 p-6">
+        <div className="bg-white p-6 rounded-lg shadow-custom">
+          <div className="overflow-x-auto">
+            <Table token={token} />
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 

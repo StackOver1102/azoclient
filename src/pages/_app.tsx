@@ -16,6 +16,7 @@ import React from "react";
 import 'daterangepicker';
 import { DefaultSeo } from "next-seo";
 import SEO from "../../next-seo.config";
+import Layout from '@/components/Layout/Layout';
 
 
 function App({ Component, pageProps }: AppProps) {
@@ -43,7 +44,14 @@ function App({ Component, pageProps }: AppProps) {
           <meta name="google-site-verification" content="zHO7oniUY1rRa36u3j4keSFeXo0bacLdJ-yroxM1Z90" />
         </Head>
         <DefaultSeo {...SEO} />
-        <Component {...pageProps} />
+        {
+          pageProps.isLayout ?
+            <Layout token={pageProps.token}>
+              <Component {...pageProps} />
+            </Layout>
+            :
+            <Component {...pageProps} />
+        }
         <ToastContainer position="top-right" autoClose={5000} />
         <ReactQueryDevtools initialIsOpen={false} /> {/* Optional: devtools */}
       </HydrationBoundary>

@@ -19,6 +19,7 @@ import dayjs from "dayjs";
 type Props = {
   error: ApiError | null;
   token: string | null;
+  isLayout: boolean;
 };
 
 export const getServerSideProps: GetServerSideProps<Props> = async (
@@ -27,7 +28,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async (
   const token = context.req.cookies.access_token;
   const queryClient = new QueryClient();
 
-    if (!token) {
+  if (!token) {
     return {
       redirect: {
         destination: "/signin",
@@ -57,6 +58,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async (
         error: null,
         token,
         dehydratedState: dehydrate(queryClient), // Pass dehydrate state to hydrate client side
+        isLayout: true
       },
     };
   } catch (err: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -73,6 +75,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async (
           },
           token,
           dehydratedState: dehydrate(queryClient),
+          isLayout: true
         },
       };
     }
@@ -84,6 +87,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async (
         },
         token,
         dehydratedState: dehydrate(queryClient),
+        isLayout: true
       },
     };
   }
@@ -152,6 +156,11 @@ const CashFlow = (props: Props) => {
   const [columnChunks, setColumnChunks] = useState<CashFlow[][]>([]); // Track chunked columns
   const [isFiltered, setIsFiltered] = useState(false); // Track if the data is filtered
   const totalPages = Math.ceil(filteredData.length / itemsPerPage); // Calculate total pages
+  const [isOpen, setIsOpen] = useState(false);
+
+  const toggleSidebar = () => {
+    setIsOpen(!isOpen);
+  };
 
   // Calculate paginatedData and update columnChunks whenever filteredData or currentPage changes
   useEffect(() => {
@@ -176,7 +185,7 @@ const CashFlow = (props: Props) => {
   const handleApplyFilter = () => {
     // Filter data based on the Order ID entered
     if (orderID) {
-      const filtered = (data as CashFlow[]).filter((item:CashFlow) => item.description.includes(orderID));
+      const filtered = (data as CashFlow[]).filter((item: CashFlow) => item.description.includes(orderID));
       setFilteredData(filtered);
       setIsFiltered(true); // Set filtered flag to true
     } else {
@@ -196,149 +205,137 @@ const CashFlow = (props: Props) => {
   };
 
   return (
-    <div className="flex text-sm">
-      {/* Sidebar */}
-      <Sidebar isLogin={token ? true : false} token={token}/>
+    <>
 
-      {/* Main content */}
-      <div className="flex-1 lg:ml-64 bg-[#f9fafb] min-h-screen">
-        {/* Header */}
-        <Header
-          logo="/images/logo4.png"
-          token={token}
-          type={TypeHearder.OTHE}
-        />
-        {isLoading && <Loading />}
-        {/* Title and Filter */}
-        <div className="flex justify-between items-center px-6 pt-6">
-          <h2 className="text-2xl font-semibold text-gray-900">Cash Flow</h2>
-          <button
-            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-            onClick={() => setFilterVisible(!filterVisible)}
-          >
-            <span>🔍</span> Filter
-          </button>
-        </div>
+      {isLoading && <Loading />}
+      {/* Title and Filter */}
+      <div className="flex justify-between items-center px-6 pt-6">
+        <h2 className="text-2xl font-semibold text-gray-900">Cash Flow</h2>
+        <button
+          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+          onClick={() => setFilterVisible(!filterVisible)}
+        >
+          <span>🔍</span> Filter
+        </button>
+      </div>
 
-        {/* Filter Panel */}
-        {filterVisible && (
-          <div className="bg-white rounded-lg shadow-custom p-4 mt-4 w-80 absolute right-6 z-10">
-            <h3 className="text-lg font-semibold text-gray-700">
-              Filter Options
-            </h3>
-            <div className="mt-4">
-              <label className="block text-gray-600">Order ID:</label>
-              <input
-                type="text"
-                value={orderID}
-                onChange={(e) => setOrderID(e.target.value)}
-                className="w-full mt-2 px-4 py-2 border rounded bg-gray-100"
-              />
-            </div>
-            <div className="flex justify-between mt-6">
-              <button
-                onClick={handleResetFilter}
-                className="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400"
-              >
-                Reset
-              </button>
-              <button
-                onClick={handleApplyFilter}
-                className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-              >
-                Apply
-              </button>
-            </div>
+      {/* Filter Panel */}
+      {filterVisible && (
+        <div className="bg-white rounded-lg shadow-custom p-4 mt-4 w-80 absolute right-6 z-10">
+          <h3 className="text-lg font-semibold text-gray-700">
+            Filter Options
+          </h3>
+          <div className="mt-4">
+            <label className="block text-gray-600">Order ID:</label>
+            <input
+              type="text"
+              value={orderID}
+              onChange={(e) => setOrderID(e.target.value)}
+              className="w-full mt-2 px-4 py-2 border rounded bg-gray-100"
+            />
           </div>
-        )}
+          <div className="flex justify-between mt-6">
+            <button
+              onClick={handleResetFilter}
+              className="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400"
+            >
+              Reset
+            </button>
+            <button
+              onClick={handleApplyFilter}
+              className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+            >
+              Apply
+            </button>
+          </div>
+        </div>
+      )}
 
-        {/* Main Section */}
-        <div className="p-6">
-          <div className="bg-white rounded-lg shadow-custom p-6">
-            {/* Conditional rendering for empty results */}
-            {isFiltered && filteredData.length === 0 ? (
-              <p className="text-center text-gray-500">
-                No results found for &quot;{orderID}&quot;
-              </p>
-            ) : (
-              <div className="flex flex-wrap">
-                {columnChunks.map((chunk, columnIndex) => (
-                  <div key={columnIndex} className="w-1/4 p-4">
-                    {chunk.map((item, idx) => (
-                      <div key={idx} className="flex justify-between mb-2">
-                        {/* Conditional rendering for DEPOSIT */}
-                        {item.type === TypeHistory.addMoney ? (
-                          <div className="flex items-start">
-                            {/* Blue vertical line */}
-                            <div className="h-full w-1 bg-blue-500 mr-2"></div>
-                            <div>
-                              <p className="font-semibold">
-                                {item.description}
-                              </p>
-                              <p className="text-gray-500">
-                                {dayjs(new Date(item.createdAt)).format(
-                                  "YYYY-MM-DD HH:mm:ss"
-                                )}
-                              </p>
-                            </div>
-                          </div>
-                        ) : (
+      {/* Main Section */}
+      <div className="p-6">
+        <div className="bg-white rounded-lg shadow-custom p-6">
+          {/* Conditional rendering for empty results */}
+          {isFiltered && filteredData.length === 0 ? (
+            <p className="text-center text-gray-500">
+              No results found for &quot;{orderID}&quot;
+            </p>
+          ) : (
+            <div className="flex flex-wrap">
+              {columnChunks.map((chunk, columnIndex) => (
+                <div key={columnIndex} className="w-1/4 p-4">
+                  {chunk.map((item, idx) => (
+                    <div key={idx} className="flex justify-between mb-2">
+                      {/* Conditional rendering for DEPOSIT */}
+                      {item.type === TypeHistory.addMoney ? (
+                        <div className="flex items-start">
+                          {/* Blue vertical line */}
+                          <div className="h-full w-1 bg-blue-500 mr-2"></div>
                           <div>
-                            <Link
-                              href={`/cashflow/${item._id}`}
-                              className="font-semibold hover:text-[#009ef7]"
-                            >
+                            <p className="font-semibold">
                               {item.description}
-                            </Link>
+                            </p>
                             <p className="text-gray-500">
-                              {" "}
                               {dayjs(new Date(item.createdAt)).format(
                                 "YYYY-MM-DD HH:mm:ss"
                               )}
                             </p>
                           </div>
-                        )}
-
-                        {/* Value handling, blue for DEPOSIT, otherwise conditional red/blue */}
+                        </div>
+                      ) : (
                         <div>
-                          <div>
-                            <p
-                              className={
-                                item.type === TypeHistory.addMoney
-                                  ? "text-blue-500 font-bold text-right"
-                                  : "text-red-500 text-right"
-                              }
-                            >
-                              {`${
-                                item.type === TypeHistory.addMoney ? "+" : "-"
+                          <Link
+                            href={`/cashflow/${item._id}`}
+                            className="font-semibold hover:text-[#009ef7]"
+                          >
+                            {item.description}
+                          </Link>
+                          <p className="text-gray-500">
+                            {" "}
+                            {dayjs(new Date(item.createdAt)).format(
+                              "YYYY-MM-DD HH:mm:ss"
+                            )}
+                          </p>
+                        </div>
+                      )}
+
+                      {/* Value handling, blue for DEPOSIT, otherwise conditional red/blue */}
+                      <div>
+                        <div>
+                          <p
+                            className={
+                              item.type === TypeHistory.addMoney
+                                ? "text-blue-500 font-bold text-right"
+                                : "text-red-500 text-right"
+                            }
+                          >
+                            {`${item.type === TypeHistory.addMoney ? "+" : "-"
                               }${item.amount.toFixed(2)}`}
-                            </p>
-                          </div>
-                          <div>
-                            <p className="text-[#A1A5B7] text-[12px] text-right font-semibold ">
-                              {item.amountOld.toFixed(2)}
-                            </p>
-                          </div>
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-[#A1A5B7] text-[12px] text-right font-semibold ">
+                            {item.amountOld.toFixed(2)}
+                          </p>
                         </div>
                       </div>
-                    ))}
-                  </div>
-                ))}
-              </div>
-            )}
+                    </div>
+                  ))}
+                </div>
+              ))}
+            </div>
+          )}
 
-            {/* Pagination Controls */}
-            <Pagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              onPrevPage={handlePrevPage}
-              onNextPage={handleNextPage}
-            />
-          </div>
+          {/* Pagination Controls */}
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPrevPage={handlePrevPage}
+            onNextPage={handleNextPage}
+          />
         </div>
       </div>
-    </div>
-  );
+    </>
+  )
 };
 
 export default withAuth(CashFlow);

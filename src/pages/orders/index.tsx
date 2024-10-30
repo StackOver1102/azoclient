@@ -1,9 +1,6 @@
-import Header from "@/components/Header/Header";
-import Sidebar from "@/components/Sidebar/Sidebar";
 import Table from "@/components/Table/Table";
 import { showErrorToast } from "@/services/toastService";
 import { ApiError, isApiError } from "@/services/UserService";
-import { TypeHearder } from "@/types/enum";
 import { GetServerSideProps } from "next";
 import Cookies from "js-cookie";
 import OrderService from "@/services/OrderService";
@@ -16,13 +13,14 @@ import { useEffect } from "react";
 type Props = {
   error: ApiError | null;
   token: string | null;
+  isLayout: boolean
 };
 export const getServerSideProps: GetServerSideProps<Props> = async (
   context
 ) => {
   const token = context.req.cookies.access_token;
 
-    if (!token) {
+  if (!token) {
     return {
       redirect: {
         destination: "/signin",
@@ -35,6 +33,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async (
     props: {
       error: null,
       token,
+      isLayout: true
     },
   };
 };
@@ -86,31 +85,22 @@ const Order = (props: Props) => {
     enabled: !!token,
   });
 
-  if (isLoading) return <Loading />;
 
   return (
-    <div className="flex">
-      <Sidebar isLogin={token ? true : false} token={token} />
-      <div className="flex-1 lg:ml-64 bg-[#f9fafb]">
-        <Header
-          logo="/images/logo4.png"
-          token={token}
-          type={TypeHearder.OTHE}
-        />
+    <>
+      {isLoading && <Loading/>}
+      <div className="px-6 pt-6">
+        <h2 className="text-2xl font-bold text-gray-900">Orders</h2>
+      </div>
 
-        <div className="px-6 pt-6">
-          <h2 className="text-2xl font-bold text-gray-900">New Order</h2>
-        </div>
-
-        <div className="grid grid-cols-1 gap-4 p-6 ">
-          <div className="bg-white p-6 rounded-lg shadow-custom">
-            <div className="overflow-x-auto">
-              <Table data={orders ?? []} token={token} />
-            </div>
+      <div className="grid grid-cols-1 gap-4 p-6 ">
+        <div className="bg-white p-6 rounded-lg shadow-custom">
+          <div className="overflow-x-auto">
+            <Table data={orders ?? []} token={token} />
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 

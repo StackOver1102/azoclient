@@ -6,10 +6,10 @@ const FooterInfoSection = () => {
           <p className="font-normal text-xl text-gray-300">
             Email us at{' '}
             <a
-              href="mailto:tuantranptkm@gmail.com"
+              href="mailto:support@1tap.top"
               className="text-white hover:text-[#009ef7] transition-colors"
             >
-              tuantranptkm@gmail.com
+              support@1tap.top
             </a>
           </p>
         </div>
@@ -18,10 +18,10 @@ const FooterInfoSection = () => {
           <p className="font-normal text-xl text-gray-300">
             Email us at{' '}
             <a
-              href="mailto:tuantranptkm@gmail.com"
+              href="mailto:support@1tap.top"
               className="text-white hover:text-[#009ef7] transition-colors"
             >
-              tuantranptkm@gmail.com
+              support@1tap.top
             </a>
           </p>
         </div>

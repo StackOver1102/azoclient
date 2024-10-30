@@ -3,7 +3,7 @@ import Sidebar from "@/components/Sidebar/Sidebar";
 import { ApiError } from "@/services/UserService";
 import { TypeHearder } from "@/types/enum";
 import { GetServerSideProps } from "next";
-import React from "react";
+import React, { useState } from "react";
 import moment from "moment";
 
 type Props = {
@@ -34,6 +34,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async (
 
 const ClashFlow = (props: Props) => {
   const { token } = props;
+  const [isOpen, setIsOpen] = useState(false);
 
   // Example transaction data
   const transactions = [
@@ -56,15 +57,18 @@ const ClashFlow = (props: Props) => {
   // Calculate total change
   const totalChange = transactions.reduce((sum, transaction) => sum + transaction.amount, 0);
 
+  const toggleSidebar = () => {
+    setIsOpen(!isOpen);
+  };
   return (
     <div className="flex">
       {/* Sidebar */}
-      <Sidebar isLogin={!!token} token={token} />
+      <Sidebar isLogin={!!token} token={token} toggleSidebar={toggleSidebar} isOpen/>
 
       {/* Main content */}
       <div className="flex-1 lg:ml-64 bg-[#f9fafb] min-h-screen">
         {/* Header */}
-        <Header logo="/images/logo4.png" token={token} type={TypeHearder.OTHE} />
+        <Header logo="/images/logo4.png" token={token} type={TypeHearder.OTHE} toggleSidebar={toggleSidebar}/>
 
         <div className="flex justify-between items-center px-6 pt-6">
           <h2 className="text-2xl font-semibold text-gray-900">Cash Flow</h2>

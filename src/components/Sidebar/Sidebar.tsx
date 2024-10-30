@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import UserService from "@/services/UserService";
 import Cookies from "js-cookie";
@@ -8,14 +8,12 @@ import { useRouter } from "next/router";
 type Props = {
   isLogin: boolean;
   token: string | null;
+  isOpen: boolean;
+  toggleSidebar: () => void;
 };
 const Sidebar = (props: Props) => {
-  const { isLogin, token } = props;
-  const [isOpen, setIsOpen] = useState(false);
+  const { isLogin, token, isOpen, toggleSidebar } = props;
   const router = useRouter();
-  const handleCloseSidebar = () => {
-    setIsOpen(false);
-  };
 
   const handleLogout = async () => {
     try {
@@ -28,34 +26,54 @@ const Sidebar = (props: Props) => {
     }
   };
 
+  const sidebarRef = useRef<HTMLDivElement>(null);
+
+  const handleClickOutside = (event: MouseEvent) => {
+    if (
+      sidebarRef.current &&
+      !sidebarRef.current.contains(event.target as Node)
+    ) {
+      toggleSidebar();
+    }
+  };
+
+  useEffect(() => {
+    // Lắng nghe sự kiện mousedown
+    if (isOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    } else {
+      document.removeEventListener("mousedown", handleClickOutside);
+    }
+
+    // Cleanup sự kiện khi component unmount
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isOpen]);
+
+  useEffect(() => {
+    if(isOpen) toggleSidebar();
+  }, [router.pathname]);
   return (
     <>
-      {/* Toggle button for mobile view */}
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="fixed top-4 left-4 z-50 block lg:hidden p-2 bg-purple-700 text-white rounded-md"
-      >
-        <i className="fa-solid fa-bars"></i>
-      </button>
 
       {/* Overlay layer */}
       {isOpen && (
         <div
-          onClick={handleCloseSidebar} // Clicking outside will close the sidebar
           className="fixed inset-0 bg-black bg-opacity-50 z-30"
         ></div>
       )}
 
       <aside
         id="sidebar"
-        className={`fixed top-[75px] lg:top-[94px] left-0 z-40 w-64 h-[calc(100vh-72px)] pt-8 border-r border-gray-200 dark:border-gray-600 flex flex-col justify-between bg-purple-700 transition-transform duration-300 ease-in-out ${
-          isOpen ? "translate-x-0" : "-translate-x-full"
-        } lg:translate-x-0 lg:overflow-y-visible overflow-y-auto`}
+        ref={sidebarRef}
+        className={`fixed top-[75px] lg:top-[94px] left-0 z-40 w-64 h-[calc(100vh-72px)] pt-8 border-r border-gray-200 dark:border-gray-600 flex flex-col justify-between bg-purple-700 transition-transform duration-300 ease-in-out ${isOpen ? "translate-x-0" : "-translate-x-full"
+          } lg:translate-x-0 lg:overflow-y-visible overflow-y-auto`}
         aria-label="Sidebar"
       >
         {/* Sidebar links and logo */}
         <div className="flex-grow">
-          <div className="flex justify-center mb-6">
+          <div className=" justify-center mb-6 hidden lg:flex">
             <Image
               alt="Logo"
               src={"/images/logo4.png"}

@@ -13,13 +13,15 @@ import Loading from "../Loading/Loading";
 interface HeaderProps {
   logo: string;
   token: string | null;
-  type: TypeHearder;
+  type?: TypeHearder;
+  toggleSidebar?: () => void;
 }
 
 const Header: React.FC<HeaderProps> = ({
   logo,
   token,
   type = TypeHearder.OTHE,
+  toggleSidebar
 }) => {
   const { t } = useTranslation("common");
   const router = useRouter();
@@ -228,38 +230,33 @@ const Header: React.FC<HeaderProps> = ({
               <div className="flex justify-between items-center py-3 px-3 mx-auto w-full max-w-8xl lg:px-4 container">
                 <div className="flex items-center">
                   <div className="flex justify-between items-center">
+                    <button
+                      onClick={() => {
+                        if (toggleSidebar)
+                          toggleSidebar(); 
+                      }}
+
+                      className="lg:hidden p-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-full shadow-lg hover:shadow-xl transition duration-200 ease-in-out transform hover:scale-105"
+                    >
+                      <i className="fa-solid fa-bars"></i>
+                    </button>
                     <Link href="/" className="flex">
                       <Image
                         alt="Logo"
                         src={logo}
-                        className="hidden lg:inline h-[70px]"
+                        className="hidden lg:inline h-[70px]  object-contain"
                         height={70}
                         width={100}
                       />
                       <Image
                         alt="Logo"
                         src={logo}
-                        className="lg:hidden h-[50px] w-[100px] ml-10"
+                        className="lg:hidden h-[50px] w-[100px] object-contain"
                         height={50}
                         width={100}
                       ></Image>
                     </Link>
                   </div>
-                  {/* <div className="ml-6 xl:ml-16 xl:pl-4">
-
-                        <button className='flex items-center space-x-2 border border-gray-900/10 shadow-sm px-3 py-1.5 hover:border-gray-300 focus:outline-none focus:border-gray-300  rounded-lg  w-72' onClick={() => setIsOpen(!isOpen)}>
-                            <svg width="24" height="24" fill="none" aria-hidden="true" className="flex-none -ml-1 text-gray-500">
-                                <path d="m19 19-3.5-3.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                </path>
-                                <circle cx="11" cy="11" r="6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                </circle>
-                            </svg>
-                            <span className='text-sm text-gray-400 text-left' >
-                                Quick service search
-                            </span>
-                        </button>
-                        {Modal()}
-                    </div> */}
                 </div>
                 <div
                   className={`flex items-center ${access_token ? "" : "hidden"
@@ -316,112 +313,6 @@ const Header: React.FC<HeaderProps> = ({
                         data-bs-dismiss="offcanvas"
                         aria-label="Close"
                       ></button>
-                    </div>
-                    <div className="offcanvas-body flex-grow p-4 overflow-y-auto ">
-                      <div>
-                        <div className="relative p-0 m-0 flex items-start">
-                          <div className="border-b-[1px] border-solid boder-[#dadaeb] w-full overflow-automt-[-0.45rem] mb-[1rem]">
-                            <div className="pr-3 mb-5 text-[#50cd89]">
-                              <div className="text-[1.15rem] font-medium mb-2">
-                                [New Service] 1037 | Tiktok Likes | Max 500K |
-                                Speed: 150K/Day | $0.21
-                              </div>
-                              <div className="flex items-center mt-1 text-[1.075rem]">
-                                <div className="text-[#a1a5b7] mr-2 text-[.95rem]">
-                                  2022-10-06 00:22:15
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <div>
-                        <div className="relative p-0 m-0 flex items-start">
-                          <div className="border-b-[1px] border-solid boder-[#dadaeb] w-full overflow-auto mt-[-0.45rem] mb-[1rem]">
-                            <div className="pr-3 mb-5 text-[#50cd89]">
-                              <div className="text-[1.15rem] font-medium mb-2">
-                                [New Service] 1037 | Tiktok Likes | Max 500K |
-                                Speed: 150K/Day | $0.21
-                              </div>
-                              <div className="flex items-center mt-1 text-[1.075rem]">
-                                <div className="text-[#a1a5b7] mr-2 text-[.95rem]">
-                                  2022-10-06 00:22:15
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div>
-                        <div className="relative p-0 m-0 flex items-start">
-                          <div className="border-b-[1px] border-solid boder-[#dadaeb] w-full overflow-automt-[-0.45rem] mb-[1rem]">
-                            <div className="pr-3 mb-5 text-[#f1416c]">
-                              <div className="text-[1.15rem] font-medium mb-2">
-                                [Disable Service] 1001 | FB Profile Followers |
-                                VIET NAM | Max 100k | Speed 3k/day
-                              </div>
-                              <div className="flex items-center mt-1 text-[1.075rem]">
-                                <div className="text-[#a1a5b7] mr-2 text-[.95rem]">
-                                  2022-10-04 13:47:09
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <div>
-                        <div className="relative p-0 m-0 flex items-start">
-                          <div className="border-b-[1px] border-solid boder-[#dadaeb] w-full overflow-automt-[-0.45rem] mb-[1rem]">
-                            <div className="pr-3 mb-5 text-[#50cd89]">
-                              <div className="text-[1.15rem] font-medium mb-2">
-                                [New Service] 1035 | Facebook Custom Comments |
-                                Bình luận Facebook Việt | Speed 50-200/Day |
-                                $3.5
-                              </div>
-                              <div className="flex items-center mt-1 text-[1.075rem]">
-                                <div className="text-[#a1a5b7] mr-2 text-[.95rem]">
-                                  2022-10-04 12:41:25
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <div>
-                        <div className="relative p-0 m-0 flex items-start">
-                          <div className="border-b-[1px] border-solid boder-[#dadaeb] w-full overflow-automt-[-0.45rem] mb-[1rem]">
-                            <div className="pr-3 mb-5 text-[#50cd89]">
-                              <div className="text-[1.15rem] font-medium mb-2">
-                                [New Service] 1034 | Facebook | 𝗣𝗼𝘀𝘁/𝗣𝗵𝗼𝘁𝗼 𝗟𝗶𝗸𝗲𝘀
-                                | Max 10k | Speed 3k-5k/day | $0.182
-                              </div>
-                              <div className="flex items-center mt-1 text-[1.075rem]">
-                                <div className="text-[#a1a5b7] mr-2 text-[.95rem]">
-                                  2022-10-03 23:52:40
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <div>
-                        <div className="relative p-0 m-0 flex items-start">
-                          <div className="border-b-[1px] border-solid boder-[#dadaeb] w-full overflow-automt-[-0.45rem] mb-[1rem]">
-                            <div className="pr-3 mb-5 text-[#50cd89]">
-                              <div className="text-[1.15rem] font-medium mb-2">
-                                [New Service] 1033 | Youtube Likes | Speed
-                                30k/Hours | $1.26
-                              </div>
-                              <div className="flex items-center mt-1 text-[1.075rem]">
-                                <div className="text-[#a1a5b7] mr-2 text-[.95rem]">
-                                  2022-10-03 22:56:17
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
                     </div>
                   </div>
                 </div>

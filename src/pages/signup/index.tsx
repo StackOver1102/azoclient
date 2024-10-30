@@ -87,40 +87,40 @@ const Signup = () => {
   return (
     <>
       {showLoader && <Loading />}
-      <div className="min-h-screen flex flex-col justify-center items-center bg-cover bg-center bg-fixed bg-no-repeat bg-[url('https://1dg.me/assets/media/bg-1.png')]">
-        <div className="w-full max-w-md p-8 space-y-6 bg-white shadow-lg rounded-lg dark:bg-gray-800">
+      <div className="min-h-screen flex flex-col justify-center items-center bg-cover bg-center bg-fixed bg-no-repeat bg-[url('https://1dg.me/assets/media/bg-1.png')] dark:bg-gradient-to-b dark:from-[#0d1b2a] dark:to-[#1b3a4b] px-4 sm:px-0">
+        <div className="flex justify-center mb-4">
+          <Link href="/">
+            <CustomImage
+              alt="Logo"
+              src={"/images/logo4.png"}
+              className="h-[120px] sm:h-[150px]"
+              height={150}
+              width={250}
+            />
+          </Link>
+        </div>
+        <div className="w-full max-w-md p-10 space-y-6 bg-white shadow-2xl rounded-xl">
           <div className="text-center">
-            <div className="flex justify-center mb-2">
-              <Link href="/">
-                <CustomImage
-                  alt="Logo"
-                  src={"/images/logo4.png"}
-                  className="h-[150px]"
-                  height={150}
-                  width={250}
-                />
-              </Link>
-            </div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+
+            <h1 className="text-3xl font-bold text-gray-900  mb-2">
               Create an Account
             </h1>
-            <p className="text-sm font-light text-gray-500 dark:text-gray-300 mt-2">
+            <p className="text-sm font-light text-gray-500 ">
               Already have an account?
               <Link
                 href="/signin"
                 className="text-[#009ef7] font-semibold hover:underline"
               >
-                {" "}
-                Sign in here
+                {" "}Sign in here
               </Link>
             </p>
           </div>
 
-          <form className="space-y-4" onSubmit={submitHandler}>
+          <form className="space-y-6" onSubmit={submitHandler}>
             <div>
               <label
                 htmlFor="name"
-                className="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-200"
+                className="block mb-2 text-sm font-medium text-gray-900 "
               >
                 Name
               </label>
@@ -130,7 +130,7 @@ const Signup = () => {
                 name="name"
                 placeholder="Nguyen Van A"
                 required
-                className="w-full px-4 py-2 text-gray-900 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#009ef7] dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#009ef7]"
                 onChange={(e) => setName(e.target.value)}
               />
             </div>
@@ -138,7 +138,7 @@ const Signup = () => {
             <div>
               <label
                 htmlFor="email"
-                className="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-200"
+                className="block mb-2 text-sm font-medium text-gray-900 "
               >
                 Your email
               </label>
@@ -148,7 +148,7 @@ const Signup = () => {
                 name="email"
                 placeholder="name@company.com"
                 required
-                className="w-full px-4 py-2 text-gray-900 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#009ef7] dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#009ef7] "
                 onChange={(e) => setEmail(e.target.value)}
               />
             </div>
@@ -156,7 +156,7 @@ const Signup = () => {
             <div>
               <label
                 htmlFor="password"
-                className="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-200"
+                className="block mb-2 text-sm font-medium text-gray-900 "
               >
                 Password
               </label>
@@ -166,7 +166,7 @@ const Signup = () => {
                 name="password"
                 placeholder="••••••••"
                 required
-                className="w-full px-4 py-2 text-gray-900 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#009ef7] dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#009ef7] "
                 onChange={(e) => setPassword(e.target.value)}
               />
             </div>
@@ -174,7 +174,7 @@ const Signup = () => {
             <div>
               <label
                 htmlFor="confirm-password"
-                className="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-200"
+                className="block mb-2 text-sm font-medium text-gray-900 "
               >
                 Confirm password
               </label>
@@ -184,7 +184,7 @@ const Signup = () => {
                 name="confirm-password"
                 placeholder="••••••••"
                 required
-                className="w-full px-4 py-2 text-gray-900 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#009ef7] dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#009ef7] "
                 onChange={(e) => setConfirmPassword(e.target.value)}
               />
             </div>
@@ -201,7 +201,7 @@ const Signup = () => {
               </div>
               <label
                 htmlFor="terms"
-                className="ml-3 text-sm font-light text-gray-500 dark:text-gray-300"
+                className="ml-3 text-sm font-light text-gray-500 "
               >
                 I accept the{" "}
                 <Link
@@ -215,13 +215,14 @@ const Signup = () => {
 
             <button
               type="submit"
-              className="w-full py-2.5 px-5 text-white bg-[#009ef7] rounded-lg font-medium text-sm hover:bg-[#007acc] focus:outline-none focus:ring-4 focus:ring-[#009ef7] dark:bg-[#009ef7] dark:hover:bg-[#007acc] dark:focus:ring-[#007acc]"
+              className="w-full py-3 text-white bg-[#009ef7] rounded-lg font-medium text-sm hover:bg-[#007acc] focus:outline-none focus:ring-4 focus:ring-[#009ef7] dark:bg-[#009ef7] dark:hover:bg-[#007acc] dark:focus:ring-[#007acc]"
             >
               Create an account
             </button>
           </form>
         </div>
       </div>
+
     </>
   );
 };

@@ -9,7 +9,7 @@ const FooterBottom = () => {
           {/* <img alt="Logo" src="/path/to/logo.png" className="h-[80px] lg:h-[100px]" /> */}
           <Image
             src="/images/logo4.png"
-            className="h-[80px] lg:h-[100px]"
+            className="h-[80px] md:h-[90px] lg:h-[100px] w-auto object-contain"
             alt="Logo"
             height={80}
             width={120}

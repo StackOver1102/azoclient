@@ -1,7 +1,5 @@
-import Header from "@/components/Header/Header";
 import Input from "@/components/Input/Input";
 import Loading from "@/components/Loading/Loading";
-import Sidebar from "@/components/Sidebar/Sidebar";
 import { useMutationHooks } from "@/hooks/useMutationHook";
 import withAuth from "@/libs/wrapAuth/warpAuth";
 import UserService, {
@@ -11,7 +9,6 @@ import UserService, {
   ResponseHistoryLogin,
 } from "@/services/UserService";
 import { showErrorToast, showSuccessToast } from "@/services/toastService";
-import { TypeHearder } from "@/types/enum";
 import { GetServerSideProps } from "next";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
@@ -25,13 +22,14 @@ import Pagination from "@/components/Pagination/Pagination";
 type Props = {
   error: ApiError | null;
   token: string | null;
+  isLayout: boolean
 };
 export const getServerSideProps: GetServerSideProps<Props> = async (
   context
 ) => {
   const token = context.req.cookies.access_token;
 
-    if (!token) {
+  if (!token) {
     return {
       redirect: {
         destination: "/signin",
@@ -59,6 +57,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async (
         error: null,
         token,
         dehydratedState: dehydrate(queryClient),
+        isLayout: true
       },
     };
   } catch (err: unknown) {
@@ -75,6 +74,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async (
           },
           token,
           dehydratedState: dehydrate(queryClient),
+          isLayout: true
         },
       };
     }
@@ -86,6 +86,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async (
         },
         token: null,
         dehydratedState: dehydrate(queryClient), // Trả về empty state nếu có lỗi
+        isLayout: true
       },
     };
   }
@@ -273,177 +274,166 @@ const Setting = (props: Props) => {
   }, [user]);
 
   return (
-    <div className="flex">
-      {(showLoader || isLoading) && <Loading />}
-      {/* Sidebar */}
-      <Sidebar isLogin={token ? true : false} token={token} />
-      {/* Main content */}
-      <div className="flex-1 lg:ml-64 bg-[#f9fafb]">
-        <Header
-          logo="/images/logo4.png"
-          token={token}
-          type={TypeHearder.OTHE}
-        />
+    <>
+      {showLoader && <Loading />}
+      {/* Settings Title */}
+      <div className="px-6 pt-6">
+        <h2 className="text-2xl font-bold text-gray-900">Settings</h2>
+      </div>
 
-        {/* Settings Title */}
-        <div className="px-6 pt-6">
-          <h2 className="text-2xl font-bold text-gray-900">Settings</h2>
-        </div>
-
-        {/* Security Settings Section */}
-        <div className="p-6">
-          {/* Card Wrapper */}
-          <div className="bg-white rounded-lg shadow-custom">
-            {/* Card Header */}
-            <div className="border-b border-gray-300 px-6 py-4">
-              <h3 className="text-xl font-semibold text-gray-800">Security</h3>
-            </div>
-
-            {/* Card Body */}
-            <div className="px-6 py-6">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Email and Phone Fields */}
-                <Input
-                  label="Email"
-                  name="email"
-                  value={formData.email}
-                  readOnly
-                  onChange={handleChange}
-                  disabled={true}
-                />
-                <Input
-                  label="Phone"
-                  name="phone"
-                  value={formData.phone}
-                  placeholder="Enter phone number"
-                  onChange={handleChange}
-                  required
-                />
-
-                {/* Update Button - spans both columns */}
-                <div className="col-span-1 lg:col-span-2 flex flex-wrap gap-2">
-                  <button
-                    className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-md"
-                    onClick={submitHandler}
-                  >
-                    Update
-                  </button>
-                </div>
-
-                {/* Password Fields */}
-                <Input
-                  label="Current Password"
-                  name="currentPassword"
-                  type="password"
-                  value={formData.currentPassword}
-                  placeholder="Enter current password"
-                  onChange={handleChange}
-                  required
-                />
-                <Input
-                  label="New Password"
-                  name="newPassword"
-                  type="password" 
-                  value={formData.newPassword}
-                  placeholder="Enter new password"
-                  onChange={handleChange}
-                  required
-                />
-                <Input
-                  label="Confirm New Password"
-                  name="confirmPassword"
-                  type="password"
-                  value={formData.confirmPassword}
-                  placeholder="Confirm new password"
-                  onChange={handleChange}
-                  required
-                />
-
-                {/* Change Password Button - spans both columns */}
-                <div className="col-span-1 lg:col-span-2">
-                  <button
-                    className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-md"
-                    onClick={submitHandleChangePassword}
-                  >
-                    Change password
-                  </button>
-                </div>
-              </div>
-            </div>
+      {/* Security Settings Section */}
+      <div className="p-6">
+        {/* Card Wrapper */}
+        <div className="bg-white rounded-lg shadow-custom max-w-[320px] md:max-w-full mx-auto">
+          {/* Card Header */}
+          <div className="border-b border-gray-300 px-6 py-4">
+            <h3 className="text-xl font-semibold text-gray-800">Security</h3>
           </div>
-        </div>
 
-        {/* Sign-in history Section */}
-        <div className="p-6">
-          {/* Card Wrapper */}
-          <div className="bg-white rounded-lg shadow-custom">
-            {/* Card Header */}
-            <div className="border-b border-gray-300 px-6 py-4">
-              <h3 className="text-xl font-semibold text-gray-800">
-                Sign-in history
-              </h3>
-            </div>
+          {/* Card Body */}
+          <div className="px-6 py-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Email and Phone Fields */}
+              <Input
+                label="Email"
+                name="email"
+                value={formData.email}
+                readOnly
+                onChange={handleChange}
+                disabled={true}
+              />
+              <Input
+                label="Phone"
+                name="phone"
+                value={formData.phone}
+                placeholder="Enter phone number"
+                onChange={handleChange}
+                required
+              />
 
-            {/* Card Body */}
-            <div className="px-6 py-6">
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th
-                        scope="col"
-                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                      >
-                        IP
-                      </th>
-                      <th
-                        scope="col"
-                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-7/12"
-                      >
-                        Device
-                      </th>
-                      <th
-                        scope="col"
-                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                      >
-                        Time
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {/* Example Row 1 */}
-                    {currentItems?.map((item: ResponseHistoryLogin, index) => (
-                      <tr key={index}>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {item.ipAddress}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {item.deviceInfo}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {dayjs(new Date(item.loginTime)).format(
-                            "YYYY-MM-DD HH:mm:ss"
-                          )}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+              {/* Update Button - spans both columns */}
+              <div className="col-span-1 lg:col-span-2 flex flex-wrap gap-2">
+                <button
+                  className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-md"
+                  onClick={submitHandler}
+                >
+                  Update
+                </button>
+              </div>
 
-                {/* Pagination Component */}
+              {/* Password Fields */}
+              <Input
+                label="Current Password"
+                name="currentPassword"
+                type="password"
+                value={formData.currentPassword}
+                placeholder="Enter current password"
+                onChange={handleChange}
+                required
+              />
+              <Input
+                label="New Password"
+                name="newPassword"
+                type="password"
+                value={formData.newPassword}
+                placeholder="Enter new password"
+                onChange={handleChange}
+                required
+              />
+              <Input
+                label="Confirm New Password"
+                name="confirmPassword"
+                type="password"
+                value={formData.confirmPassword}
+                placeholder="Confirm new password"
+                onChange={handleChange}
+                required
+              />
 
-                <Pagination
-                  currentPage={currentPage}
-                  totalPages={totalPages}
-                  onPrevPage={handlePrevPage}
-                  onNextPage={handleNextPage}
-                />
+              {/* Change Password Button - spans both columns */}
+              <div className="col-span-1 lg:col-span-2">
+                <button
+                  className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-md"
+                  onClick={submitHandleChangePassword}
+                >
+                  Change password
+                </button>
               </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
+
+      {/* Sign-in history Section */}
+      <div className="p-6">
+        {/* Card Wrapper */}
+        <div className="bg-white rounded-lg shadow-custom max-w-[320px] md:max-w-full mx-auto">
+          {/* Card Header */}
+          <div className="border-b border-gray-300 px-6 py-4">
+            <h3 className="text-xl font-semibold text-gray-800">
+              Sign-in history
+            </h3>
+          </div>
+
+          {/* Card Body */}
+          <div className="px-6 py-6">
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th
+                      scope="col"
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    >
+                      IP
+                    </th>
+                    <th
+                      scope="col"
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-7/12"
+                    >
+                      Device
+                    </th>
+                    <th
+                      scope="col"
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    >
+                      Time
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {/* Example Row 1 */}
+                  {currentItems?.map((item: ResponseHistoryLogin, index) => (
+                    <tr key={index}>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {item.ipAddress}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {item.deviceInfo}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {dayjs(new Date(item.loginTime)).format(
+                          "YYYY-MM-DD HH:mm:ss"
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+
+              {/* Pagination Component */}
+
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPrevPage={handlePrevPage}
+                onNextPage={handleNextPage}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
   );
 };
 

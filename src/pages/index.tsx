@@ -15,6 +15,7 @@ import OrderService from "@/services/OrderService";
 type Props = {
   token: string | null;
   error: ApiError | null;
+  isLayout: boolean
 };
 export const getServerSideProps: GetServerSideProps<Props> = async (
   context
@@ -38,6 +39,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async (
           message: "Unauthorized: Invalid or expired token",
         },
         token: null,
+        isLayout: false
       },
     };
   }
@@ -78,6 +80,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async (
         error: null,
         token,
         dehydratedState: dehydrate(queryClient), // Pass dehydrate state to hydrate client side
+        isLayout: false
       },
     };
   } catch (err: any) {  // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -94,6 +97,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async (
           },
           token,
           dehydratedState: dehydrate(queryClient),
+          isLayout: false
         },
       };
     }
@@ -105,6 +109,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async (
         },
         token,
         dehydratedState: dehydrate(queryClient),
+        isLayout: false
       },
     };
   }
@@ -147,9 +152,8 @@ export default function Home(prop: Props) {
           <div className="flex flex-col mb-8 lg:mt-16 lg:mb-24  space-y-4 sm:flex-row sm:justify-center sm:space-y-0 sm:space-x-4">
             <Link
               href="/signup"
-              className={`${
-                token ? "hidden" : ""
-              } text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-8 py-5 mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800`}
+              className={`${token ? "hidden" : ""
+                } text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-8 py-5 mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800`}
             >
               Sign up now!
             </Link>

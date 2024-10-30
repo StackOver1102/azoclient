@@ -20,6 +20,7 @@ import { useUserDetail } from "@/hooks/fetch/useUserDetail";
 type Props = {
   error: ApiError | null;
   token: string | null;
+  isLayout: boolean
 };
 
 // interface
@@ -57,7 +58,8 @@ export const getServerSideProps: GetServerSideProps<Props> = async (
       props: {
         error: null,
         token,
-        dehydratedState: dehydrate(queryClient), // Pass dehydrate state to hydrate client side
+        dehydratedState: dehydrate(queryClient),
+        isLayout: true
       },
     };
   } catch (err: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -74,6 +76,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async (
           },
           token,
           dehydratedState: dehydrate(queryClient),
+          isLayout: true
         },
       };
     }
@@ -85,6 +88,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async (
         },
         token,
         dehydratedState: dehydrate(queryClient),
+        isLayout: true
       },
     };
   }
@@ -140,7 +144,11 @@ const AddFunds = (props: Props) => {
 
   const [dateRange, setDateRange] = useState({ start: "", end: "" });
   const [filteredTransactions, setFilteredTransactions] = useState(data ?? []);
+  const [isOpen, setIsOpen] = useState(false);
 
+  const toggleSidebar = () => {
+    setIsOpen(!isOpen);
+  };
   const handleDateChange = (start: string, end: string) => {
     setDateRange({ start, end });
   };
@@ -172,119 +180,125 @@ const AddFunds = (props: Props) => {
   }, [dateRange, data]);
 
   return (
-    <div className="flex">
-      {/* Sidebar (adjust or import as needed) */}
-      <Sidebar isLogin={token ? true : false} token={token} />
+    <>
+      <div className="px-6 pt-6">
+        <h2 className="text-2xl font-bold text-gray-900">Add funds</h2>
+      </div>
 
-      {/* Main content */}
-      <div className="flex-1 lg:ml-64 bg-[#f9fafb]">
-        {/* Header (you can customize the header as per your requirements) */}
-        <Header
-          logo="/images/logo4.png"
-          token={token} // Assuming 'token' is passed as a prop or retrieved
-          type={TypeHearder.OTHE} // Adjust this as needed
-        />
+      {/* Main Section */}
 
-        {/* Title */}
-        <div className="px-6 pt-6">
-          <h2 className="text-2xl font-bold text-gray-900">Add funds</h2>
-        </div>
+      <div className="p-6">
+        <div className="bg-white rounded-lg shadow-custom p-6">
+          {/* Profile Section */}
+          <div className="flex flex-col sm:flex-row items-center sm:items-start mb-6">
+            <CustomImage
+              src="/images/300-3.jpg"
+              alt="Profile"
+              className="w-[100px] h-[100px] sm:w-[160px] sm:h-[160px] rounded-full mb-4 sm:mb-0 sm:mr-4"
+              width={160}
+              height={160}
+            />
+            <div className="flex flex-col sm:flex-grow items-center sm:items-start text-center sm:text-left w-full">
+              <div className="flex items-center justify-center sm:justify-start mb-2">
+                <span className="text-lg sm:text-xl font-bold text-gray-800 mr-2">
+                  {user?.email || "username"}
+                </span>
+                <span className="bg-yellow-500 text-white text-xs font-semibold py-1 px-2 rounded">
+                  RESELLER
+                </span>
+              </div>
+              <div className="flex items-center text-sm text-gray-600 mb-4 sm:mb-0">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-4 w-4 mr-1 text-gray-500"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path d="M2.003 5.884L10 10.882l7.997-4.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
+                  <path d="M18 8.118l-8 5-8-5V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
+                </svg>
+                <span>{user?.email || "user@example.com"}</span>
+              </div>
 
-        {/* Main Section */}
-
-        <div className="p-6">
-          <div className="bg-white rounded-lg shadow-custom p-6">
-            {/* Profile Section */}
-            <div className="flex items-center mb-6">
-              <CustomImage
-                src="/images/300-3.jpg"
-                alt="Profile"
-                className="w-[160px] h-[160px] rounded-full mr-4"
-                width={160}
-                height={160}
-              />
-              <div className="flex-grow">
-                <div className="flex items-center">
-                  <span className="text-xl font-bold text-gray-800 mr-2">
-                    {user?.email}
-                  </span>
-                  <span className="bg-yellow-500 text-white text-xs font-semibold py-1 px-2 rounded">
-                    RESELLER
-                  </span>
-                </div>
-                <span className="text-sm text-gray-600">{user?.email}</span>
-                <div className="ml-auto flex space-x-4">
+              <div className="flex justify-center sm:justify-start space-x-4 mt-4 sm:mt-2">
+                <div className="text-center">
                   <CountUpDisplay end={user?.money ?? 0} />
+
+                </div>
+                <div className="text-center">
                   <CountUpDisplay end={0} />
+
                 </div>
               </div>
-            </div>
-
-            {/* Tabs */}
-            <div className="flex border-b mb-6">
-              <button
-                onClick={() => handleTabSwitch("addFunds")}
-                className={`px-4 py-2 font-bold ${
-                  activeTab === "addFunds"
-                    ? "text-blue-500 border-b-2 border-blue-500"
-                    : "text-gray-500"
-                }`}
-              >
-                Add funds
-              </button>
-              <button
-                onClick={() => handleTabSwitch("history")}
-                className={`px-4 py-2 font-bold ${
-                  activeTab === "history"
-                    ? "text-blue-500 border-b-2 border-blue-500"
-                    : "text-gray-500"
-                }`}
-              >
-                History
-              </button>
             </div>
           </div>
-        </div>
 
-        <div className="p-6">
-          <div className="bg-white rounded-lg shadow-custom p-6">
-            {activeTab === "addFunds" ? (
-              <div>
-                {/* Form Section */}
-                <label className="block text-sm font-bold text-gray-700 mb-2">
-                  Choose method <span className="text-red-500">*</span>
-                </label>
-                <div className="relative">
-                  <select className="block appearance-none w-full bg-white border border-gray-300 text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <option>Select method</option>
-                    {/* Add options dynamically */}
-                  </select>
-                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-                    <svg
-                      className="fill-current h-4 w-4"
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 20 20"
-                    >
-                      <path d="M5.516 7.548a.596.596 0 0 1 .937 0L10 11.634l3.547-4.086a.596.596 0 1 1 .937.766l-4 4.602a.596.596 0 0 1-.937 0l-4-4.602a.596.596 0 0 1 0-.766z" />
-                    </svg>
-                  </div>
+
+          {/* Tabs */}
+          <div className="flex border-b mb-6">
+            <button
+              onClick={() => handleTabSwitch("addFunds")}
+              className={`px-4 py-2 font-bold ${activeTab === "addFunds"
+                ? "text-blue-500 border-b-2 border-blue-500"
+                : "text-gray-500"
+                }`}
+            >
+              Add funds
+            </button>
+            <button
+              onClick={() => handleTabSwitch("history")}
+              className={`px-4 py-2 font-bold ${activeTab === "history"
+                ? "text-blue-500 border-b-2 border-blue-500"
+                : "text-gray-500"
+                }`}
+            >
+              History
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div className="p-6">
+        <div className="bg-white rounded-lg shadow-custom p-6">
+          {activeTab === "addFunds" ? (
+            <div>
+              {/* Form Section */}
+              <label className="block text-sm font-bold text-gray-700 mb-2">
+                Choose method <span className="text-red-500">*</span>
+              </label>
+              <div className="relative">
+                <select className="block appearance-none w-full bg-white border border-gray-300 text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500">
+                  <option>Select method</option>
+                  {/* Add options dynamically */}
+                </select>
+                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                  <svg
+                    className="fill-current h-4 w-4"
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 20 20"
+                  >
+                    <path d="M5.516 7.548a.596.596 0 0 1 .937 0L10 11.634l3.547-4.086a.596.596 0 1 1 .937.766l-4 4.602a.596.596 0 0 1-.937 0l-4-4.602a.596.596 0 0 1 0-.766z" />
+                  </svg>
                 </div>
               </div>
-            ) : (
-              <div>
-                <div className="mb-4">
-                  <label className="block text-gray-700 font-semibold mb-2">
-                    Filter
-                  </label>
-                  <div className="w-full">
-                    <DateRangePickerComponent
-                      start={dateRange.start}
-                      end={dateRange.end}
-                      onDateChange={handleDateChange}
-                    />
-                  </div>
+            </div>
+          ) : (
+            <div>
+              <div className="mb-4">
+                <label className="block text-gray-700 font-semibold mb-2">
+                  Filter
+                </label>
+                <div className="w-full">
+                  <DateRangePickerComponent
+                    start={dateRange.start}
+                    end={dateRange.end}
+                    onDateChange={handleDateChange}
+                  />
                 </div>
-                {/* History Section */}
+              </div>
+
+              {/* History Section with Responsive Table */}
+              <div className="overflow-x-auto">
                 <table className="min-w-full bg-white border border-gray-200 rounded-lg">
                   <thead>
                     <tr>
@@ -303,7 +317,6 @@ const AddFunds = (props: Props) => {
                     </tr>
                   </thead>
                   <tbody>
-                    {/* Map through transactions and render rows */}
                     {filteredTransactions.length > 0 ? (
                       filteredTransactions.map((transaction, index) => (
                         <tr key={index} className="hover:bg-gray-100">
@@ -343,11 +356,11 @@ const AddFunds = (props: Props) => {
                   </tbody>
                 </table>
               </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
       </div>
-    </div>
+    </>
   );
 };
 
