@@ -87,8 +87,8 @@ const Header: React.FC<HeaderProps> = ({
             <nav
               className={
                 color
-                  ? "bg-white px-2 sm:px-4 py-2.5 dark:bg-gray-900 fixed w-full z-20 top-0 left-0 border-b border-gray-200 dark:border-gray-600"
-                  : "bg-[#13263c] px-2 sm:px-4 py-2.5 dark:bg-gray-900 fixed w-full z-20 top-0 left-0 border-b border-[#13263c] dark:border-gray-600"
+                  ? "bg-white px-2 sm:px-4 py-2.5  fixed w-full z-20 top-0 left-0 border-b border-gray-200 dark:border-gray-600"
+                  : "bg-[#13263c] px-2 sm:px-4 py-2.5  fixed w-full z-20 top-0 left-0 border-b border-[#13263c] dark:border-gray-600"
               }
             >
               <div className="container flex flex-wrap justify-between items-center mx-auto">
@@ -159,8 +159,8 @@ const Header: React.FC<HeaderProps> = ({
                   <div
                     className={
                       color
-                        ? "flex flex-col p-4 mt-4 bg-gray-50 rounded-lg border border-gray-100 md:flex-row md:space-x-8 md:mt-0 md:text-sm md:font-medium md:border-0 md:bg-white dark:bg-gray-800 md:dark:bg-gray-900 dark:border-gray-700"
-                        : "flex flex-col p-4 mt-4 bg-[#13263c] rounded-lg border border-[#13263c] md:flex-row md:space-x-8 md:mt-0 md:text-sm md:font-medium md:border-0 md:bg-[#13263c] dark:bg-gray-800 md:dark:bg-gray-900 dark:border-gray-700"
+                        ? "flex flex-col p-4 mt-4 bg-gray-50 rounded-lg border border-gray-100 md:flex-row md:space-x-8 md:mt-0 md:text-sm md:font-medium md:border-0 md:bg-white"
+                        : "flex flex-col p-4 mt-4 bg-[#13263c] rounded-lg border border-[#13263c] md:flex-row md:space-x-8 md:mt-0 md:text-sm md:font-medium md:border-0 md:bg-[#13263c]"
                     }
                   >
                     <div>
@@ -224,7 +224,7 @@ const Header: React.FC<HeaderProps> = ({
       default:
         return (
           <>
-            <header className="sticky top-0 z-40 flex-none mx-auto w-full bg-white border-b border-gray-200 dark:border-gray-600 dark:bg-gray-800">
+            <header className="sticky top-0 z-40 flex-none mx-auto w-full bg-white border-b border-gray-200 dark:border-gray-600 ">
               <div className="flex justify-between items-center py-3 px-3 mx-auto w-full max-w-8xl lg:px-4 container">
                 <div className="flex items-center">
                   <div className="flex justify-between items-center">
@@ -262,9 +262,8 @@ const Header: React.FC<HeaderProps> = ({
                     </div> */}
                 </div>
                 <div
-                  className={`flex items-center ${
-                    access_token ? "" : "hidden"
-                  }`}
+                  className={`flex items-center ${access_token ? "" : "hidden"
+                    }`}
                 >
                   <a
                     href="/pro/#pricing"

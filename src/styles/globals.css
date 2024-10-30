@@ -8,9 +8,23 @@
 }
 
 @media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  body {
+    color: #181C32; /* Đặt màu văn bản sáng để dễ nhìn trên nền tối */
+  }
+
+  .form-container, #sidebar {
+    background-color: #1f2937; /* Thay đổi màu nền của form và sidebar để phù hợp với chế độ tối */
+  }
+
+  .form-container input,
+  .form-container label,
+  .form-container a,
+  #sidebar a {
+    color: #ffffff; /* Đặt màu văn bản sáng cho input, label và liên kết */
+  }
+
+  .form-container input::placeholder {
+    color: #181C32; /* Đặt màu placeholder sáng hơn để dễ đọc */
   }
 }
 
@@ -49,3 +63,4 @@ body {
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background-color: #4f46e5; /* Darker purple when hovering */
 }
+

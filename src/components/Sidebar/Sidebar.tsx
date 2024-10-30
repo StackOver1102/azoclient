@@ -69,7 +69,7 @@ const Sidebar = (props: Props) => {
               <li className={`${isLogin ? "" : "hidden"}`}>
                 <Link
                   href="/new"
-                  className="flex items-center space-x-2 p-2 text-base font-normal text-white rounded-lg hover:bg-purple-600 transition duration-200"
+                  className="flex items-center dark:text-white space-x-2 p-2 text-base font-normal text-white rounded-lg hover:bg-purple-600 transition duration-200"
                 >
                   <i className="fa-solid fa-cart-shopping text-lg text-white"></i>
                   <span className="text-xl">New Order</span>
@@ -78,7 +78,7 @@ const Sidebar = (props: Props) => {
               <li className={`${isLogin ? "" : "hidden"}`}>
                 <Link
                   href="/mass"
-                  className="flex items-center space-x-2 p-2 text-base font-normal text-white rounded-lg hover:bg-purple-600 transition duration-200"
+                  className="flex items-center dark:text-white space-x-2 p-2 text-base font-normal text-white rounded-lg hover:bg-purple-600 transition duration-200"
                 >
                   <i className="fa-solid fa-user text-lg text-white"></i>
                   <span className="text-xl">Mass Order</span>
@@ -87,7 +87,7 @@ const Sidebar = (props: Props) => {
               <li className={`${isLogin ? "" : "hidden"}`}>
                 <Link
                   href="/orders"
-                  className="flex items-center space-x-2 p-2 text-base font-normal text-white rounded-lg hover:bg-purple-600 transition duration-200"
+                  className="flex items-center dark:text-white space-x-2 p-2 text-base font-normal text-white rounded-lg hover:bg-purple-600 transition duration-200"
                 >
                   <i className="fa-solid fa-cog text-lg text-white"></i>
                   <span className="text-xl">My Orders</span>
@@ -96,7 +96,7 @@ const Sidebar = (props: Props) => {
               <li>
                 <Link
                   href="/services"
-                  className="flex items-center space-x-2 p-2 text-base font-normal text-white rounded-lg hover:bg-purple-600 transition duration-200"
+                  className="flex items-center dark:text-white space-x-2 p-2 text-base font-normal text-white rounded-lg hover:bg-purple-600 transition duration-200"
                 >
                   <i className="fa-solid fa-list text-lg text-white"></i>
                   <span className="text-xl">Services</span>
@@ -105,7 +105,7 @@ const Sidebar = (props: Props) => {
               {/* <li className={`${isLogin ? "" : "hidden"}`}>
                 <Link
                   href="/refill"
-                  className="flex items-center space-x-2 p-2 text-base font-normal text-white rounded-lg hover:bg-purple-600 transition duration-200"
+                  className="flex items-center dark:text-white space-x-2 p-2 text-base font-normal text-white rounded-lg hover:bg-purple-600 transition duration-200"
                 >
                   <i className="fa-solid fa-sync text-lg text-white"></i>
                   <span className="text-xl">Refill</span>
@@ -114,7 +114,7 @@ const Sidebar = (props: Props) => {
               <li className={`${isLogin ? "" : "hidden"}`}>
                 <Link
                   href="/addfunds"
-                  className="flex items-center space-x-2 p-2 text-base font-normal text-white rounded-lg hover:bg-purple-600 transition duration-200"
+                  className="flex items-center dark:text-white space-x-2 p-2 text-base font-normal text-white rounded-lg hover:bg-purple-600 transition duration-200"
                 >
                   <i className="fa-solid fa-money-bill-wave text-lg text-white"></i>
                   <span className="text-xl">Add Funds</span>
@@ -123,7 +123,7 @@ const Sidebar = (props: Props) => {
               <li>
                 <Link
                   href="/support"
-                  className="flex items-center space-x-2 p-2 text-base font-normal text-white rounded-lg hover:bg-purple-600 transition duration-200"
+                  className="flex items-center dark:text-white space-x-2 p-2 text-base font-normal text-white rounded-lg hover:bg-purple-600 transition duration-200"
                 >
                   <i className="fa-solid fa-headset text-lg text-white"></i>
                   <span className="text-xl">Support</span>
@@ -132,7 +132,7 @@ const Sidebar = (props: Props) => {
               <li className={`${isLogin ? "" : "hidden"}`}>
                 <Link
                   href="/settings"
-                  className="flex items-center space-x-2 p-2 text-base font-normal text-white rounded-lg hover:bg-purple-600 transition duration-200"
+                  className="flex items-center dark:text-white space-x-2 p-2 text-base font-normal text-white rounded-lg hover:bg-purple-600 transition duration-200"
                 >
                   <i className="fa-solid fa-sliders text-lg text-white"></i>
                   <span className="text-xl">Settings</span>
@@ -141,7 +141,7 @@ const Sidebar = (props: Props) => {
               <li className={`${isLogin ? "" : "hidden"}`}>
                 <Link
                   href="/cashflow"
-                  className="flex items-center space-x-2 p-2 text-base font-normal text-white rounded-lg hover:bg-purple-600 transition duration-200"
+                  className="flex items-center dark:text-white space-x-2 p-2 text-base font-normal text-white rounded-lg hover:bg-purple-600 transition duration-200"
                 >
                   <i className="fa-solid fa-chart-line text-lg text-white"></i>
                   <span className="text-xl">Cash Flow</span>
@@ -150,7 +150,7 @@ const Sidebar = (props: Props) => {
               <li>
                 <Link
                   href="/apidoc"
-                  className="flex items-center space-x-2 p-2 text-base font-normal text-white rounded-lg hover:bg-purple-600 transition duration-200"
+                  className="flex items-center dark:text-white space-x-2 p-2 text-base font-normal text-white rounded-lg hover:bg-purple-600 transition duration-200"
                 >
                   <i className="fa-solid fa-file-code text-lg text-white"></i>
                   <span className="text-xl">API</span>
@@ -160,7 +160,7 @@ const Sidebar = (props: Props) => {
                 <li>
                   <a
                     onClick={handleLogout}
-                    className="flex items-center space-x-2 p-2 text-base font-normal text-white rounded-lg hover:bg-purple-600 transition duration-200"
+                    className="flex items-center dark:text-white space-x-2 p-2 text-base font-normal text-white rounded-lg hover:bg-purple-600 transition duration-200"
                   >
                     <i className="fa-solid fa-right-to-bracket text-lg text-white"></i>
                     <span className="text-xl">Log out</span>
@@ -173,7 +173,7 @@ const Sidebar = (props: Props) => {
                   <li>
                     <Link
                       href="/signin"
-                      className="flex items-center space-x-2 p-2 text-base font-normal text-white rounded-lg hover:bg-purple-600 transition duration-200"
+                      className="flex items-center dark:text-white space-x-2 p-2 text-base font-normal text-white rounded-lg hover:bg-purple-600 transition duration-200"
                     >
                       <i className="fa-solid fa-right-to-bracket text-lg text-white"></i>
                       <span className="text-xl">Sign in</span>
@@ -182,7 +182,7 @@ const Sidebar = (props: Props) => {
                   <li>
                     <Link
                       href="/signup"
-                      className="flex items-center space-x-2 p-2 text-base font-normal text-white rounded-lg hover:bg-purple-600 transition duration-200"
+                      className="flex items-center dark:text-white space-x-2 p-2 text-base font-normal text-white rounded-lg hover:bg-purple-600 transition duration-200"
                     >
                       <i className="fa-solid fa-right-to-bracket text-lg text-white"></i>
                       <span className="text-xl">Sign up</span>
