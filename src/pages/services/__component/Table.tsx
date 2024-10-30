@@ -49,7 +49,6 @@ function Table(props: Props) {
 
             {/* Service Row */}
             {item.products.map((product, index) => {
-              const randomInt = Math.floor(Math.random() * 10) + 1;
               return (
                 <tr
                   className="service hover:bg-[#E4E6EF] border-b border-b-dashed hover:border-gray-300"

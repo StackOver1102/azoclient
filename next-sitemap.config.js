@@ -1,4 +1,4 @@
 module.exports = {
-    siteUrl: "https://yourwebsite.com",
+    siteUrl: "https://1tap.top",
     generateRobotsTxt: true,
 };

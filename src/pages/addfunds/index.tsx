@@ -60,8 +60,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async (
         dehydratedState: dehydrate(queryClient), // Pass dehydrate state to hydrate client side
       },
     };
-  } catch (err: any) {
-    // eslint-disable-line @typescript-eslint/no-explicit-any
+  } catch (err: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
     if (isApiError(err)) {
       const errorCode = err.status;
       if (errorCode === 401) {
@@ -105,7 +104,7 @@ const AddFunds = (props: Props) => {
   }, [token, error]);
 
   const router = useRouter();
-  const { data, isLoading } = useQuery({
+  const { data } = useQuery({
     queryKey: ["historyPayment", token],
     queryFn: async () => {
       try {
@@ -170,7 +169,7 @@ const AddFunds = (props: Props) => {
     }
 
     setFilteredTransactions(filtered);
-  }, [dateRange]);
+  }, [dateRange, data]);
 
   return (
     <div className="flex">

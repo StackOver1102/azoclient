@@ -6,7 +6,13 @@ const nextConfig = {
   reactStrictMode: true,
   i18n,
   images: {
-    domains: ['cdn.mypanel.link'],  // Add this line to configure the allowed image domains
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "cdn.mypanel.link",
+        pathname: "/**",
+      },
+    ],
   },
 };
 

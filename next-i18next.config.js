@@ -2,7 +2,7 @@
 const i18n = {
     locales: ['en', 'fr', 'es'],      
     defaultLocale: 'en',               
-    localeDetection: true,            
+    localeDetection: false,         
     // localePath: path.resolve('./public/locales'),
 };
 

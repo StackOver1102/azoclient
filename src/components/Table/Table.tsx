@@ -12,6 +12,7 @@ import RefillService from "@/services/RefillService";
 import { showErrorToast, showSuccessToast } from "@/services/toastService";
 import { CustomError } from "@/commons/req";
 import { useRouter } from "next/router";
+import Loading from "../Loading/Loading";
 
 type Props = {
   data: Orders[];
@@ -222,6 +223,7 @@ export default function Table(props: Props) {
       {/* Filters Section */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
         {/* Filter Dropdown - 15% width */}
+        {showLoader && <Loading />}
         <div className="relative">
           <SelectDropdown
             data={StatusSelect}

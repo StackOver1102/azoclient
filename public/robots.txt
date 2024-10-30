@@ -1,4 +1,9 @@
+# *
 User-agent: *
-Disallow: /private
 Allow: /
-Sitemap: https://yourwebsite.com/sitemap.xml
+
+# Host
+Host: https://1tap.top
+
+# Sitemaps
+Sitemap: https://1tap.top/sitemap.xml

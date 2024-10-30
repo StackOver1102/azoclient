@@ -36,7 +36,7 @@ const CountUpDisplay = memo(({ end }: { end: number }) => {
             end={end}
             duration={1}
             className="min-w-[70px]"
-            formattingFn={(num) => num.toLocaleString()}
+            formattingFn={(num: number) => num.toLocaleString()}
           />
         </span>
       </div>
@@ -44,5 +44,7 @@ const CountUpDisplay = memo(({ end }: { end: number }) => {
     </div>
   );
 });
+
+CountUpDisplay.displayName = "CountUpDisplay";
 
 export default CountUpDisplay;

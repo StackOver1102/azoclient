@@ -59,8 +59,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async (
         dehydratedState: dehydrate(queryClient), // Pass dehydrate state to hydrate client side
       },
     };
-  } catch (err: any) {
-    // eslint-disable-line @typescript-eslint/no-explicit-any
+  } catch (err: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
     if (isApiError(err)) {
       const errorCode = err.status;
       if (errorCode === 401) {

@@ -40,6 +40,7 @@ function App({ Component, pageProps }: AppProps) {
             rel="stylesheet"
             href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
           />
+          <meta name="google-site-verification" content="zHO7oniUY1rRa36u3j4keSFeXo0bacLdJ-yroxM1Z90" />
         </Head>
         <DefaultSeo {...SEO} />
         <Component {...pageProps} />
