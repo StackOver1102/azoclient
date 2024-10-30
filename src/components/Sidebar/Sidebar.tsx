@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import Image from "next/image";
 import UserService from "@/services/UserService";
 import Cookies from "js-cookie";
@@ -37,22 +37,24 @@ const Sidebar = (props: Props) => {
     }
   };
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     // Lắng nghe sự kiện mousedown
     if (isOpen) {
       document.addEventListener("mousedown", handleClickOutside);
     } else {
-      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside); 
     }
 
     // Cleanup sự kiện khi component unmount
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside); 
     };
   }, [isOpen]);
 
+
   useEffect(() => {
-    if(isOpen) toggleSidebar();
+    if (isOpen) toggleSidebar(); // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [router.pathname]);
   return (
     <>

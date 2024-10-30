@@ -1,5 +1,4 @@
 import React, { ReactNode, useState } from "react";
-import Loading from "../Loading/Loading";
 import Sidebar from "../Sidebar/Sidebar";
 import Header from "../Header/Header";
 import { TypeHearder } from "@/types/enum";
@@ -9,9 +8,8 @@ interface LayoutProps {
     token: string | null;
 }
 
-const Layout: React.FC<LayoutProps> = ({ children, token}) => {
+const Layout: React.FC<LayoutProps> = ({ children, token }) => {
     const [isOpen, setIsOpen] = useState(false);
-    const [showLoader, setShowLoader] = useState(false);
 
     const toggleSidebar = () => {
         setIsOpen(!isOpen);
@@ -19,8 +17,6 @@ const Layout: React.FC<LayoutProps> = ({ children, token}) => {
 
     return (
         <div className="flex">
-            {showLoader && <Loading />}
-
             {/* Sidebar */}
             <Sidebar isLogin={!!token} token={token} isOpen={isOpen} toggleSidebar={toggleSidebar} />
 

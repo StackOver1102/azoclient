@@ -1,9 +1,6 @@
-import Header from "@/components/Header/Header";
 import CustomImage from "@/components/Image/Image";
-import Sidebar from "@/components/Sidebar/Sidebar";
 import { showErrorToast } from "@/services/toastService";
 import UserService, { ApiError, isApiError } from "@/services/UserService";
-import { TypeHearder } from "@/types/enum";
 import { GetServerSideProps } from "next";
 import React, { useEffect, useState } from "react";
 import Cookies from "js-cookie";
@@ -144,11 +141,7 @@ const AddFunds = (props: Props) => {
 
   const [dateRange, setDateRange] = useState({ start: "", end: "" });
   const [filteredTransactions, setFilteredTransactions] = useState(data ?? []);
-  const [isOpen, setIsOpen] = useState(false);
-
-  const toggleSidebar = () => {
-    setIsOpen(!isOpen);
-  };
+ 
   const handleDateChange = (start: string, end: string) => {
     setDateRange({ start, end });
   };

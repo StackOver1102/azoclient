@@ -107,7 +107,7 @@ const Setting = (props: Props) => {
     }
   }, [token, error, router]);
 
-  const { data: loginHistory, isLoading } = useQuery({
+  const { data: loginHistory } = useQuery({
     queryKey: ["historyLogin", token],
     queryFn: async () => {
       try {
@@ -263,6 +263,7 @@ const Setting = (props: Props) => {
       token,
     });
   };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (user) {
       setFormData({

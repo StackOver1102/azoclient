@@ -1,8 +1,5 @@
-import Header from "@/components/Header/Header";
-import Sidebar from "@/components/Sidebar/Sidebar";
 import { showErrorToast } from "@/services/toastService";
 import UserService, { ApiError, isApiError } from "@/services/UserService";
-import { TypeHearder } from "@/types/enum";
 import { GetServerSideProps } from "next";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
@@ -156,11 +153,6 @@ const CashFlow = (props: Props) => {
   const [columnChunks, setColumnChunks] = useState<CashFlow[][]>([]); // Track chunked columns
   const [isFiltered, setIsFiltered] = useState(false); // Track if the data is filtered
   const totalPages = Math.ceil(filteredData.length / itemsPerPage); // Calculate total pages
-  const [isOpen, setIsOpen] = useState(false);
-
-  const toggleSidebar = () => {
-    setIsOpen(!isOpen);
-  };
 
   // Calculate paginatedData and update columnChunks whenever filteredData or currentPage changes
   useEffect(() => {
