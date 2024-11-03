@@ -85,7 +85,6 @@ const Order = (props: Props) => {
     enabled: !!token,
   });
 
-
   return (
     <>
       {isLoading && <Loading/>}

@@ -13,14 +13,34 @@ import CashFlowService from "@/services/CashFlowService";
 import { useRouter } from "next/router";
 import dayjs from "dayjs";
 import { useUserDetail } from "@/hooks/fetch/useUserDetail";
+import SelectDropdown from "@/components/Select/Select";
+import PerfectMoneyPayment from "@/components/Addfunds/PerfectMoney/PerfectMoney";
+import depositFetch from "@/hooks/fetch/deposit";
 
 type Props = {
   error: ApiError | null;
   token: string | null;
-  isLayout: boolean
+  isLayout: boolean;
 };
 
-// interface
+export interface DataForm {
+  API_URL: string;
+  PAYMENT_ID: string;
+  PAYEE_NAME: string;
+  PAYEE_ACCOUNT: string;
+  PAYMENT_UNITS: string;
+  PAYMENT_URL: string;
+  NOPAYMENT_URL: string;
+  STATUS_URL: string;
+  SUGGESTED_MEMO: string;
+}
+
+const MethodPay = ["Perfect Money", "Banking"];
+
+enum ConvertMethod {
+  "Perfect Money" = "perfect_money",
+  "Banking" = "banking",
+}
 export const getServerSideProps: GetServerSideProps<Props> = async (
   context
 ) => {
@@ -56,10 +76,11 @@ export const getServerSideProps: GetServerSideProps<Props> = async (
         error: null,
         token,
         dehydratedState: dehydrate(queryClient),
-        isLayout: true
+        isLayout: true,
       },
     };
-  } catch (err: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
+  } catch (err: any) {
+    // eslint-disable-line @typescript-eslint/no-explicit-any
     if (isApiError(err)) {
       const errorCode = err.status;
       if (errorCode === 401) {
@@ -73,7 +94,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async (
           },
           token,
           dehydratedState: dehydrate(queryClient),
-          isLayout: true
+          isLayout: true,
         },
       };
     }
@@ -85,7 +106,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async (
         },
         token,
         dehydratedState: dehydrate(queryClient),
-        isLayout: true
+        isLayout: true,
       },
     };
   }
@@ -141,16 +162,27 @@ const AddFunds = (props: Props) => {
 
   const [dateRange, setDateRange] = useState({ start: "", end: "" });
   const [filteredTransactions, setFilteredTransactions] = useState(data ?? []);
- 
+  const [selectedMethod, setMethodPay] = useState<string | null>(MethodPay[0]);
   const handleDateChange = (start: string, end: string) => {
     setDateRange({ start, end });
   };
 
+  const methodKey =
+    (selectedMethod as keyof typeof ConvertMethod) ?? "Perfect Money";
+
+  const { data: dataDesposit, isLoading } = depositFetch(
+    ConvertMethod[methodKey],
+    token
+  );
+
   const [activeTab, setActiveTab] = useState("addFunds");
 
-  // Function to handle tab switching
   const handleTabSwitch = (tab: string) => {
     setActiveTab(tab);
+  };
+
+  const handleMethodChange = (selectedType: string | null) => {
+    setMethodPay(selectedType);
   };
 
   useEffect(() => {
@@ -179,7 +211,6 @@ const AddFunds = (props: Props) => {
       </div>
 
       {/* Main Section */}
-
       <div className="p-6">
         <div className="bg-white rounded-lg shadow-custom p-6">
           {/* Profile Section */}
@@ -216,34 +247,33 @@ const AddFunds = (props: Props) => {
               <div className="flex justify-center sm:justify-start space-x-4 mt-4 sm:mt-2">
                 <div className="text-center">
                   <CountUpDisplay end={user?.money ?? 0} />
-
                 </div>
                 <div className="text-center">
                   <CountUpDisplay end={0} />
-
                 </div>
               </div>
             </div>
           </div>
 
-
           {/* Tabs */}
           <div className="flex border-b mb-6">
             <button
               onClick={() => handleTabSwitch("addFunds")}
-              className={`px-4 py-2 font-bold ${activeTab === "addFunds"
-                ? "text-blue-500 border-b-2 border-blue-500"
-                : "text-gray-500"
-                }`}
+              className={`px-4 py-2 font-bold ${
+                activeTab === "addFunds"
+                  ? "text-blue-500 border-b-2 border-blue-500"
+                  : "text-gray-500"
+              }`}
             >
               Add funds
             </button>
             <button
               onClick={() => handleTabSwitch("history")}
-              className={`px-4 py-2 font-bold ${activeTab === "history"
-                ? "text-blue-500 border-b-2 border-blue-500"
-                : "text-gray-500"
-                }`}
+              className={`px-4 py-2 font-bold ${
+                activeTab === "history"
+                  ? "text-blue-500 border-b-2 border-blue-500"
+                  : "text-gray-500"
+              }`}
             >
               History
             </button>
@@ -260,20 +290,18 @@ const AddFunds = (props: Props) => {
                 Choose method <span className="text-red-500">*</span>
               </label>
               <div className="relative">
-                <select className="block appearance-none w-full bg-white border border-gray-300 text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500">
-                  <option>Select method</option>
-                  {/* Add options dynamically */}
-                </select>
-                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-                  <svg
-                    className="fill-current h-4 w-4"
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 20 20"
-                  >
-                    <path d="M5.516 7.548a.596.596 0 0 1 .937 0L10 11.634l3.547-4.086a.596.596 0 1 1 .937.766l-4 4.602a.596.596 0 0 1-.937 0l-4-4.602a.596.596 0 0 1 0-.766z" />
-                  </svg>
-                </div>
+                <SelectDropdown
+                  badge={false}
+                  data={MethodPay}
+                  image={false}
+                  onSelect={handleMethodChange}
+                  defaultValue={selectedMethod ?? ""}
+                  defaultLabel={selectedMethod ?? ""}
+                />
               </div>
+              {selectedMethod === "Perfect Money" && (
+                <PerfectMoneyPayment data={(dataDesposit?.data as DataForm) ?? {}} />
+              )}
             </div>
           ) : (
             <div>

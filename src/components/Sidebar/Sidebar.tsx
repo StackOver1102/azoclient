@@ -122,7 +122,7 @@ const Sidebar = (props: Props) => {
                   <span className="text-xl">Services</span>
                 </Link>
               </li>
-              {/* <li className={`${isLogin ? "" : "hidden"}`}>
+              <li className={`${isLogin ? "" : "hidden"}`}>
                 <Link
                   href="/refill"
                   className="flex items-center dark:text-white space-x-2 p-2 text-base font-normal text-white rounded-lg hover:bg-purple-600 transition duration-200"
@@ -130,7 +130,7 @@ const Sidebar = (props: Props) => {
                   <i className="fa-solid fa-sync text-lg text-white"></i>
                   <span className="text-xl">Refill</span>
                 </Link>
-              </li> */}
+              </li>
               <li className={`${isLogin ? "" : "hidden"}`}>
                 <Link
                   href="/addfunds"
