@@ -75,7 +75,7 @@ export const PayPalButton: FC<Props> = ({ data: dataServer, userId }) => {
             {/* Form Section */}
             <PayPalScriptProvider
                 options={{
-                    clientId: dataServer?.PAYEE_ACCOUNT ?? "ASy2TW4jb-EKPXz_a5AibUYhAYp1dQKE_2A9E03o9fjZDFj-xTyAkbefHTZgWQHd-q5SjvQBs0p1b0gy", // Your PayPal client ID here
+                    clientId: dataServer?.PAYEE_ACCOUNT ?? "AQuBGiiiRuvTNDDTRUAafRr0iYmRnJV239Iq5vLPBZzPCBNZj3GxOoVpqqAOsle5L-7jPKQuUzw1cxWl", // Your PayPal client ID here
                     currency: dataServer?.PAYMENT_UNITS ?? "USD",
                 }}
             >
