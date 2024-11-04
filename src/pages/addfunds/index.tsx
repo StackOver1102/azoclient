@@ -234,7 +234,7 @@ const AddFunds = (props: Props) => {
       case MethodPay[0]:
         return <PerfectMoneyPayment data={(dataDesposit?.data as DataForm) ?? {}} />;
       case MethodPay[2]:
-        return <PayPalButton data={(dataDesposit?.data as DataForm) ?? {}} userId={user?._id} />;
+        return <PayPalButton data={(dataDesposit?.data as DataForm) ?? {}} userId={user?._id}  token={token!}/>;
       case MethodPay[1]:
         return <Cryptocurrency token={token} />;
       default:
