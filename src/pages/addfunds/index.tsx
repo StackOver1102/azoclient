@@ -9,13 +9,16 @@ import Image from "next/image";
 import DateRangePickerComponent from "@/components/DatePick/DateRangePickerComponent";
 import CountUpDisplay from "@/components/Counter/CountUpDisplay";
 import { QueryClient, dehydrate, useQuery } from "@tanstack/react-query";
-import CashFlowService from "@/services/CashFlowService";
 import { useRouter } from "next/router";
 import dayjs from "dayjs";
 import { useUserDetail } from "@/hooks/fetch/useUserDetail";
 import SelectDropdown from "@/components/Select/Select";
 import PerfectMoneyPayment from "@/components/Addfunds/PerfectMoney/PerfectMoney";
 import depositFetch from "@/hooks/fetch/deposit";
+import { PayPalButton } from "@/components/Addfunds/Paypal/Paypal";
+import Loading from "@/components/Loading/Loading";
+import InvoiceService from "@/services/InvoiceService";
+import Cryptocurrency from "@/components/Addfunds/Cryptocurrency/Cryptocurrency";
 
 type Props = {
   error: ApiError | null;
@@ -35,11 +38,12 @@ export interface DataForm {
   SUGGESTED_MEMO: string;
 }
 
-const MethodPay = ["Perfect Money", "Banking"];
+const MethodPay = ["Perfect Money", "Cryptocurrency", "Paypal"];
 
 enum ConvertMethod {
   "Perfect Money" = "perfect_money",
-  "Banking" = "banking",
+  "Cryptocurrency" = "cryptocurrency",
+  "Paypal" = "paypal"
 }
 export const getServerSideProps: GetServerSideProps<Props> = async (
   context
@@ -60,7 +64,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async (
       queryKey: ["historyPayment", token],
       queryFn: async () => {
         try {
-          const response = await CashFlowService.getCashFlowPay(token);
+          const response = await InvoiceService.getHistory(token);
           if (!response || !response.data) {
             throw new Error("No data returned from API");
           }
@@ -131,7 +135,7 @@ const AddFunds = (props: Props) => {
     queryFn: async () => {
       try {
         // Gọi API và chỉ trả về dữ liệu `user` (lấy `data` từ `ApiResponseDetail<User>`)
-        const response = await CashFlowService.getCashFlowPay(token!);
+        const response = await InvoiceService.getHistory(token!);
         if (!response || !response.data) {
           throw new Error("No data returned from API");
         }
@@ -170,10 +174,31 @@ const AddFunds = (props: Props) => {
   const methodKey =
     (selectedMethod as keyof typeof ConvertMethod) ?? "Perfect Money";
 
-  const { data: dataDesposit, isLoading } = depositFetch(
+  const { data: dataDesposit, isLoading, isError, error: errorCallApi } = depositFetch(
     ConvertMethod[methodKey],
     token
   );
+
+  useEffect(() => {
+    if (isError && errorCallApi) {
+      console.error("Lỗi khi gọi API:", errorCallApi);
+
+      if (isApiError(errorCallApi)) {
+        if (errorCallApi.status === 401) {
+          showErrorToast(
+            "Unauthorized: Invalid or expired token, please login again"
+          );
+          Cookies.remove("access_token");
+          router.push("/signin");
+        } else {
+          throw error;
+        }
+      } else {
+        console.error("Unexpected error occurred:", error);
+        throw new Error("An unexpected error occurred");
+      }
+    }
+  }, [isError, errorCallApi])
 
   const [activeTab, setActiveTab] = useState("addFunds");
 
@@ -204,12 +229,24 @@ const AddFunds = (props: Props) => {
     setFilteredTransactions(filtered);
   }, [dateRange, data]);
 
+  const genareteMethod = (method: string) => {
+    switch (method) {
+      case MethodPay[0]:
+        return <PerfectMoneyPayment data={(dataDesposit?.data as DataForm) ?? {}} />;
+      case MethodPay[2]:
+        return <PayPalButton data={(dataDesposit?.data as DataForm) ?? {}} userId={user?._id} />;
+      case MethodPay[1]:
+        return <Cryptocurrency token={token} />;
+      default:
+        return null;
+    }
+  }
   return (
     <>
       <div className="px-6 pt-6">
         <h2 className="text-2xl font-bold text-gray-900">Add funds</h2>
       </div>
-
+      {isLoading && <Loading />}
       {/* Main Section */}
       <div className="p-6">
         <div className="bg-white rounded-lg shadow-custom p-6">
@@ -259,21 +296,19 @@ const AddFunds = (props: Props) => {
           <div className="flex border-b mb-6">
             <button
               onClick={() => handleTabSwitch("addFunds")}
-              className={`px-4 py-2 font-bold ${
-                activeTab === "addFunds"
-                  ? "text-blue-500 border-b-2 border-blue-500"
-                  : "text-gray-500"
-              }`}
+              className={`px-4 py-2 font-bold ${activeTab === "addFunds"
+                ? "text-blue-500 border-b-2 border-blue-500"
+                : "text-gray-500"
+                }`}
             >
               Add funds
             </button>
             <button
               onClick={() => handleTabSwitch("history")}
-              className={`px-4 py-2 font-bold ${
-                activeTab === "history"
-                  ? "text-blue-500 border-b-2 border-blue-500"
-                  : "text-gray-500"
-              }`}
+              className={`px-4 py-2 font-bold ${activeTab === "history"
+                ? "text-blue-500 border-b-2 border-blue-500"
+                : "text-gray-500"
+                }`}
             >
               History
             </button>
@@ -299,9 +334,7 @@ const AddFunds = (props: Props) => {
                   defaultLabel={selectedMethod ?? ""}
                 />
               </div>
-              {selectedMethod === "Perfect Money" && (
-                <PerfectMoneyPayment data={(dataDesposit?.data as DataForm) ?? {}} />
-              )}
+              {genareteMethod(selectedMethod ?? "")}
             </div>
           ) : (
             <div>
@@ -349,7 +382,7 @@ const AddFunds = (props: Props) => {
                               width={24}
                               height={24}
                             />
-                            <span>{transaction.method}</span>
+                            <span>{transaction.type}</span>
                           </td>
                           <td className="px-4 py-2 text-blue-500 text-sm font-bold">
                             {transaction.amount}
