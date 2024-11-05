@@ -14,7 +14,7 @@ import dayjs from "dayjs";
 import { useUserDetail } from "@/hooks/fetch/useUserDetail";
 import SelectDropdown from "@/components/Select/Select";
 import PerfectMoneyPayment from "@/components/Addfunds/PerfectMoney/PerfectMoney";
-import depositFetch from "@/hooks/fetch/deposit";
+import useDepositFetch from "@/hooks/fetch/deposit";
 import { PayPalButton } from "@/components/Addfunds/Paypal/Paypal";
 import Loading from "@/components/Loading/Loading";
 import InvoiceService from "@/services/InvoiceService";
@@ -83,8 +83,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async (
         isLayout: true,
       },
     };
-  } catch (err: any) {
-    // eslint-disable-line @typescript-eslint/no-explicit-any
+  } catch (err: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
     if (isApiError(err)) {
       const errorCode = err.status;
       if (errorCode === 401) {
@@ -174,7 +173,7 @@ const AddFunds = (props: Props) => {
   const methodKey =
     (selectedMethod as keyof typeof ConvertMethod) ?? "Perfect Money";
 
-  const { data: dataDesposit, isLoading, isError, error: errorCallApi } = depositFetch(
+  const { data: dataDesposit, isLoading, isError, error: errorCallApi } = useDepositFetch(
     ConvertMethod[methodKey],
     token
   );

@@ -18,6 +18,15 @@ interface Invoice {
     request_id: string,
     createdAt: Date
 }
+export enum ChannelInvoice {
+    BANKING = "banking",
+    FPAYMENT = "fpayment"
+}
+export type BodyCreate = {
+    channel: ChannelInvoice,
+    amount: string
+}
+
 const InvoiceService = {
     getHistory: async (token: string): Promise<ApiResponse<Invoice>> => {
         try {
@@ -31,7 +40,7 @@ const InvoiceService = {
             throw error;
         }
     },
-    createInvoiceFpayment: async (data: any, token: string) => {
+    createInvoiceFpayment: async (data: BodyCreate, token: string) => {
         try {
             const response = await commonRequest('post', `${API_URL}/invoice/fpayment`, data, {
                 headers: {

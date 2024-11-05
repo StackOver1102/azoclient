@@ -32,7 +32,6 @@ export const PayPalButton: FC<Props> = ({
   };
 
   const handleApprove = async (orderID: string) => {
-    console.log("🚀 ~ handleApprove ~ orderID:", orderID)
     try {
       const response = await axios.post(
         `${API_URL}/paypal`,
@@ -106,7 +105,7 @@ export const PayPalButton: FC<Props> = ({
         options={{
           clientId:
             // dataServer?.PAYEE_ACCOUNT ??
-            "ASy2TW4jb-EKPXz_a5AibUYhAYp1dQKE_2A9E03o9fjZDFj-xTyAkbefHTZgWQHd-q5SjvQBs0p1b0gy", // Your PayPal client ID here
+            "AQuBGiiiRuvTNDDTRUAafRr0iYmRnJV239Iq5vLPBZzPCBNZj3GxOoVpqqAOsle5L-7jPKQuUzw1cxWl", // Your PayPal client ID here
           currency: dataServer?.PAYMENT_UNITS ?? "USD",
         }}
       >

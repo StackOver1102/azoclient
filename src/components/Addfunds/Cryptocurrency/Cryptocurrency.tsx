@@ -1,29 +1,20 @@
 import { CustomError } from "@/commons/req";
+import Loading from "@/components/Loading/Loading";
 import { useMutationHooks } from "@/hooks/useMutationHook";
-import { DataForm } from "@/pages/addfunds";
-import InvoiceService from "@/services/InvoiceService";
+import InvoiceService, { BodyCreate, ChannelInvoice } from "@/services/InvoiceService";
 import { showErrorToast, showSuccessToast } from "@/services/toastService";
 import Image from "next/image";
 import { useRouter } from "next/router";
 import React, { useState } from "react";
 
-export enum ChannelInvoice {
-    BANKING = "banking",
-    FPAYMENT = "fpayment"
-}
-
-type BodyCreate = {
-    channel: ChannelInvoice,
-    amount: string
-}
-
 
 export default function Cryptocurrency({ token }: { token: string | null }) {
     const [amount, setAmount] = useState(10);
     const [showLoader, setShowLoader] = useState<boolean>(false)
-    const handleAmountChange = (e: any) => {
-        setAmount(e.target.value);
+    const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setAmount(Number(e.target.value));
     };
+
     const router = useRouter()
     const mutation = useMutationHooks(
         async ({
@@ -84,7 +75,7 @@ export default function Cryptocurrency({ token }: { token: string | null }) {
             if (!token) return;
             await mutation.mutateAsync({ data, token })
         } catch (error) {
-
+            console.log(error)
         }
     }
 
@@ -100,7 +91,7 @@ export default function Cryptocurrency({ token }: { token: string | null }) {
                     height={40}
                 />
             </div>
-
+            {showLoader && <Loading />}
             {/* Form */}
             <form
                 className="w-full max-w-sm"

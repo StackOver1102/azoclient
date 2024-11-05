@@ -10,9 +10,9 @@ export default function PerfectMoneyPayment(props: Props) {
   const { data } = props;
   const [amount, setAmount] = useState(10); // Thiết lập giá trị mặc định là 10 USD
 
-  const handleAmountChange = (e: any) => {
-    setAmount(e.target.value);
-  };
+  const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setAmount(Number(e.target.value));
+};
 
   return (
     <div className="flex flex-col items-center justify-center p-4">
