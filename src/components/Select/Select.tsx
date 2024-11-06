@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import CustomImage from "../Image/Image";
 import Badge from "../Badge/Badge";
+import { Product } from "@/services/ProductService";
 
 interface PropsSelect<T> {
   badge: boolean;
@@ -12,6 +13,8 @@ interface PropsSelect<T> {
   className?: string;
   defaultValue?: T | string; // Add defaultValue prop
   defaultLabel?: string
+  detailData?: Product | null | undefined;
+  type?: string
 }
 
 interface OptionType {
@@ -21,7 +24,7 @@ interface OptionType {
 }
 
 export default function SelectDropdown<T>(props: PropsSelect<T>) {
-  const { badge, data, onSelect, resetSelected, image, className, defaultValue, defaultLabel } = props;
+  const { badge, data, onSelect, resetSelected, image, className, defaultValue, defaultLabel, detailData, type } = props;
   const [selectedOption, setSelectedOption] = useState<T | string | null>(defaultValue || null);
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -50,11 +53,26 @@ export default function SelectDropdown<T>(props: PropsSelect<T>) {
 
   // Set defaultValue as selectedOption on first render or when defaultValue changes
   useEffect(() => {
-    if (!selectedOption && data.length > 0 && onSelect && !defaultLabel) {
+    if (!selectedOption && data.length > 0 && onSelect && !defaultLabel && !detailData) {
       setSelectedOption(data[0]); // Chọn giá trị đầu tiên trong data
       onSelect(data[0]); // Gọi onSelect để cập nhật giá trị mặc định
     }
-  }, [data, selectedOption, onSelect, defaultLabel]);
+    else if (detailData && !selectedOption && data.length > 0 && onSelect && !defaultLabel && type) {
+      if (type === "service") {
+        setSelectedOption(detailData as T | string | null);
+        onSelect(detailData as T | string | null);
+      }
+      else if (type === "platforms") {
+
+        setSelectedOption(detailData.platform)
+        onSelect(detailData.platform);
+      }
+      else {
+        setSelectedOption(detailData.category)
+        onSelect(detailData.category);
+      }
+    }
+  }, [data, selectedOption, onSelect, defaultLabel, detailData, type]);
 
   // Filter data based on search term
   const filteredData = data.filter((option) => {
@@ -99,9 +117,8 @@ export default function SelectDropdown<T>(props: PropsSelect<T>) {
   const selectedOptionText =
     typeof selectedOption === "string"
       ? selectedOption
-      : `${(selectedOption as OptionType)?.value} - ${
-          (selectedOption as OptionType)?.label
-        } - ${(selectedOption as OptionType)?.rate}`;
+      : `${(selectedOption as OptionType)?.value} - ${(selectedOption as OptionType)?.label
+      } - ${(selectedOption as OptionType)?.rate}`;
 
   return (
     <div className="relative w-full" ref={dropdownRef}>
@@ -164,13 +181,12 @@ export default function SelectDropdown<T>(props: PropsSelect<T>) {
                 <li
                   key={index}
                   onClick={() => handleOptionSelect(option)}
-                  className={`select-none relative py-2 pl-4 pr-4 cursor-pointer hover:bg-gray-100 ${
-                    typeof selectedOption === "object" &&
+                  className={`select-none relative py-2 pl-4 pr-4 cursor-pointer hover:bg-gray-100 ${typeof selectedOption === "object" &&
                     selectedOption !== null &&
                     (selectedOption as any)?.id === (option as any)?.id // eslint-disable-line @typescript-eslint/no-explicit-any
-                      ? "text-blue-500 font-bold"
-                      : ""
-                  }`}
+                    ? "text-blue-500 font-bold"
+                    : ""
+                    }`}
                 >
                   <div className="flex items-center">
                     {image && (

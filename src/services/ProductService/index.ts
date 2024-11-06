@@ -9,6 +9,7 @@ export interface Product {
     origin: string,
     platform: string,
     rate: number,
+    category:string,
     refill: boolean,
     value: string,
     description?: string,

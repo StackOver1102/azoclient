@@ -22,13 +22,14 @@ type Props = {
   error: ApiError | null;
   token: string | null;
   isLayout: boolean
+  detailProduct?: Product | null;
 };
 
-export const getServerSideProps: GetServerSideProps<Props> = async (
-  context
-) => {
+export const getServerSideProps: GetServerSideProps<Props> = async (context) => {
   const token = context.req.cookies.access_token;
+  const { service } = context.query;
 
+  // Redirect unauthenticated users to the signin page
   if (!token) {
     return {
       redirect: {
@@ -37,29 +38,32 @@ export const getServerSideProps: GetServerSideProps<Props> = async (
       },
     };
   }
-  // if (!token) {
-  //   return {
-  //     props: {
-  //       error: {
-  //         status: 401,
-  //         message: "Unauthorized: Invalid or expired token",
-  //       },
-  //       token: null,
-  //     },
-  //   };
-  // }
+
+  let detailProduct: Product | null = null;
+
+  // Only fetch product details if 'service' is provided
+  if (service) {
+    try {
+      const response = await ProductService.getDetail(service as string);
+      detailProduct = response.data
+    } catch (error) {
+      console.error("Failed to fetch product details:", error);
+      // You might still set an error prop here if necessary, but we skip it to proceed silently
+    }
+  }
 
   return {
     props: {
       error: null,
       token,
-      isLayout: true
+      isLayout: true,
+      detailProduct
     },
   };
 };
 
 const NewOrder = (props: Props) => {
-  const { error, token } = props;
+  const { error, token, detailProduct } = props;
   const router = useRouter();
 
   useEffect(() => {
@@ -72,6 +76,7 @@ const NewOrder = (props: Props) => {
       router.push("/signin");
     }
   }, [token, error, router]);
+
   const [platforms, setPlatforms] = useState<string[]>([]);
   const [category, setCategory] = useState<string[]>([]);
   const [service, setService] = useState<Product[]>([]);
@@ -175,6 +180,7 @@ const NewOrder = (props: Props) => {
   };
 
   const handleSelectProduct = (selected: Product | string | null) => {
+    console.log("🚀 ~ handleSelectProduct ~ selected:", selected)
     setProduct(selected as Product);
   };
   const queryClient = useQueryClient();
@@ -287,6 +293,8 @@ const NewOrder = (props: Props) => {
                       data={platforms}
                       onSelect={handleSelect}
                       image={true}
+                      detailData={detailProduct}
+                      type="platforms"
 
                     // resetSelected={resetSelected}
                     />
@@ -300,6 +308,9 @@ const NewOrder = (props: Props) => {
                       data={category}
                       onSelect={handleSelectCategory}
                       image={true}
+                      detailData={detailProduct}
+                      type="category"
+
                     // resetSelected={resetSelected}
                     />
                   </div>
@@ -314,6 +325,9 @@ const NewOrder = (props: Props) => {
                     onSelect={handleSelectProduct}
                     resetSelected={resetSelected}
                     image={true}
+                    detailData={detailProduct}
+                    type="service"
+
                   />
                 </div>
 
@@ -382,7 +396,7 @@ const NewOrder = (props: Props) => {
               </div>
             </div>
           </div>
-          
+
         </>
       )}
     </>
