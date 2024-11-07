@@ -1,7 +1,7 @@
 import { ApiResponse, ApiResponseDetail, commonRequest } from "@/commons/req";
 import { Role } from "@/types/enum";
 import axios from "axios";
-export const API_URL = process.env.NEXT_PUBLIC_API_URL_DEV;
+export const API_URL = process.env.NEXT_PUBLIC_API_URL_PRD;
 
 export interface BodyUser {
     email?: string;

@@ -160,11 +160,14 @@ const NewOrder = (props: Props) => {
       setService(serviceArray);
       setResetSelected(false);
 
-      if (serviceArray.length > 0) {
+      if(detailProduct){
+        setProduct(detailProduct)
+      }
+      else if (serviceArray.length > 0) {
         setProduct(serviceArray[0]); // Chọn giá trị service đầu tiên
       }
     }
-  }, [data, selectedPlatform, selectedCategory]);
+  }, [data, selectedPlatform, selectedCategory, detailProduct]);
 
   const handleSelect = (selected: string | null) => {
     console.log("🚀 ~ handleSelect ~ selected:", selected);
@@ -180,7 +183,6 @@ const NewOrder = (props: Props) => {
   };
 
   const handleSelectProduct = (selected: Product | string | null) => {
-    console.log("🚀 ~ handleSelectProduct ~ selected:", selected)
     setProduct(selected as Product);
   };
   const queryClient = useQueryClient();
