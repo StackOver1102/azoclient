@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useTranslation } from "react-i18next";
-import { TypeHearder } from "@/types/enum";
+import { TypeHeader } from "@/types/enum";
 import UserService, { isApiError } from "@/services/UserService";
 import { useQuery } from "@tanstack/react-query";
 import { showErrorToast } from "@/services/toastService";
@@ -13,14 +13,14 @@ import Loading from "../Loading/Loading";
 interface HeaderProps {
   logo: string;
   token: string | null;
-  type?: TypeHearder;
+  type?: TypeHeader;
   toggleSidebar?: () => void;
 }
 
 const Header: React.FC<HeaderProps> = ({
   logo,
   token,
-  type = TypeHearder.OTHE,
+  type = TypeHeader.OTHER,
   toggleSidebar
 }) => {
   const { t } = useTranslation("common");
@@ -81,9 +81,9 @@ const Header: React.FC<HeaderProps> = ({
     };
   }, []);
 
-  const renderHeader = (type: TypeHearder) => {
+  const renderHeader = (type: TypeHeader) => {
     switch (type) {
-      case TypeHearder.HOME:
+      case TypeHeader.HOME:
         return (
           <>
             <nav

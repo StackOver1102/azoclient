@@ -10,7 +10,7 @@ function useDepositFetch(name: string, token: string | null) {
                 if (!data) {
                     throw new Error('No deposit found'); // Corrected spelling here
                 }
-                return data;
+                return data.data;
             } catch (error: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
                 throw {
                     status: error.response?.status || 500,

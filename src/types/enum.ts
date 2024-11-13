@@ -10,7 +10,7 @@ export enum Role {
     'other' = 'other',
 }
 
-export enum TypeHearder {
+export enum TypeHeader {
     HOME = "home",
-    OTHE = "other"
+    OTHER = "other"
 }

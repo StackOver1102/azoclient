@@ -19,6 +19,7 @@ import { PayPalButton } from "@/components/Addfunds/Paypal/Paypal";
 import Loading from "@/components/Loading/Loading";
 import InvoiceService from "@/services/InvoiceService";
 import Cryptocurrency from "@/components/Addfunds/Cryptocurrency/Cryptocurrency";
+import MoMo from "@/components/Addfunds/MoMo";
 
 type Props = {
   error: ApiError | null;
@@ -27,23 +28,25 @@ type Props = {
 };
 
 export interface DataForm {
-  API_URL: string;
-  PAYMENT_ID: string;
-  PAYEE_NAME: string;
-  PAYEE_ACCOUNT: string;
-  PAYMENT_UNITS: string;
-  PAYMENT_URL: string;
-  NOPAYMENT_URL: string;
-  STATUS_URL: string;
-  SUGGESTED_MEMO: string;
+  API_URL?: string;
+  PAYMENT_ID?: string;
+  PAYEE_NAME?: string;
+  PAYEE_ACCOUNT?: string;
+  PAYMENT_UNITS?: string;
+  PAYMENT_URL?: string;
+  NOPAYMENT_URL?: string;
+  STATUS_URL?: string;
+  SUGGESTED_MEMO?: string;
+  code?: string;
 }
 
-const MethodPay = ["Perfect Money", "Cryptocurrency", "Paypal"];
+const MethodPay = ["Perfect Money", "Cryptocurrency", "Paypal", "MoMo"];
 
 enum ConvertMethod {
   "Perfect Money" = "perfect_money",
   "Cryptocurrency" = "cryptocurrency",
-  "Paypal" = "paypal"
+  "Paypal" = "paypal",
+  "MoMo" = "momo",
 }
 export const getServerSideProps: GetServerSideProps<Props> = async (
   context
@@ -83,7 +86,8 @@ export const getServerSideProps: GetServerSideProps<Props> = async (
         isLayout: true,
       },
     };
-  } catch (err: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
+  } catch (err: any) {
+    // eslint-disable-line @typescript-eslint/no-explicit-any
     if (isApiError(err)) {
       const errorCode = err.status;
       if (errorCode === 401) {
@@ -133,7 +137,6 @@ const AddFunds = (props: Props) => {
     queryKey: ["historyPayment", token],
     queryFn: async () => {
       try {
-        // Gọi API và chỉ trả về dữ liệu `user` (lấy `data` từ `ApiResponseDetail<User>`)
         const response = await InvoiceService.getHistory(token!);
         if (!response || !response.data) {
           throw new Error("No data returned from API");
@@ -173,10 +176,12 @@ const AddFunds = (props: Props) => {
   const methodKey =
     (selectedMethod as keyof typeof ConvertMethod) ?? "Perfect Money";
 
-  const { data: dataDesposit, isLoading, isError, error: errorCallApi } = useDepositFetch(
-    ConvertMethod[methodKey],
-    token
-  );
+  const {
+    data: dataDeposit,
+    isLoading,
+    isError,
+    error: errorCallApi,
+  } = useDepositFetch(ConvertMethod[methodKey], token);
 
   useEffect(() => {
     if (isError && errorCallApi) {
@@ -197,7 +202,7 @@ const AddFunds = (props: Props) => {
         throw new Error("An unexpected error occurred");
       }
     }
-  }, [isError, errorCallApi])
+  }, [isError, errorCallApi]);
 
   const [activeTab, setActiveTab] = useState("addFunds");
 
@@ -214,10 +219,10 @@ const AddFunds = (props: Props) => {
 
     if (dateRange.start && dateRange.end) {
       const startDate = new Date(dateRange.start);
-      startDate.setHours(0, 0, 0, 0); // Đặt giờ bắt đầu
+      startDate.setHours(0, 0, 0, 0);
 
       const endDate = new Date(dateRange.end);
-      endDate.setHours(23, 59, 59, 999); // Đặt giờ kết thúc để bao gồm toàn bộ ngày kết thúc
+      endDate.setHours(23, 59, 59, 999);
 
       filtered = filtered?.filter((item) => {
         const createdAt = new Date(item.createdAt);
@@ -228,191 +233,206 @@ const AddFunds = (props: Props) => {
     setFilteredTransactions(filtered);
   }, [dateRange, data]);
 
-  const genareteMethod = (method: string) => {
+  const genareteMethod = (method: string, dataDeposit: DataForm) => {
     switch (method) {
       case MethodPay[0]:
-        return <PerfectMoneyPayment data={(dataDesposit?.data as DataForm) ?? {}} />;
+        return <PerfectMoneyPayment data={dataDeposit ?? {}} />;
       case MethodPay[2]:
-        return <PayPalButton data={(dataDesposit?.data as DataForm) ?? {}} userId={user?._id}  token={token!}/>;
+        return (
+          <PayPalButton
+            data={dataDeposit ?? {}}
+            userId={user?._id}
+            token={token!}
+          />
+        );
       case MethodPay[1]:
         return <Cryptocurrency token={token} />;
+      case MethodPay[3]:
+        return <MoMo data={dataDeposit} />;
       default:
         return null;
     }
-  }
+  };
   return (
     <>
       <div className="px-6 pt-6">
         <h2 className="text-2xl font-bold text-gray-900">Add funds</h2>
       </div>
-      {isLoading && <Loading />}
-      {/* Main Section */}
-      <div className="p-6">
-        <div className="bg-white rounded-lg shadow-custom p-6">
-          {/* Profile Section */}
-          <div className="flex flex-col sm:flex-row items-center sm:items-start mb-6">
-            <CustomImage
-              src="/images/300-3.jpg"
-              alt="Profile"
-              className="w-[100px] h-[100px] sm:w-[160px] sm:h-[160px] rounded-full mb-4 sm:mb-0 sm:mr-4"
-              width={160}
-              height={160}
-            />
-            <div className="flex flex-col sm:flex-grow items-center sm:items-start text-center sm:text-left w-full">
-              <div className="flex items-center justify-center sm:justify-start mb-2">
-                <span className="text-lg sm:text-xl font-bold text-gray-800 mr-2">
-                  {user?.email || "username"}
-                </span>
-                <span className="bg-yellow-500 text-white text-xs font-semibold py-1 px-2 rounded">
-                  RESELLER
-                </span>
-              </div>
-              <div className="flex items-center text-sm text-gray-600 mb-4 sm:mb-0">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-4 w-4 mr-1 text-gray-500"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path d="M2.003 5.884L10 10.882l7.997-4.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
-                  <path d="M18 8.118l-8 5-8-5V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
-                </svg>
-                <span>{user?.email || "user@example.com"}</span>
-              </div>
-
-              <div className="flex justify-center sm:justify-start space-x-4 mt-4 sm:mt-2">
-                <div className="text-center">
-                  <CountUpDisplay end={user?.money ?? 0} />
-                </div>
-                <div className="text-center">
-                  <CountUpDisplay end={0} />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Tabs */}
-          <div className="flex border-b mb-6">
-            <button
-              onClick={() => handleTabSwitch("addFunds")}
-              className={`px-4 py-2 font-bold ${activeTab === "addFunds"
-                ? "text-blue-500 border-b-2 border-blue-500"
-                : "text-gray-500"
-                }`}
-            >
-              Add funds
-            </button>
-            <button
-              onClick={() => handleTabSwitch("history")}
-              className={`px-4 py-2 font-bold ${activeTab === "history"
-                ? "text-blue-500 border-b-2 border-blue-500"
-                : "text-gray-500"
-                }`}
-            >
-              History
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <div className="p-6">
-        <div className="bg-white rounded-lg shadow-custom p-6">
-          {activeTab === "addFunds" ? (
-            <div>
-              {/* Form Section */}
-              <label className="block text-sm font-bold text-gray-700 mb-2">
-                Choose method <span className="text-red-500">*</span>
-              </label>
-              <div className="relative">
-                <SelectDropdown
-                  badge={false}
-                  data={MethodPay}
-                  image={false}
-                  onSelect={handleMethodChange}
-                  defaultValue={selectedMethod ?? ""}
-                  defaultLabel={selectedMethod ?? ""}
+      {isLoading ? (
+        <Loading />
+      ) : (
+        <>
+          {/* Main Section */}
+          <div className="p-6">
+            <div className="bg-white rounded-lg shadow-custom p-6">
+              {/* Profile Section */}
+              <div className="flex flex-col sm:flex-row items-center sm:items-start mb-6">
+                <CustomImage
+                  src="/images/300-3.jpg"
+                  alt="Profile"
+                  className="w-[100px] h-[100px] sm:w-[160px] sm:h-[160px] rounded-full mb-4 sm:mb-0 sm:mr-4"
+                  width={160}
+                  height={160}
                 />
-              </div>
-              {genareteMethod(selectedMethod ?? "")}
-            </div>
-          ) : (
-            <div>
-              <div className="mb-4">
-                <label className="block text-gray-700 font-semibold mb-2">
-                  Filter
-                </label>
-                <div className="w-full">
-                  <DateRangePickerComponent
-                    start={dateRange.start}
-                    end={dateRange.end}
-                    onDateChange={handleDateChange}
-                  />
+                <div className="flex flex-col sm:flex-grow items-center sm:items-start text-center sm:text-left w-full">
+                  <div className="flex items-center justify-center sm:justify-start mb-2">
+                    <span className="text-lg sm:text-xl font-bold text-gray-800 mr-2">
+                      {user?.email || "username"}
+                    </span>
+                    <span className="bg-yellow-500 text-white text-xs font-semibold py-1 px-2 rounded">
+                      RESELLER
+                    </span>
+                  </div>
+                  <div className="flex items-center text-sm text-gray-600 mb-4 sm:mb-0">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-4 w-4 mr-1 text-gray-500"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path d="M2.003 5.884L10 10.882l7.997-4.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
+                      <path d="M18 8.118l-8 5-8-5V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
+                    </svg>
+                    <span>{user?.email || "user@example.com"}</span>
+                  </div>
+
+                  <div className="flex justify-center sm:justify-start space-x-4 mt-4 sm:mt-2">
+                    <div className="text-center">
+                      <CountUpDisplay end={user?.money ?? 0} />
+                    </div>
+                    <div className="text-center">
+                      <CountUpDisplay end={0} />
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              {/* History Section with Responsive Table */}
-              <div className="overflow-x-auto">
-                <table className="min-w-full bg-white border border-gray-200 rounded-lg">
-                  <thead>
-                    <tr>
-                      <th className="px-4 py-2 border-b text-left text-sm font-semibold text-gray-700">
-                        Method
-                      </th>
-                      <th className="px-4 py-2 border-b text-left text-sm font-semibold text-gray-700">
-                        Amount
-                      </th>
-                      <th className="px-4 py-2 border-b text-left text-sm font-semibold text-gray-700">
-                        Details
-                      </th>
-                      <th className="px-4 py-2 border-b text-left text-sm font-semibold text-gray-700">
-                        Created
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredTransactions.length > 0 ? (
-                      filteredTransactions.map((transaction, index) => (
-                        <tr key={index} className="hover:bg-gray-100">
-                          <td className="px-4 py-2 text-sm text-gray-700 flex items-center space-x-2">
-                            <Image
-                              src="/images/bank.png"
-                              alt="Bank icon"
-                              className="h-6 w-6"
-                              width={24}
-                              height={24}
-                            />
-                            <span>{transaction.type}</span>
-                          </td>
-                          <td className="px-4 py-2 text-blue-500 text-sm font-bold">
-                            {transaction.amount}
-                          </td>
-                          <td className="px-4 py-2 text-sm text-gray-700">
-                            {transaction.description}
-                          </td>
-                          <td className="px-4 py-2 text-sm text-gray-700">
-                            {dayjs(new Date(transaction.createdAt)).format(
-                              "YYYY-MM-DD HH:mm:ss"
-                            )}
-                          </td>
-                        </tr>
-                      ))
-                    ) : (
-                      <tr>
-                        <td
-                          colSpan={4}
-                          className="px-4 py-2 text-center text-gray-500"
-                        >
-                          No transaction history available.
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
+              {/* Tabs */}
+              <div className="flex border-b mb-6">
+                <button
+                  onClick={() => handleTabSwitch("addFunds")}
+                  className={`px-4 py-2 font-bold ${
+                    activeTab === "addFunds"
+                      ? "text-blue-500 border-b-2 border-blue-500"
+                      : "text-gray-500"
+                  }`}
+                >
+                  Add funds
+                </button>
+                <button
+                  onClick={() => handleTabSwitch("history")}
+                  className={`px-4 py-2 font-bold ${
+                    activeTab === "history"
+                      ? "text-blue-500 border-b-2 border-blue-500"
+                      : "text-gray-500"
+                  }`}
+                >
+                  History
+                </button>
               </div>
             </div>
-          )}
-        </div>
-      </div>
+          </div>
+
+          <div className="p-6">
+            <div className="bg-white rounded-lg shadow-custom p-6">
+              {activeTab === "addFunds" ? (
+                <div>
+                  {/* Form Section */}
+                  <label className="block text-sm font-bold text-gray-700 mb-2">
+                    Choose method <span className="text-red-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <SelectDropdown
+                      badge={false}
+                      data={MethodPay}
+                      image={false}
+                      onSelect={handleMethodChange}
+                      defaultValue={selectedMethod ?? ""}
+                      defaultLabel={selectedMethod ?? ""}
+                    />
+                  </div>
+                  {genareteMethod(selectedMethod ?? "", dataDeposit)}
+                </div>
+              ) : (
+                <div>
+                  <div className="mb-4">
+                    <label className="block text-gray-700 font-semibold mb-2">
+                      Filter
+                    </label>
+                    <div className="w-full">
+                      <DateRangePickerComponent
+                        start={dateRange.start}
+                        end={dateRange.end}
+                        onDateChange={handleDateChange}
+                      />
+                    </div>
+                  </div>
+
+                  {/* History Section with Responsive Table */}
+                  <div className="overflow-x-auto">
+                    <table className="min-w-full bg-white border border-gray-200 rounded-lg">
+                      <thead>
+                        <tr>
+                          <th className="px-4 py-2 border-b text-left text-sm font-semibold text-gray-700">
+                            Method
+                          </th>
+                          <th className="px-4 py-2 border-b text-left text-sm font-semibold text-gray-700">
+                            Amount
+                          </th>
+                          <th className="px-4 py-2 border-b text-left text-sm font-semibold text-gray-700">
+                            Details
+                          </th>
+                          <th className="px-4 py-2 border-b text-left text-sm font-semibold text-gray-700">
+                            Created
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {filteredTransactions.length > 0 ? (
+                          filteredTransactions.map((transaction, index) => (
+                            <tr key={index} className="hover:bg-gray-100">
+                              <td className="px-4 py-2 text-sm text-gray-700 flex items-center space-x-2">
+                                <Image
+                                  src="/images/bank.png"
+                                  alt="Bank icon"
+                                  className="h-6 w-6"
+                                  width={24}
+                                  height={24}
+                                />
+                                <span>{transaction.type}</span>
+                              </td>
+                              <td className="px-4 py-2 text-blue-500 text-sm font-bold">
+                                {transaction.amount}
+                              </td>
+                              <td className="px-4 py-2 text-sm text-gray-700">
+                                {transaction.description}
+                              </td>
+                              <td className="px-4 py-2 text-sm text-gray-700">
+                                {dayjs(new Date(transaction.createdAt)).format(
+                                  "YYYY-MM-DD HH:mm:ss"
+                                )}
+                              </td>
+                            </tr>
+                          ))
+                        ) : (
+                          <tr>
+                            <td
+                              colSpan={4}
+                              className="px-4 py-2 text-center text-gray-500"
+                            >
+                              No transaction history available.
+                            </td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </>
+      )}
     </>
   );
 };

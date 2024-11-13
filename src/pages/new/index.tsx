@@ -21,11 +21,13 @@ import Image from "next/image";
 type Props = {
   error: ApiError | null;
   token: string | null;
-  isLayout: boolean
+  isLayout: boolean;
   detailProduct?: Product | null;
 };
 
-export const getServerSideProps: GetServerSideProps<Props> = async (context) => {
+export const getServerSideProps: GetServerSideProps<Props> = async (
+  context
+) => {
   const token = context.req.cookies.access_token;
   const { service } = context.query;
 
@@ -45,7 +47,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async (context) => 
   if (service) {
     try {
       const response = await ProductService.getDetail(service as string);
-      detailProduct = response.data
+      detailProduct = response.data;
     } catch (error) {
       console.error("Failed to fetch product details:", error);
       // You might still set an error prop here if necessary, but we skip it to proceed silently
@@ -57,7 +59,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async (context) => 
       error: null,
       token,
       isLayout: true,
-      detailProduct
+      detailProduct,
     },
   };
 };
@@ -160,10 +162,9 @@ const NewOrder = (props: Props) => {
       setService(serviceArray);
       setResetSelected(false);
 
-      if(detailProduct){
-        setProduct(detailProduct)
-      }
-      else if (serviceArray.length > 0) {
+      if (detailProduct) {
+        setProduct(detailProduct);
+      } else if (serviceArray.length > 0) {
         setProduct(serviceArray[0]); // Chọn giá trị service đầu tiên
       }
     }
@@ -239,6 +240,8 @@ const NewOrder = (props: Props) => {
     }
   );
 
+  const rate = product?.rate ?? 0; 
+  const totalMoney = quantity * (rate / 1000);
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -247,8 +250,6 @@ const NewOrder = (props: Props) => {
       showErrorToast("Please fill in both fields.");
       return;
     }
-
-    const totalMoney = quantity * product.rate;
 
     if (user && totalMoney > user.money) {
       showErrorToast(
@@ -274,7 +275,7 @@ const NewOrder = (props: Props) => {
 
   return (
     <>
-      {(isLoading || showLoader) ? (
+      {isLoading || showLoader ? (
         <Loading />
       ) : (
         <>
@@ -298,7 +299,7 @@ const NewOrder = (props: Props) => {
                       detailData={detailProduct}
                       type="platforms"
 
-                    // resetSelected={resetSelected}
+                      // resetSelected={resetSelected}
                     />
                   </div>
                   <div className="xl:pl-4">
@@ -313,7 +314,7 @@ const NewOrder = (props: Props) => {
                       detailData={detailProduct}
                       type="category"
 
-                    // resetSelected={resetSelected}
+                      // resetSelected={resetSelected}
                     />
                   </div>
                 </div>
@@ -329,7 +330,6 @@ const NewOrder = (props: Props) => {
                     image={true}
                     detailData={detailProduct}
                     type="service"
-
                   />
                 </div>
 
@@ -357,6 +357,9 @@ const NewOrder = (props: Props) => {
                     className="w-full p-2 border border-gray-300 rounded-md"
                     onChange={(e) => setQuantity(Number(e.target.value))}
                   />
+                  <p className="mt-1 text-xs text-gray-500">
+                    Total: ${totalMoney.toFixed(2)}
+                  </p>
                 </div>
 
                 {/* Submit Button */}
@@ -398,7 +401,6 @@ const NewOrder = (props: Props) => {
               </div>
             </div>
           </div>
-
         </>
       )}
     </>

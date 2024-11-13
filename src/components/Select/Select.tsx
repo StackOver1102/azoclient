@@ -95,7 +95,7 @@ export default function SelectDropdown<T>(props: PropsSelect<T>) {
           <div className="sm:flex items-center">
             <span className="font-bold mr-2">{obj.value}</span>
             <span>{obj.label} - </span>
-            <span className="text-blue-500 font-bold ml-2">{obj.rate}</span>
+            <span className="text-blue-500 font-bold ml-2">{obj.rate} $</span>
           </div>
           {badge && (
             <div className="mt-1 flex flex-wrap">
@@ -118,7 +118,7 @@ export default function SelectDropdown<T>(props: PropsSelect<T>) {
     typeof selectedOption === "string"
       ? selectedOption
       : `${(selectedOption as OptionType)?.value} - ${(selectedOption as OptionType)?.label
-      } - ${(selectedOption as OptionType)?.rate}`;
+      } - ${(selectedOption as OptionType)?.rate} $`;
 
   return (
     <div className="relative w-full" ref={dropdownRef}>

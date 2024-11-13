@@ -77,8 +77,8 @@ function Table(props: Props) {
                       </div>
                     </div>
                   </td>
-                  <td className="text-center min-w-[100px] whitespace-nowrap">
-                    <span className="text-sm text-gray-500">
+                  <td className="text-start min-w-[100px] whitespace-nowrap">
+                    <span className="text-sm text-gray-500 text-start">
                       <span className="text-gray-800">{product.min}</span> -{" "}
                       <span className="text-gray-800">{product.max}</span>
                     </span>
@@ -88,7 +88,7 @@ function Table(props: Props) {
                       token ? "min-w-[150px]" : ""
                     } whitespace-nowrap`}
                   >
-                    <span className="text-gray-500">{product.rate}</span>
+                    <span className="text-gray-500">$ {product.rate}</span>
                   </td>
                   <td
                     className={`px-1 text-center font-bold min-w-[100px] ${

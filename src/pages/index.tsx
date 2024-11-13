@@ -3,7 +3,7 @@
 import Footer from "@/components/Footer/Footer";
 import Header from "@/components/Header/Header";
 import UserService, { ApiError, isApiError } from "@/services/UserService";
-import { TypeHearder } from "@/types/enum";
+import { TypeHeader } from "@/types/enum";
 import { dehydrate, QueryClient } from "@tanstack/react-query";
 import { GetServerSideProps } from "next";
 import Link from "next/link";
@@ -137,7 +137,7 @@ export default function Home(prop: Props) {
 
   return (
     <>
-      <Header logo="/images/logo4.png" token={token} type={TypeHearder.HOME} />
+      <Header logo="/images/logo4.png" token={token} type={TypeHeader.HOME} />
       {/* START LANDING */}
       <section className="bg-[#13263c] dark:bg-gray-900 pt-10" id="hero">
         <div className="py-16 px-4 mx-auto max-w-screen-xl text-center lg:py-20 lg:px-12">

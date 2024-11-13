@@ -2,7 +2,7 @@ import Header from "@/components/Header/Header";
 import Sidebar from "@/components/Sidebar/Sidebar";
 import { showErrorToast } from "@/services/toastService";
 import { ApiError, isApiError } from "@/services/UserService";
-import { TypeHearder } from "@/types/enum";
+import { TypeHeader } from "@/types/enum";
 import { GetServerSideProps } from "next";
 import Cookies from "js-cookie";
 import OrderService from "@/services/OrderService";
@@ -91,7 +91,7 @@ const Refill = (props: Props) => {
         <Header
           logo="/images/logo4.png"
           token={token}
-          type={TypeHearder.OTHE}
+          type={TypeHeader.OTHER}
         />
 
         {/* New Order Heading */}

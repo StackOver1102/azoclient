@@ -1,7 +1,8 @@
 import React, { ReactNode, useState } from "react";
 import Sidebar from "../Sidebar/Sidebar";
 import Header from "../Header/Header";
-import { TypeHearder } from "@/types/enum";
+import { TypeHeader } from "@/types/enum";
+import FooterLayout from "../FooterLayout/FooterLayout";
 
 interface LayoutProps {
     children: ReactNode;
@@ -26,13 +27,14 @@ const Layout: React.FC<LayoutProps> = ({ children, token }) => {
                 <Header
                     logo="/images/logo4.png"
                     token={token}
-                    type={TypeHearder.OTHE}
+                    type={TypeHeader.OTHER}
                     toggleSidebar={toggleSidebar}
                 />
 
                 <div>
                     {children}
                 </div>
+                <FooterLayout />
             </div>
         </div>
     );
