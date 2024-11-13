@@ -134,6 +134,7 @@ const NewOrder = (props: Props) => {
         }
       });
 
+      console.log("vao day r");
       setCategory(Array.from(categorySet));
       setService(Array.from(productSet));
 
@@ -171,12 +172,16 @@ const NewOrder = (props: Props) => {
   }, [data, selectedPlatform, selectedCategory, detailProduct]);
 
   const handleSelect = (selected: string | null) => {
-    console.log("🚀 ~ handleSelect ~ selected:", selected);
-    // setSelectedPlatform(selected);
+    if (service && selectedPlatform !== selected) {
+      setService([]);
+      setCategory([]);
+      setResetSelected(true);
+    }
+    setSelectedPlatform(selected);
   };
 
   const handleSelectCategory = (selected: string | null) => {
-    if (service) {
+    if (service && selectedCategory !== selected) {
       setService([]);
       setResetSelected(true);
     }
@@ -240,7 +245,7 @@ const NewOrder = (props: Props) => {
     }
   );
 
-  const rate = product?.rate ?? 0; 
+  const rate = product?.rate ?? 0;
   const totalMoney = quantity * (rate / 1000);
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -272,6 +277,8 @@ const NewOrder = (props: Props) => {
       // showErrorToast(`Login failed: ${error.message}`);
     }
   };
+
+  useEffect(() => {}, [service]);
 
   return (
     <>
@@ -313,7 +320,6 @@ const NewOrder = (props: Props) => {
                       image={true}
                       detailData={detailProduct}
                       type="category"
-
                       // resetSelected={resetSelected}
                     />
                   </div>

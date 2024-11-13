@@ -36,7 +36,11 @@ function Table(props: Props) {
               <td colSpan={10} className="text-xl font-bold whitespace-nowrap">
                 <div className="flex items-center">
                   <Image
-                    src="https://cdn.mypanel.link/sw177w/3y6jfcfgmm14jned.gif"
+                    src={
+                      item._id.includes("Tiktok")
+                        ? "https://cdn.mypanel.link/4cgr8h/ewzs0f9k8ic2932y.gif"
+                        : "https://cdn.mypanel.link/sw177w/3y6jfcfgmm14jned.gif"
+                    }
                     className="mr-2"
                     width={24}
                     height={24}
