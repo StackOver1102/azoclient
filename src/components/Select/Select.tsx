@@ -12,9 +12,9 @@ interface PropsSelect<T> {
   image: boolean;
   className?: string;
   defaultValue?: T | string; // Add defaultValue prop
-  defaultLabel?: string
+  defaultLabel?: string;
   detailData?: Product | null | undefined;
-  type?: string
+  type?: string;
 }
 
 interface OptionType {
@@ -24,8 +24,21 @@ interface OptionType {
 }
 
 export default function SelectDropdown<T>(props: PropsSelect<T>) {
-  const { badge, data, onSelect, resetSelected, image, className, defaultValue, defaultLabel, detailData, type } = props;
-  const [selectedOption, setSelectedOption] = useState<T | string | null>(defaultValue || null);
+  const {
+    badge,
+    data,
+    onSelect,
+    resetSelected,
+    image,
+    className,
+    defaultValue,
+    defaultLabel,
+    detailData,
+    type,
+  } = props;
+  const [selectedOption, setSelectedOption] = useState<T | string | null>(
+    defaultValue || null
+  );
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -33,7 +46,10 @@ export default function SelectDropdown<T>(props: PropsSelect<T>) {
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
         setIsOpen(false);
       }
     };
@@ -52,28 +68,60 @@ export default function SelectDropdown<T>(props: PropsSelect<T>) {
   }, [resetSelected]);
 
   // Set defaultValue as selectedOption on first render or when defaultValue changes
-  useEffect(() => {
-    if (!selectedOption && data.length > 0 && onSelect && !defaultLabel && !detailData) {
-      setSelectedOption(data[0]); // Chọn giá trị đầu tiên trong data
-      onSelect(data[0]); // Gọi onSelect để cập nhật giá trị mặc định
-    }
-    else if (detailData && !selectedOption && data.length > 0 && onSelect && !defaultLabel && type) {
-      if (type === "service") {
-        setSelectedOption(detailData as T | string | null);
-        onSelect(detailData as T | string | null);
-      }
-      else if (type === "platforms") {
+  // useEffect(() => {
 
-        setSelectedOption(detailData.platform)
-        onSelect(detailData.platform);
+  //   if (
+  //     !selectedOption &&
+  //     data.length > 0 &&
+  //     onSelect &&
+  //     !defaultLabel &&
+  //     !detailData
+  //   ) {
+  //     setSelectedOption(data[0]);
+  //     onSelect(data[0]);
+  //   } else if (
+  //     detailData &&
+  //     !selectedOption &&
+  //     data.length > 0 &&
+  //     onSelect &&
+  //     !defaultLabel &&
+  //     type
+  //   ) {
+  //     if (type === "service") {
+  //       setSelectedOption(detailData as T | string | null);
+  //       onSelect(detailData as T | string | null);
+  //     } else if (type === "platforms") {
+  //       setSelectedOption(detailData.platform);
+  //       onSelect(detailData.platform);
+  //     } else {
+  //       setSelectedOption(detailData.category);
+  //       onSelect(detailData.category);
+  //     }
+  //   }
+  // }, [data, selectedOption, onSelect, defaultLabel, detailData, type]);
+  useEffect(() => {
+    if (!selectedOption && data.length > 0 && onSelect) {
+      // Đặt giá trị mặc định nếu không có `defaultLabel` và `detailData`
+      if (!defaultLabel && !detailData) {
+        setSelectedOption(data[0]);
+        onSelect(data[0]);
       }
-      else {
-        setSelectedOption(detailData.category)
-        onSelect(detailData.category);
+      // Đặt giá trị dựa trên `type` nếu có `detailData`
+      else if (detailData && type) {
+        if (type === "service") {
+          console.log("🚀 ~ useEffect ~ detailData:", detailData)
+          setSelectedOption(detailData as T | string | null);
+          onSelect(detailData as T | string | null);
+        } else if (type === "platforms") {
+          setSelectedOption(detailData.platform);
+          onSelect(detailData.platform);
+        } else {
+          setSelectedOption(detailData.category);
+          onSelect(detailData.category);
+        }
       }
     }
   }, [data, selectedOption, onSelect, defaultLabel, detailData, type]);
-
   // Filter data based on search term
   const filteredData = data.filter((option) => {
     if (typeof option === "string") {
@@ -110,15 +158,18 @@ export default function SelectDropdown<T>(props: PropsSelect<T>) {
 
   const handleOptionSelect = (option: T | string) => {
     setSelectedOption(option);
-    if (onSelect) onSelect(option);
+    if (onSelect) {
+      onSelect(option);
+    }
     setIsOpen(false);
   };
 
   const selectedOptionText =
     typeof selectedOption === "string"
       ? selectedOption
-      : `${(selectedOption as OptionType)?.value} - ${(selectedOption as OptionType)?.label
-      } - ${(selectedOption as OptionType)?.rate} $`;
+      : `${(selectedOption as OptionType)?.value} - ${
+          (selectedOption as OptionType)?.label
+        } - ${(selectedOption as OptionType)?.rate} $`;
 
   return (
     <div className="relative w-full" ref={dropdownRef}>
@@ -130,9 +181,16 @@ export default function SelectDropdown<T>(props: PropsSelect<T>) {
           <div className="flex items-center">
             {image && (
               <CustomImage
-                src="https://cdn.mypanel.link/sw177w/3y6jfcfgmm14jned.gif"
+                src={
+                  (typeof selectedOption === "string" &&
+                    selectedOption.includes("Tiktok")) ||
+                  (typeof selectedOption === "object" &&
+                    (selectedOption as any).category.includes("Tiktok"))  // eslint-disable-line @typescript-eslint/no-explicit-any
+                    ? "https://cdn.mypanel.link/4cgr8h/ewzs0f9k8ic2932y.gif"
+                    : "https://cdn.mypanel.link/sw177w/3y6jfcfgmm14jned.gif"
+                }
                 alt="option"
-                className="w-6 h-6 mr-2"
+                className="w-6 h-6 mr-2 object-cover"
                 width={24}
                 height={24}
               />
@@ -177,35 +235,47 @@ export default function SelectDropdown<T>(props: PropsSelect<T>) {
 
           <ul role="listbox">
             {filteredData.length > 0 ? (
-              filteredData.map((option, index) => (
-                <li
-                  key={index}
-                  onClick={() => handleOptionSelect(option)}
-                  className={`select-none relative py-2 pl-4 pr-4 cursor-pointer hover:bg-gray-100 ${typeof selectedOption === "object" &&
-                    selectedOption !== null &&
-                    (selectedOption as any)?.id === (option as any)?.id // eslint-disable-line @typescript-eslint/no-explicit-any
-                    ? "text-blue-500 font-bold"
-                    : ""
+              filteredData.map((option, index) => {
+                return (
+                  <li
+                    key={index}
+                    onClick={() => {
+                      handleOptionSelect(option);
+                    }}
+                    className={`select-none relative py-2 pl-4 pr-4 cursor-pointer hover:bg-gray-100 ${
+                      typeof selectedOption === "object" &&
+                      selectedOption !== null &&
+                      (selectedOption as any)?.id === (option as any)?.id  // eslint-disable-line @typescript-eslint/no-explicit-any
+                        ? "text-blue-500 font-bold"
+                        : ""
                     }`}
-                >
-                  <div className="flex items-center">
-                    {image && (
-                      <CustomImage
-                        src="https://cdn.mypanel.link/sw177w/3y6jfcfgmm14jned.gif"
-                        alt="option"
-                        className="w-6 h-6 mr-2"
-                        width={24}
-                        height={24}
-                      />
-                    )}
-                    <div className="flex-grow truncate">
-                      {renderOptionContent(option)}
+                  >
+                    <div className="flex items-center">
+                      {image && (
+                        <CustomImage
+                          src={
+                            (typeof option === "string" &&
+                              option.includes("Tiktok")) ||
+                            (typeof option === "object" &&
+                              (option as any).category.includes("Tiktok"))  // eslint-disable-line @typescript-eslint/no-explicit-any
+                              ? "https://cdn.mypanel.link/4cgr8h/ewzs0f9k8ic2932y.gif"
+                              : "https://cdn.mypanel.link/sw177w/3y6jfcfgmm14jned.gif"
+                          }
+                          alt="option"
+                          className="w-6 h-6 mr-2 object-cover"
+                          width={24}
+                          height={24}
+                        />
+                      )}
+                      <div className="flex-grow truncate">
+                        {renderOptionContent(option)}
+                      </div>
                     </div>
-                  </div>
-                </li>
-              ))
+                  </li>
+                );
+              })
             ) : (
-              <li className="py-2 pl-4 pr-4 text-gray-500">No results found</li>
+              <li className="py-2 pl-4 pr-4 text-gray-500">No results found</li> // Fallback for empty data
             )}
           </ul>
         </div>

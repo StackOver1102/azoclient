@@ -55,7 +55,8 @@ const TermsConditions = (props: Props) => {
               <Link href="https://1TAP.me/" passHref>
                 https://1TAP.me
               </Link>
-              , it is recommended that you review the Terms & Conditions, which contain the site&apos;s general rules and legal obligations.
+              , it is recommended that you review the Terms & Conditions, which
+              contain the site&apos;s general rules and legal obligations.
             </p>
             <p className="mb-1">
               1TAP suggests that users visit the user agreement page every time
@@ -259,7 +260,7 @@ const TermsConditions = (props: Props) => {
               sections have accepted these rules in advance.
             </p>
             <p className="mb-1">
-              3.h Please review the &apos;Usage Agreement&apos; page to learn about the
+              3.h Please review the &quot;Usage Agreement&quot; page to learn about the
               measures we take to protect the personal information and privacy
               of our users, as well as our general policy regarding this matter.
               The user agrees that he/she will be deemed to have accepted all
