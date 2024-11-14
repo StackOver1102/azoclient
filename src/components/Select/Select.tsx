@@ -68,38 +68,60 @@ export default function SelectDropdown<T>(props: PropsSelect<T>) {
   }, [resetSelected]);
 
   // Set defaultValue as selectedOption on first render or when defaultValue changes
+  // useEffect(() => {
+
+  //   if (
+  //     !selectedOption &&
+  //     data.length > 0 &&
+  //     onSelect &&
+  //     !defaultLabel &&
+  //     !detailData
+  //   ) {
+  //     setSelectedOption(data[0]);
+  //     onSelect(data[0]);
+  //   } else if (
+  //     detailData &&
+  //     !selectedOption &&
+  //     data.length > 0 &&
+  //     onSelect &&
+  //     !defaultLabel &&
+  //     type
+  //   ) {
+  //     if (type === "service") {
+  //       setSelectedOption(detailData as T | string | null);
+  //       onSelect(detailData as T | string | null);
+  //     } else if (type === "platforms") {
+  //       setSelectedOption(detailData.platform);
+  //       onSelect(detailData.platform);
+  //     } else {
+  //       setSelectedOption(detailData.category);
+  //       onSelect(detailData.category);
+  //     }
+  //   }
+  // }, [data, selectedOption, onSelect, defaultLabel, detailData, type]);
   useEffect(() => {
-    
-    if (
-      !selectedOption &&
-      data.length > 0 &&
-      onSelect &&
-      !defaultLabel &&
-      !detailData
-    ) {
-      setSelectedOption(data[0]);
-      onSelect(data[0]);
-    } else if (
-      detailData &&
-      !selectedOption &&
-      data.length > 0 &&
-      onSelect &&
-      !defaultLabel &&
-      type
-    ) {
-      if (type === "service") {
-        setSelectedOption(detailData as T | string | null);
-        onSelect(detailData as T | string | null);
-      } else if (type === "platforms") {
-        setSelectedOption(detailData.platform);
-        onSelect(detailData.platform);
-      } else {
-        setSelectedOption(detailData.category);
-        onSelect(detailData.category);
+    if (!selectedOption && data.length > 0 && onSelect) {
+      // Đặt giá trị mặc định nếu không có `defaultLabel` và `detailData`
+      if (!defaultLabel && !detailData) {
+        setSelectedOption(data[0]);
+        onSelect(data[0]);
+      }
+      // Đặt giá trị dựa trên `type` nếu có `detailData`
+      else if (detailData && type) {
+        if (type === "service") {
+          console.log("🚀 ~ useEffect ~ detailData:", detailData)
+          setSelectedOption(detailData as T | string | null);
+          onSelect(detailData as T | string | null);
+        } else if (type === "platforms") {
+          setSelectedOption(detailData.platform);
+          onSelect(detailData.platform);
+        } else {
+          setSelectedOption(detailData.category);
+          onSelect(detailData.category);
+        }
       }
     }
   }, [data, selectedOption, onSelect, defaultLabel, detailData, type]);
-
   // Filter data based on search term
   const filteredData = data.filter((option) => {
     if (typeof option === "string") {
@@ -163,7 +185,7 @@ export default function SelectDropdown<T>(props: PropsSelect<T>) {
                   (typeof selectedOption === "string" &&
                     selectedOption.includes("Tiktok")) ||
                   (typeof selectedOption === "object" &&
-                    (selectedOption as any).category.includes("Tiktok"))
+                    (selectedOption as any).category.includes("Tiktok"))  // eslint-disable-line @typescript-eslint/no-explicit-any
                     ? "https://cdn.mypanel.link/4cgr8h/ewzs0f9k8ic2932y.gif"
                     : "https://cdn.mypanel.link/sw177w/3y6jfcfgmm14jned.gif"
                 }
@@ -223,8 +245,8 @@ export default function SelectDropdown<T>(props: PropsSelect<T>) {
                     className={`select-none relative py-2 pl-4 pr-4 cursor-pointer hover:bg-gray-100 ${
                       typeof selectedOption === "object" &&
                       selectedOption !== null &&
-                      (selectedOption as any)?.id === (option as any)?.id // Use optional chaining for safety
-                        ? "text-blue-500 font-bold" // Selected item style
+                      (selectedOption as any)?.id === (option as any)?.id  // eslint-disable-line @typescript-eslint/no-explicit-any
+                        ? "text-blue-500 font-bold"
                         : ""
                     }`}
                   >
@@ -235,7 +257,7 @@ export default function SelectDropdown<T>(props: PropsSelect<T>) {
                             (typeof option === "string" &&
                               option.includes("Tiktok")) ||
                             (typeof option === "object" &&
-                              (option as any).category.includes("Tiktok"))
+                              (option as any).category.includes("Tiktok"))  // eslint-disable-line @typescript-eslint/no-explicit-any
                               ? "https://cdn.mypanel.link/4cgr8h/ewzs0f9k8ic2932y.gif"
                               : "https://cdn.mypanel.link/sw177w/3y6jfcfgmm14jned.gif"
                           }

@@ -65,7 +65,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async (
 };
 
 const NewOrder = (props: Props) => {
-  const { error, token, detailProduct } = props;
+  const { error, token } = props;
   const router = useRouter();
 
   useEffect(() => {
@@ -84,7 +84,9 @@ const NewOrder = (props: Props) => {
   const [service, setService] = useState<Product[]>([]);
   const [selectedPlatform, setSelectedPlatform] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [resetSelected, setResetSelected] = useState<boolean>(false);
+  const [detailProduct, setDetailProduct] = useState<Product | null>(props.detailProduct!);
+  const [resetCategory, setResetCategory] = useState(false);
+  const [resetService, setResetService] = useState(false);
   const [product, setProduct] = useState<Product>();
   const [link, setLink] = useState<string>("");
   const [quantity, setQuantity] = useState<number>(0);
@@ -134,10 +136,9 @@ const NewOrder = (props: Props) => {
         }
       });
 
-      console.log("vao day r");
       setCategory(Array.from(categorySet));
       setService(Array.from(productSet));
-
+      setResetCategory(false);
       if (categorySet.size > 0) {
         setSelectedCategory(Array.from(categorySet)[0]);
       }
@@ -161,8 +162,7 @@ const NewOrder = (props: Props) => {
 
       const serviceArray = Array.from(productSet);
       setService(serviceArray);
-      setResetSelected(false);
-
+      setResetService(false);
       if (detailProduct) {
         setProduct(detailProduct);
       } else if (serviceArray.length > 0) {
@@ -172,19 +172,28 @@ const NewOrder = (props: Props) => {
   }, [data, selectedPlatform, selectedCategory, detailProduct]);
 
   const handleSelect = (selected: string | null) => {
+    if (detailProduct && selectedPlatform !== selected) {
+      setDetailProduct(null); // Đặt detailProduct về null khi thay đổi Social Media
+    }
     if (service && selectedPlatform !== selected) {
       setService([]);
       setCategory([]);
-      setResetSelected(true);
+      setResetCategory(true);
+      setResetService(true);
     }
+
     setSelectedPlatform(selected);
   };
 
   const handleSelectCategory = (selected: string | null) => {
+    if (detailProduct && selectedPlatform !== selected) {
+      setDetailProduct(null); // Đặt detailProduct về null khi thay đổi Social Media
+    }
     if (service && selectedCategory !== selected) {
       setService([]);
-      setResetSelected(true);
+      setResetService(true);
     }
+
     setSelectedCategory(selected);
   };
 
@@ -320,7 +329,7 @@ const NewOrder = (props: Props) => {
                       image={true}
                       detailData={detailProduct}
                       type="category"
-                      // resetSelected={resetSelected}
+                      resetSelected={resetCategory}
                     />
                   </div>
                 </div>
@@ -332,7 +341,7 @@ const NewOrder = (props: Props) => {
                     badge={true}
                     data={service}
                     onSelect={handleSelectProduct}
-                    resetSelected={resetSelected}
+                    resetSelected={resetService}
                     image={true}
                     detailData={detailProduct}
                     type="service"
