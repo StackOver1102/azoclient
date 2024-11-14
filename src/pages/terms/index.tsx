@@ -55,8 +55,7 @@ const TermsConditions = (props: Props) => {
               <Link href="https://1TAP.me/" passHref>
                 https://1TAP.me
               </Link>
-              , it is recommended that you review the Terms & Conditions, which
-              contain the site's general rules and legal obligations.
+              , it is recommended that you review the Terms & Conditions, which contain the site&apos;s general rules and legal obligations.
             </p>
             <p className="mb-1">
               1TAP suggests that users visit the user agreement page every time
@@ -80,7 +79,7 @@ const TermsConditions = (props: Props) => {
               <li>
                 The service descriptions for each service contain varying
                 explanations. Prior to placing an order, every customer has read
-                and agreed to all of the description's terms. 1TAP does not
+                and agreed to all of the description&apos;s terms. 1TAP does not
                 provide refunds for any orders if the explanation section is not
                 read.
               </li>
@@ -126,7 +125,7 @@ const TermsConditions = (props: Props) => {
                 apply the return conditions in the event of an objection.
               </li>
               <li>
-                Customers' social media accounts are deactivated, and their
+                Customers&apos; social media accounts are deactivated, and their
                 posts are deleted, etc. 1TAP assumes no responsibility and
                 reserves the terms of return, in the event of any action taken
                 against their accounts, which is at the discretion of social
@@ -176,7 +175,7 @@ const TermsConditions = (props: Props) => {
               usage rights with third parties or organizations.
             </p>
             <p className="mb-1">
-              1.d Using software that will compromise the site's security and
+              1.d Using software that will compromise the site&apos;s security and
               prevent it from functioning.
             </p>
             <p className="mb-1">
@@ -260,7 +259,7 @@ const TermsConditions = (props: Props) => {
               sections have accepted these rules in advance.
             </p>
             <p className="mb-1">
-              3.h Please review the "Usage Agreement" page to learn about the
+              3.h Please review the &apos;Usage Agreement&apos; page to learn about the
               measures we take to protect the personal information and privacy
               of our users, as well as our general policy regarding this matter.
               The user agrees that he/she will be deemed to have accepted all
@@ -268,7 +267,7 @@ const TermsConditions = (props: Props) => {
               use the service and that the agreement will include a provision
               for him/her. The user agrees to indemnify 1TAP for any and all
               damages incurred by 1TAP websites and applications as a result of
-              the user's breach of this agreement's obligations. 1TAP has
+              the user&apos;s breach of this agreement&apos;s obligations. 1TAP has
               recourse to the user for any compensation and/or
               administrative/judicial fines that the user may be required to pay
               to public institutions and/or third parties due to the breach of
@@ -282,7 +281,7 @@ const TermsConditions = (props: Props) => {
               right to permanently or temporarily discontinue the service they
               provide unilaterally and without explanation, to execute the site
               without refunding the balances and credits in 1TAP applications, to
-              close access, and to modify or eliminate the service's contents.
+              close access, and to modify or eliminate the service&apos;s contents.
               Under these terms and conditions, the user accepts every provision
               of the contract and registers for the website. 1TAP and its
               applications will publish updated terms of service under the same
@@ -305,7 +304,7 @@ const TermsConditions = (props: Props) => {
             </h2>
             <ol className="list-decimal pl-5 mt-4 space-y-2">
               <li>
-                The records of 1TAP and its members' transactions on the website
+                The records of 1TAP and its members&apos; transactions on the website
                 are kept strictly confidential and are never disclosed to third
                 parties.
               </li>

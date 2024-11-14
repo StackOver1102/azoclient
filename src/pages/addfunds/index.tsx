@@ -86,8 +86,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async (
         isLayout: true,
       },
     };
-  } catch (err: any) {
-    // eslint-disable-line @typescript-eslint/no-explicit-any
+  } catch (err: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
     if (isApiError(err)) {
       const errorCode = err.status;
       if (errorCode === 401) {
